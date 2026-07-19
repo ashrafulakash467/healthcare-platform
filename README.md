@@ -4,7 +4,7 @@ cd healthcare-platform
 2. Initialize Monorepo
 npm init -y
 3. Frontend (Patient Website)
-npx create-next-app@latest ./apps/web --use-npm
+npx create-next-app@latest ./apps/web --use-npm                                                
             ✔ TypeScript → Yes
             ✔ ESLint → Yes
             ✔ Tailwind CSS → Yes
