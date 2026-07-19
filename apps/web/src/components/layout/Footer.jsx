@@ -53,7 +53,7 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#345c32] text-white">
+    <footer className="relative overflow-hidden bg-[#3b423a] text-black">
       <div className="absolute inset-x-0 top-0 h-1 bg-[#a7f0dd]" />
       <div className="absolute -left-24 top-10 h-48 w-48 rounded-full bg-[#9cac54]/20 blur-3xl" />
       <div className="absolute right-0 top-40 h-56 w-56 rounded-full bg-[#a7f0dd]/10 blur-3xl" />
@@ -61,15 +61,18 @@ export default function Footer() {
       <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr_0.9fr_1fr]">
           <section className="space-y-6">
-            <Link href="/" className="inline-flex items-center gap-4">
-              <div className="flex h-20 w-56 items-center justify-center rounded-2xl bg-[#2b4f2a] shadow-[0_14px_40px_rgba(0,0,0,0.22)] ring-1 ring-white/10">
-                <span className="text-3xl font-black tracking-tight text-white/90">
-                  Health 
-                </span>
-                <span className="ml-2 rounded-full bg-[#a7f0dd]/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#a7f0dd]">
-                  Care
-                </span>
-              </div>
+            <Link href="/" className="flex items-center gap-3">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-lg font-semibold text-brand-foreground shadow-lg shadow-brand/25">
+            HC
+              </span>
+              <span className="leading-tight">
+                <span className="block text-base font-semibold tracking-wide text-brand">
+              HealthGHYHUT Care
+            </span>
+            <span className="block text-xs uppercase tracking-[0.24em] text-slate-500">
+              Wellness made simple
+            </span>
+          </span>
             </Link>
 
             <p className="max-w-sm text-base leading-7 text-white/90">
