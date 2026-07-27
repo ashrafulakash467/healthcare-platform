@@ -1,5 +1,6 @@
 {
   "name": "healthcare-platform",
+<<<<<<< HEAD
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,4 +11,33 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs"
+=======
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build",
+    "start:web": "npm --workspace apps/web run start",
+    "dev:api": "nest start --watch",
+    "build:api": "nest build",
+    "start:api": "node dist/main.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.28",
+    "@nestjs/core": "^11.1.28",
+    "@nestjs/platform-express": "^11.1.28",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.10",
+    "@nestjs/schematics": "^11.0.7",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3"
+  }
+>>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
 }

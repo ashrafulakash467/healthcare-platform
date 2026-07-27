@@ -29,6 +29,7 @@ const doctorLinks = [
   "Account Deletion",
 ];
 
+<<<<<<< HEAD
 const paymentBadges = [
   "VISA",
   "MC",
@@ -42,6 +43,8 @@ const paymentBadges = [
   "SSLCommerz",
 ];
 
+=======
+>>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
 const socialLinks = [
   { label: "Facebook", icon: <FacebookIcon /> },
   { label: "LinkedIn", icon: <LinkedInIcon /> },
@@ -67,7 +70,11 @@ export default function Footer() {
               </span>
               <span className="leading-tight">
                 <span className="block text-base font-semibold tracking-wide text-brand">
+<<<<<<< HEAD
               HealthGHYHUT Care
+=======
+              Health Care
+>>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
             </span>
             <span className="block text-xs uppercase tracking-[0.24em] text-slate-500">
               Wellness made simple
@@ -84,7 +91,11 @@ export default function Footer() {
               {socialLinks.map((item) => (
                 <Link
                   key={item.label}
+<<<<<<< HEAD
                   href="#"
+=======
+                  href="/facebook.com"
+>>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
                   aria-label={item.label}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-white text-[#345c32] transition hover:-translate-y-0.5 hover:bg-[#a7f0dd]"
                 >
@@ -116,6 +127,7 @@ export default function Footer() {
           <FooterColumn title="For Doctors/Organisations" links={doctorLinks} />
         </div>
 
+<<<<<<< HEAD
         <div className="mt-12 border-t border-white/10 pt-8">
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
             <span className="mr-2">Pay with</span>
@@ -130,6 +142,10 @@ export default function Footer() {
           </div>
 
           <p className="mt-10 text-center text-sm text-white/70">
+=======
+        <div className="mt-6 border-t border-white/10 pt-8">
+          <p className="mt-6 text-center text-sm text-white/70">
+>>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
             Copyright © 2026 Health Care Limited. All rights reserved.
           </p>
         </div>

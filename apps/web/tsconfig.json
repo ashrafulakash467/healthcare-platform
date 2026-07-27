@@ -21,20 +21,28 @@
       {
         "name": "next"
       }
+<<<<<<< HEAD
     ],
     "paths": {
       "@/*": [
         "./src/*"
       ]
     }
+=======
+    ]
+>>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+<<<<<<< HEAD
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
+=======
+    ".next/types/**/*.ts"
+>>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
   ],
   "exclude": [
     "node_modules"
