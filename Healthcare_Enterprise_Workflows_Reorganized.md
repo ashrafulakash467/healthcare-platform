@@ -1446,13 +1446,11 @@ Admin Dashboard
     ├──► Users
     ├──► Doctors
     ├──► Hospitals
-    ├──► Diagnostics
-    ├──► Ambulances
-    ├──► Home Care
     ├──► Appointments
     ├──► Payments
     ├──► Content
     ├──► Reports
+    └──► Notification
     ├──► Support
     └──► Settings
 ```
@@ -1503,10 +1501,6 @@ Admin Dashboard
 ├── User Management
 ├── Doctor Management
 ├── Hospital Management
-├── Diagnostic Centers
-├── Ambulance Providers
-├── Home Care Providers
-├── Health Packages
 ├── Appointment Management
 ├── Payment & Finance
 ├── Patient Management
@@ -1534,7 +1528,6 @@ Load KPI Widgets
  ├── Total Patients
  ├── Total Doctors
  ├── Hospitals
- ├── Diagnostics
  ├── Today's Appointments
  ├── Revenue
  ├── Pending Verifications

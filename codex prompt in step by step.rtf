@@ -1,0 +1,1017 @@
+{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil\fcharset1 Shonar Bangla;}{\f2\fnil Shonar Bangla;}{\f3\fnil\fcharset1 Calibri;}{\f4\fnil\fcharset1 Cambria Math;}{\f5\fnil Calibri;}{\f6\fnil\fcharset1 Segoe UI Symbol;}{\f7\fnil\fcharset1 Segoe UI Symbol;}}
+{\*\generator Riched20 10.0.19041}{\*\mmathPr\mmathFont4\mwrapIndent1440 }\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang9 | Step type                               \tab\tab |   Count | \f1\lang1093\u2474?\u2509?\u2480?\u2468?\u2495? \f0\lang1033 step \f1\lang1093\u2488?\u2478?\u2527? \f0\lang1033 |      \f1\lang1093\u2478?\u2507?\u2463? \u2488?\u2478?\u2527? \f0\lang1033 |\par
+| --------------------------------------- \tab | ------: \tab   | -------------: | -----------: |\par
+| Simple frontend/static page             \tab |   \f1\lang1093\u2539?\f2\endash\f1\u2541?\u2463?\u2494? \f3     \f0\lang1033 |      \f1\lang1093\u2535?\f2\endash\f1\u2536? \u2456?\u2467?\u2509?\u2463?\u2494? \f3     \f0\lang1033 |   \f1\lang1093\u2539?\f2\endash\f1\u2535?\u2538? \u2456?\u2467?\u2509?\u2463?\u2494? \f0\lang1033 |\par
+| Medium workflow UI + basic logic        | \f1\lang1093\u2535?\u2536?\f2\endash\f1\u2535?\u2539?\u2463?\u2494? \f3   \f0\lang1033 |      \f1\lang1093\u2538?\f2\endash\f1\u2542? \u2456?\u2467?\u2509?\u2463?\u2494? \f3      \f0\lang1033 | \f1\lang1093\u2538?\u2542?\f2\endash\f1\u2535?\u2536?\u2534? \u2456?\u2467?\u2509?\u2463?\u2494? \f0\lang1033 |\par
+| Full backend workflow + DB + API        \tab | \f1\lang1093\u2535?\u2539?\f2\endash\f1\u2535?\u2542?\u2463?\u2494? \f3   \f0\lang1033 |        \f1\lang1093\u2535?\f2\endash\f1\u2537? \u2470?\u2495?\u2472? \f3  \f0\lang1033\tab |    \f1\lang1093\u2535?\u2539?\f2\endash\f1\u2539?\u2538? \u2470?\u2495?\u2472? \f0\lang1033 |\par
+| Complex system/payment/video/\par
+RBAC/audit \tab\tab\tab\tab |   \f1\lang1093\u2539?\f2\endash\f1\u2542?\u2463?\u2494? \f3      \f0\lang1033 |        \f1\lang1093\u2537?\f2\endash\f1\u2541? \u2470?\u2495?\u2472? \f0\lang1033\tab  |    \f1\lang1093\u2535?\u2539?\f2\endash\f1\u2539?\u2540? \u2470?\u2495?\u2472? \f0\lang1033 |\par
+\par
+\b Main missing areas:\b0\par
+Patient registration\par
+Patient login\par
+Forgot password\par
+Real doctor search/filter logic\par
+Doctor profile detail page\par
+Appointment booking\par
+Reschedule/cancel appointment\par
+messageing system\par
+Patient medical records\par
+Reviews/ratings\par
+Payment/refund\par
+Notifications(optional -add in future)\par
+Customer support\par
+Doctor registration/verification\par
+Doctor dashboard\par
+Doctor schedule management\par
+Prescription workflow\par
+Hospital/clinic onboarding\par
+Diagnostic center operations\par
+Ambulance provider workflow\par
+Admin login/dashboard\par
+Admin doctor/hospital/patient/appointment management\par
+CMS\par
+Reports/analytics\par
+RBAC permissions\par
+Audit logs\par
+System settings\par
+Complaint/dispute\par
+Account deactivation\par
+Workflow status models\par
+\b Fastest practical order hobe:\b0\par
+Frontend public pages\par
+Auth/login/register\par
+Doctor listing + doctor profile\par
+Appointment booking\par
+Patient dashboard\par
+Admin dashboard\par
+Payment/notification\par
+Doctor dashboard\par
+Reports, RBAC, audit logs\par
+So short answer: \f1\lang1093\u2538?\u2534?\u2463?\u2494? \f0\lang1033 step baki, and MVP korte approx \f1\lang1093\u2536?\u2534?-\u2537?\u2534? \u2470?\u2495?\u2472?, \f0\lang1033 full enterprise system korte \f1\lang1093\u2537?-\u2540? \u2478?\u2494?\u2488? \u2482?\u2494?\u2455?\u2476?\u2503?\u2404?\line\line\line\line\par
+\par
+\u2489?\u2509?\u2479?\u2494?\u2433?\u2404? **\f0\lang1033 Codex-\f1\lang1093\u2453?\u2503? \u2447?\u2453?\u2476?\u2494?\u2480?\u2503? \u2474?\u2497?\u2480?\u2507? \f0\lang1033 project complete \f1\lang1093\u2453?\u2480?\u2468?\u2503? \u2470?\u2495?\u2482?\u2503?** \u2488?\u2494?\u2471?\u2494?\u2480?\u2467?\u2468? \f0\lang1033 context \f1\lang1093\u2476?\u2465?\u2492? \u2489?\u2479?\u2492?\u2503? \u2479?\u2494?\u2479?\u2492?, \u2477?\u2497?\u2482? \u2476?\u2494?\u2465?\u2492?\u2503? \u2447?\u2476?\u2434? \u2488?\u2478?\u2479?\u2492?\u2451? \u2476?\u2503?\u2486?\u2495? \u2482?\u2494?\u2455?\u2503?\u2404? \u2438?\u2474?\u2472?\u2494?\u2480? \u2482?\u2453?\u2509?\u2487?\u2509?\u2479? \u2479?\u2470?\u2495? \u2489?\u2527? **\u2474?\u2509?\u2480?\u2468?\u2495? \f0\lang1033 task \f1\lang1093\u2447?\u2478?\u2472?\u2477?\u2494?\u2476?\u2503? \u2459?\u2507?\u2463? \u2453?\u2480?\u2494? \u2479?\u2494?\u2468?\u2503? \f0\lang1033 Codex \f1\lang1093\u2470?\u2509?\u2480?\u2497?\u2468? 2\f2\endash\f0\lang1033 5 \f1\lang1093\u2478?\u2495?\u2472?\u2495?\u2463?\u2503? \u2453?\u2494?\u2460? \u2486?\u2503?\u2487? \u2453?\u2480?\u2468?\u2503? \u2474?\u2494?\u2480?\u2503?**, \u2468?\u2494?\u2489?\u2482?\u2503? \u2488?\u2476?\u2458?\u2503?\u2527?\u2503? \u2477?\u2494?\u2482?\u2507? \u2474?\u2470?\u2509?\u2471?\u2468?\u2495? \u2489?\u2482?\u2507?:\par
+\par
+**\u2447?\u2453?\u2476?\u2494?\u2480?\u2503? \u2535?\u2463?\u2495? \u2459?\u2507?\u2463? \f0\lang1033 module \f4\u8594?\f5  \f0 inspect \f4\u8594?\f5  \f0 implement \f4\u8594?\f5  \f0 test \f4\u8594?\f5  \f0 next module**\par
+\par
+\f1\lang1093\u2472?\u2495?\u2458?\u2503? \u2438?\u2478?\u2495? \u2438?\u2474?\u2472?\u2494?\u2480? \f0\lang1033 missing areas-\f1\lang1093\u2455?\u2497?\u2482?\u2507?\u2453?\u2503? **\f0\lang1033 small, Codex-friendly implementation steps**-\f1\lang1093\u2447? \u2477?\u2494?\u2455? \u2453?\u2480?\u2503? \u2470?\u2495?\u2482?\u2494?\u2478?\u2404? \u2474?\u2509?\u2480?\u2468?\u2495?\u2463?\u2495? \f0\lang1033 prompt \f1\lang1093\u2447?\u2478?\u2472?\u2477?\u2494?\u2476?\u2503? \u2482?\u2503?\u2454?\u2494? \u2479?\u2503? \u2438?\u2474?\u2472?\u2495? \u2488?\u2480?\u2494?\u2488?\u2480?\u2495? \f0\lang1033 Codex-\f1\lang1093\u2447? \f0\lang1033 copy-paste \f1\lang1093\u2453?\u2480?\u2468?\u2503? \u2474?\u2494?\u2480?\u2476?\u2503?\u2472?\u2404?\f0\lang1033\par
+\par
+> **Important:** \f1\lang1093\u2474?\u2509?\u2480?\u2468?\u2495?\u2463?\u2495? \f0\lang1033 prompt-\f1\lang1093\u2447?\u2480? \u2438?\u2455?\u2503? \f0\lang1033 Codex-\f1\lang1093\u2453?\u2503? \f0\lang1033 project structure \f1\lang1093\u2472?\u2495?\u2460?\u2503? \f0\lang1033 inspect \f1\lang1093\u2453?\u2480?\u2468?\u2503? \u2476?\u2482?\u2503?\u2459?\u2495?\u2404? \u2468?\u2494?\u2439? \u2438?\u2474?\u2472?\u2494?\u2480? \f0\lang1033 existing codebase \f1\lang1093\u2437?\u2472?\u2497?\u2479?\u2494?\u2479?\u2492?\u2496? \f0\lang1033 implementation \f1\lang1093\u2453?\u2480?\u2494?\u2480? \u2488?\u2497?\u2479?\u2507?\u2455? \u2469?\u2494?\u2453?\u2476?\u2503?\u2404?\f0\lang1033\par
+\par
+---\par
+\par
+# Phase 0 \f5\emdash  \f1\lang1093\u2474?\u2509?\u2480?\u2469?\u2478?\u2503? \f0\lang1033 Project \f1\lang1093\u2476?\u2497?\u2461?\u2494?\u2472?\u2507?\f0\lang1033\par
+\par
+### Step 0.1 \f5\emdash  Project Audit\par
+\par
+**Prompt:**\par
+\par
+```text\par
+Inspect the existing codebase and understand the current architecture.\par
+\par
+Do not modify any code yet.\par
+\par
+Identify:\par
+- Framework and version\par
+- Frontend structure\par
+- Backend/API structure\par
+- Database/ORM\par
+- Authentication system\par
+- Existing user roles\par
+- Existing doctor/patient/hospital models\par
+- Existing appointment flow\par
+- Existing payment integration\par
+- Existing admin/CMS\par
+- Existing UI components\par
+- Existing API endpoints\par
+\par
+Return a concise summary of the current implementation and list the missing modules that need to be completed.\par
+\par
+Keep the response short.\par
+```\par
+\par
+---\par
+\par
+# Phase 1 \emdash  Authentication\par
+\par
+## Step 1 \emdash  Patient Registration\par
+\par
+```text\par
+Implement patient registration using the existing project architecture.\par
+\par
+Requirements:\par
+- Name\par
+- Email\par
+- Phone\par
+- Password\par
+- Confirm password\par
+- Server-side validation\par
+- Duplicate email/phone validation\par
+- Secure password hashing\par
+- Create patient role/user\par
+- Return proper success and error responses\par
+- Use existing UI components and styling\par
+\par
+Do not modify unrelated features.\par
+Run type checking or relevant tests after implementation.\par
+```\par
+\par
+## Step 2 \emdash  Patient Login\par
+\par
+```text\par
+Implement patient login using the existing authentication architecture.\par
+\par
+Requirements:\par
+- Email/phone login\par
+- Password validation\par
+- Secure authentication\par
+- Session/token handling\par
+- Invalid credential error\par
+- Redirect authenticated patient to patient dashboard\par
+\par
+Reuse existing auth utilities.\par
+Do not create a second authentication system.\par
+Do not modify unrelated code.\par
+```\par
+\par
+## Step 3 \emdash  Forgot Password\par
+\par
+```text\par
+Implement forgot-password and reset-password functionality.\par
+\par
+Requirements:\par
+- Request reset using email\par
+- Secure reset token\par
+- Token expiration\par
+- Reset password page/API\par
+- Password hashing\par
+- Prevent reused/expired tokens\par
+- Proper success/error states\par
+\par
+Reuse existing email/auth infrastructure if available.\par
+Do not modify unrelated features.\par
+```\par
+\par
+---\par
+\par
+# Phase 2 \emdash  Doctor Discovery\par
+\par
+## Step 4 \emdash  Real Doctor Search\par
+\par
+```text\par
+Implement real doctor search functionality.\par
+\par
+Requirements:\par
+- Search by doctor name\par
+- Filter by specialty\par
+- Filter by location\par
+- Filter by gender if supported by schema\par
+- Filter by availability\par
+- Pagination\par
+- Sorting\par
+- Only show verified/active doctors\par
+\par
+Use real database/API data.\par
+Do not use mock data.\par
+Reuse existing Doctor model and API patterns.\par
+Keep the implementation focused only on doctor search.\par
+```\par
+\par
+## Step 5 \emdash  Doctor Profile\par
+\par
+```text\par
+Implement the doctor profile detail page.\par
+\par
+Show:\par
+- Doctor name\par
+- Profile photo\par
+- Specialty\par
+- Qualifications\par
+- Experience\par
+- Hospital/clinic affiliations\par
+- Consultation fee\par
+- Available schedule\par
+- Rating/reviews\par
+- Book appointment CTA\par
+\par
+Fetch data from the real backend/API.\par
+Handle loading, error, and not-found states.\par
+Do not modify unrelated pages.\par
+```\par
+\par
+---\par
+\par
+# Phase 3 \emdash  Appointment\par
+\par
+## Step 6 \emdash  Appointment Booking\par
+\par
+```text\par
+Implement the patient appointment booking workflow.\par
+\par
+Requirements:\par
+- Select doctor\par
+- Select hospital/clinic if applicable\par
+- Show available dates\par
+- Show available time slots\par
+- Prevent double booking\par
+- Create appointment\par
+- Save patient and doctor relationship\par
+- Store appointment status\par
+- Show booking confirmation\par
+\par
+Use a transactional database operation if supported.\par
+Do not use mock data.\par
+Keep this task limited to appointment booking.\par
+```\par
+\par
+## Step 7 \emdash  Reschedule Appointment\par
+\par
+```text\par
+Implement appointment rescheduling.\par
+\par
+Requirements:\par
+- Patient can reschedule eligible appointments\par
+- Show only available slots\par
+- Prevent double booking\par
+- Update appointment date/time\par
+- Preserve appointment history if audit/history exists\par
+- Validate appointment status\par
+\par
+Do not modify cancellation or payment logic yet.\par
+```\par
+\par
+## Step 8 \emdash  Cancel Appointment\par
+\par
+```text\par
+Implement appointment cancellation.\par
+\par
+Requirements:\par
+- Patient can cancel eligible appointments\par
+- Doctor/admin cancellation should also be supported if existing role permissions allow it\par
+- Validate cancellation rules\par
+- Update appointment status\par
+- Store cancellation reason\par
+- Preserve cancellation history\par
+\par
+Do not implement refund logic in this task.\par
+```\par
+\par
+---\par
+\par
+# Phase 4 \emdash  Messaging\par
+\par
+## Step 9 \emdash  Messaging System\par
+\par
+```text\par
+Implement a basic patient-doctor messaging system.\par
+\par
+Requirements:\par
+- Patient can message doctor\par
+- Doctor can reply\par
+- Conversation/thread model\par
+- Message model\par
+- Read/unread status\par
+- Message timestamps\par
+- Access control so users can only access their own conversations\par
+\par
+Use the existing database and authentication system.\par
+Do not implement real-time WebSocket functionality unless already available.\par
+Keep it simple and reliable.\par
+```\par
+\par
+---\par
+\par
+# Phase 5 \emdash  Medical Records\par
+\par
+## Step 10 \emdash  Patient Medical Records\par
+\par
+```text\par
+Implement patient medical records.\par
+\par
+Requirements:\par
+- Patient can view own records\par
+- Doctor can create/update records for authorized patients\par
+- Record date\par
+- Diagnosis\par
+- Symptoms\par
+- Notes\par
+- Attachments if file storage already exists\par
+- Access control\par
+- Record history\par
+\par
+Ensure patients cannot access another patient's medical records.\par
+Reuse existing authentication and RBAC patterns.\par
+```\par
+\par
+---\par
+\par
+# Phase 6 \emdash  Reviews & Ratings\par
+\par
+## Step 11 \emdash  Reviews\par
+\par
+```text\par
+Implement doctor reviews and ratings.\par
+\par
+Requirements:\par
+- Only eligible patients can review doctors\par
+- Rating from 1 to 5\par
+- Written review\par
+- Prevent duplicate review for the same completed appointment\par
+- Calculate average rating\par
+- Show reviews on doctor profile\par
+- Validate and sanitize input\par
+\par
+Use real database data.\par
+```\par
+\par
+---\par
+\par
+# Phase 7 \emdash  Payment\par
+\par
+## Step 12 \emdash  Payment\par
+\par
+```text\par
+Implement the appointment payment workflow using the existing payment provider if one is already configured.\par
+\par
+Requirements:\par
+- Create payment for eligible appointment\par
+- Store payment record\par
+- Payment status\par
+- Link payment to appointment\par
+- Handle successful payment\par
+- Handle failed payment\par
+- Prevent duplicate payment\par
+- Update appointment payment status\par
+\par
+Do not implement refunds in this task.\par
+Do not expose secret keys to frontend.\par
+```\par
+\par
+## Step 13 \emdash  Refund\par
+\par
+```text\par
+Implement appointment payment refund handling.\par
+\par
+Requirements:\par
+- Refund eligible cancelled appointments\par
+- Validate refund eligibility\par
+- Create refund record\par
+- Store refund status\par
+- Handle successful/failed refund\par
+- Prevent duplicate refunds\par
+- Update appointment/payment status\par
+\par
+Reuse existing payment provider integration.\par
+Do not modify unrelated payment logic.\par
+```\par
+\par
+---\par
+\par
+# Phase 8 \emdash  Customer Support\par
+\par
+## Step 14 \emdash  Customer Support\par
+\par
+```text\par
+Implement a basic customer support/ticket system.\par
+\par
+Requirements:\par
+- Patient can create support ticket\par
+- Ticket subject\par
+- Description\par
+- Category\par
+- Status\par
+- Priority\par
+- User can view own tickets\par
+- Admin/support can reply\par
+- Admin/support can change status\par
+\par
+Add proper access control.\par
+Keep the UI simple and consistent with the existing project.\par
+```\par
+\par
+---\par
+\par
+# Phase 9 \emdash  Doctor Onboarding\par
+\par
+## Step 15 \emdash  Doctor Registration\par
+\par
+```text\par
+Implement doctor registration.\par
+\par
+Requirements:\par
+- Personal information\par
+- Email/phone\par
+- Password\par
+- Specialty\par
+- Qualifications\par
+- Experience\par
+- License information\par
+- Profile information\par
+\par
+Create doctor account with pending verification status.\par
+Do not automatically mark doctors as verified.\par
+Reuse existing authentication system.\par
+```\par
+\par
+## Step 16 \emdash  Doctor Verification\par
+\par
+```text\par
+Implement doctor verification workflow.\par
+\par
+Requirements:\par
+- Admin can view pending doctors\par
+- Admin can approve doctor\par
+- Admin can reject doctor\par
+- Rejection reason\par
+- Doctor verification status\par
+- Only approved doctors appear in public doctor search\par
+\par
+Use existing admin permissions if available.\par
+```\par
+\par
+---\par
+\par
+# Phase 10 \emdash  Doctor Dashboard\par
+\par
+## Step 17 \emdash  Doctor Dashboard\par
+\par
+```text\par
+Implement the doctor dashboard.\par
+\par
+Show:\par
+- Today's appointments\par
+- Upcoming appointments\par
+- Completed appointments\par
+- Pending appointments\par
+- Patient count\par
+- Earnings if payment data exists\par
+- Recent messages\par
+\par
+Use real backend data.\par
+Do not use mock statistics.\par
+Keep dashboard components modular.\par
+```\par
+\par
+## Step 18 \emdash  Doctor Schedule\par
+\par
+```text\par
+Implement doctor schedule management.\par
+\par
+Requirements:\par
+- Doctor can define working days\par
+- Start/end time\par
+- Slot duration\par
+- Break time\par
+- Day off\par
+- Block specific dates\par
+- Generate available appointment slots\par
+\par
+Prevent overlapping schedules.\par
+Do not modify appointment booking UI unless required for integration.\par
+```\par
+\par
+---\par
+\par
+# Phase 11 \emdash  Prescription\par
+\par
+## Step 19 \emdash  Prescription Workflow\par
+\par
+```text\par
+Implement prescription workflow.\par
+\par
+Requirements:\par
+- Doctor can create prescription for an authorized patient\par
+- Medicine name\par
+- Dosage\par
+- Frequency\par
+- Duration\par
+- Instructions\par
+- Diagnosis/notes\par
+- Link prescription to appointment\par
+- Patient can view prescription\par
+- Doctor can update prescription before finalization\par
+- Finalized prescription should become read-only\par
+\par
+Enforce patient/doctor access control.\par
+```\par
+\par
+---\par
+\par
+# Phase 12 \emdash  Hospital / Clinic\par
+\par
+## Step 20 \emdash  Hospital/Clinic Onboarding\par
+\par
+```text\par
+Implement hospital and clinic onboarding.\par
+\par
+Requirements:\par
+- Organization registration\par
+- Organization name\par
+- Type: hospital or clinic\par
+- Address\par
+- Contact information\par
+- Admin/contact person\par
+- Verification status\par
+- Admin approval/rejection\par
+\par
+Only approved organizations should appear publicly.\par
+Reuse existing organization model if available.\par
+```\par
+\par
+---\par
+\par
+# Phase 13 \emdash  Diagnostic Center\par
+\par
+## Step 21 \emdash  Diagnostic Center Operations\par
+\par
+```text\par
+Implement basic diagnostic center operations.\par
+\par
+Requirements:\par
+- Diagnostic center profile\par
+- Services/tests\par
+- Test pricing\par
+- Availability\par
+- Patient test booking/request\par
+- Booking status\par
+- Admin/center staff management\par
+\par
+Use existing organization architecture where possible.\par
+Keep the first implementation simple.\par
+```\par
+\par
+---\par
+\par
+# Phase 14 \emdash  Ambulance\par
+\par
+## Step 22 \emdash  Ambulance Provider Workflow\par
+\par
+```text\par
+Implement basic ambulance provider workflow.\par
+\par
+Requirements:\par
+- Provider registration\par
+- Provider verification\par
+- Ambulance details\par
+- Availability status\par
+- Emergency request creation\par
+- Request status\par
+- Assign available ambulance/provider\par
+- Patient request tracking\par
+\par
+Use role-based access control.\par
+Keep this implementation focused on the core workflow only.\par
+```\par
+\par
+---\par
+\par
+# Phase 15 \emdash  Admin\par
+\par
+## Step 23 \emdash  Admin Login\par
+\par
+```text\par
+Implement secure admin authentication.\par
+\par
+Requirements:\par
+- Admin-only login\par
+- Role validation\par
+- Protected admin routes\par
+- Unauthorized access handling\par
+- Session/token security\par
+\par
+Reuse the existing authentication system.\par
+Do not create duplicate auth infrastructure.\par
+```\par
+\par
+## Step 24 \emdash  Admin Dashboard\par
+\par
+```text\par
+Implement the admin dashboard.\par
+\par
+Show real metrics:\par
+- Total patients\par
+- Total doctors\par
+- Verified doctors\par
+- Hospitals/clinics\par
+- Appointments\par
+- Revenue\par
+- Pending verification requests\par
+- Open complaints\par
+\par
+Use real database/API data.\par
+```\par
+\par
+## Step 25 \emdash  Admin Management\par
+\par
+```text\par
+Implement admin management pages for:\par
+\par
+- Patients\par
+- Doctors\par
+- Hospitals\par
+- Clinics\par
+- Appointments\par
+\par
+Requirements:\par
+- List\par
+- Search\par
+- Filter\par
+- View details\par
+- Activate/deactivate where applicable\par
+- Doctor verification\par
+- Appointment status management\par
+\par
+Use reusable table components.\par
+Do not implement reports or analytics yet.\par
+```\par
+\par
+---\par
+\par
+# Phase 16 \emdash  CMS\par
+\par
+## Step 26 \emdash  CMS\par
+\par
+```text\par
+Implement a basic CMS for admin-managed content.\par
+\par
+Requirements:\par
+- Create content\par
+- Edit content\par
+- Delete content\par
+- Publish/unpublish\par
+- Draft status\par
+- Slug\par
+- Title\par
+- Body/content\par
+- Author\par
+- Published date\par
+\par
+Use existing admin authentication and permissions.\par
+```\par
+\par
+---\par
+\par
+# Phase 17 \emdash  Reports & Analytics\par
+\par
+## Step 27 \emdash  Reports\par
+\par
+```text\par
+Implement admin reports and analytics.\par
+\par
+Include:\par
+- Appointment trends\par
+- Patient registrations\par
+- Doctor registrations\par
+- Revenue\par
+- Completed/cancelled appointments\par
+- Top doctors\par
+- Hospital/clinic performance\par
+\par
+Use real database aggregation queries.\par
+Add date range filtering.\par
+Avoid unnecessary complex chart libraries if not already installed.\par
+```\par
+\par
+---\par
+\par
+# Phase 18 \emdash  RBAC\par
+\par
+## Step 28 \emdash  RBAC Permissions\par
+\par
+```text\par
+Implement centralized RBAC permissions.\par
+\par
+Roles may include:\par
+- Patient\par
+- Doctor\par
+- Hospital Admin\par
+- Clinic Admin\par
+- Diagnostic Center Staff\par
+- Ambulance Provider\par
+- Support Staff\par
+- Admin\par
+- Super Admin\par
+\par
+Create reusable permission checks.\par
+Protect API routes and frontend routes.\par
+Do not duplicate role logic across files.\par
+```\par
+\par
+---\par
+\par
+# Phase 19 \emdash  Audit Logs\par
+\par
+## Step 29 \emdash  Audit Logs\par
+\par
+```text\par
+Implement audit logging for important system actions.\par
+\par
+Track:\par
+- User\par
+- Role\par
+- Action\par
+- Entity type\par
+- Entity ID\par
+- Timestamp\par
+- IP if available\par
+- Metadata if needed\par
+\par
+Add logs for:\par
+- Login\par
+- User creation\par
+- Doctor verification\par
+- Appointment changes\par
+- Payment/refund\par
+- Account deactivation\par
+- Admin changes\par
+\par
+Create reusable audit logging utility.\par
+```\par
+\par
+---\par
+\par
+# Phase 20 \emdash  System Settings\par
+\par
+## Step 30 \emdash  System Settings\par
+\par
+```text\par
+Implement admin system settings.\par
+\par
+Settings should include configurable values such as:\par
+- Appointment cancellation rules\par
+- Refund rules\par
+- Consultation fee settings\par
+- Platform commission if applicable\par
+- Support contact\par
+- General platform settings\par
+\par
+Create a centralized settings model/API.\par
+Add admin UI for managing settings.\par
+```\par
+\par
+---\par
+\par
+# Phase 21 \emdash  Complaint / Dispute\par
+\par
+## Step 31 \emdash  Complaint System\par
+\par
+```text\par
+Implement complaint and dispute management.\par
+\par
+Requirements:\par
+- Patient can create complaint\par
+- Complaint category\par
+- Description\par
+- Related appointment/order/payment\par
+- Status\par
+- Priority\par
+- Admin/support response\par
+- Resolution notes\par
+- Close complaint\par
+\par
+Add access control.\par
+```\par
+\par
+---\par
+\par
+# Phase 22 \emdash  Account Deactivation\par
+\par
+## Step 32 \emdash  Account Deactivation\par
+\par
+```text\par
+Implement account deactivation.\par
+\par
+Requirements:\par
+- Patient can request/deactivate own account\par
+- Doctor can deactivate own account\par
+- Admin can deactivate accounts\par
+- Store deactivation reason\par
+- Prevent login for deactivated accounts\par
+- Preserve historical appointments and records\par
+- Do not hard-delete important transactional data\par
+\par
+Use soft deletion/deactivation.\par
+```\par
+\par
+---\par
+\par
+# Phase 23 \emdash  Workflow Status Models\par
+\par
+\f1\lang1093\u2447?\u2463?\u2494? \u2454?\u2497?\u2476? \u2455?\u2497?\u2480?\u2497?\u2468?\u2509?\u2476?\u2474?\u2498?\u2480?\u2509?\u2467?\u2404? \u2488?\u2476?\u2486?\u2503?\u2487?\u2503? \u2488?\u2476? \f0\lang1033 workflow-\f1\lang1093\u2447?\u2480? \f0\lang1033 status \f1\lang1093\u2447?\u2453? \u2460?\u2494?\u2527?\u2455?\u2494?\u2527? \f0\lang1033 standardize \f1\lang1093\u2453?\u2480?\u2476?\u2503?\u2472?\u2404?\f0\lang1033\par
+\par
+## Step 33 \f5\emdash  Status Models\par
+\par
+```text\par
+Review all existing workflow status fields and standardize them.\par
+\par
+Define clear status enums/models for:\par
+\par
+Appointment:\par
+- PENDING\par
+- CONFIRMED\par
+- RESCHEDULED\par
+- COMPLETED\par
+- CANCELLED\par
+- NO_SHOW\par
+\par
+Payment:\par
+- PENDING\par
+- PAID\par
+- FAILED\par
+- REFUNDED\par
+- PARTIALLY_REFUNDED\par
+\par
+Doctor Verification:\par
+- PENDING\par
+- APPROVED\par
+- REJECTED\par
+- SUSPENDED\par
+\par
+Support Ticket:\par
+- OPEN\par
+- IN_PROGRESS\par
+- RESOLVED\par
+- CLOSED\par
+\par
+Complaint:\par
+- OPEN\par
+- INVESTIGATING\par
+- RESOLVED\par
+- REJECTED\par
+- CLOSED\par
+\par
+Ambulance Request:\par
+- REQUESTED\par
+- ACCEPTED\par
+- ASSIGNED\par
+- ON_THE_WAY\par
+- ARRIVED\par
+- COMPLETED\par
+- CANCELLED\par
+\par
+Prescription:\par
+- DRAFT\par
+- FINALIZED\par
+- CANCELLED\par
+\par
+Organization:\par
+- PENDING\par
+- APPROVED\par
+- REJECTED\par
+- SUSPENDED\par
+\par
+Update the database/API/business logic to use these statuses consistently.\par
+\par
+Do not change unrelated UI.\par
+```\par
+\par
+---\par
+\par
+# Phase 24 \emdash  Final Integration\par
+\par
+\f1\lang1093\u2488?\u2476? \f0\lang1033 feature \f1\lang1093\u2438?\u2482?\u2494?\u2470?\u2494? \u2438?\u2482?\u2494?\u2470?\u2494?\u2477?\u2494?\u2476?\u2503? \u2453?\u2480?\u2494?\u2480? \u2474?\u2480? **\u2486?\u2503?\u2487?\u2503? \u2447?\u2439? \f0\lang1033 prompts** \f1\lang1093\u2458?\u2494?\u2482?\u2494?\u2476?\u2503?\u2472?\u2404?\f0\lang1033\par
+\par
+## Step 34 \f5\emdash  Integration Audit\par
+\par
+```text\par
+Audit the entire application after the recent feature implementations.\par
+\par
+Check:\par
+- Broken API calls\par
+- TypeScript errors\par
+- Database relation issues\par
+- Authentication issues\par
+- Authorization issues\par
+- Missing loading states\par
+- Missing error handling\par
+- Broken routes\par
+- Broken imports\par
+- Inconsistent status values\par
+\par
+Do not redesign the UI.\par
+Do not add new features.\par
+Fix only issues caused by integration.\par
+```\par
+\par
+## Step 35 \emdash  Security Audit\par
+\par
+```text\par
+Perform a security-focused audit of the application.\par
+\par
+Check:\par
+- Authentication\par
+- Authorization\par
+- RBAC\par
+- API route protection\par
+- Patient medical record access\par
+- Doctor/patient data isolation\par
+- Admin access\par
+- Password handling\par
+- Payment secrets\par
+- Input validation\par
+- SQL/ORM injection risks\par
+- IDOR risks\par
+- File upload security if applicable\par
+\par
+Fix critical and high-risk issues only.\par
+Do not refactor unrelated code.\par
+```\par
+\par
+## Step 36 \emdash  Final QA\par
+\par
+```text\par
+Run a final application QA audit.\par
+\par
+Test the main flows:\par
+\par
+1. Patient registration\par
+2. Patient login\par
+3. Forgot password\par
+4. Doctor search\par
+5. Doctor profile\par
+6. Appointment booking\par
+7. Reschedule\par
+8. Cancellation\par
+9. Payment\par
+10. Refund\par
+11. Messaging\par
+12. Medical records\par
+13. Prescription\par
+14. Doctor registration\par
+15. Doctor verification\par
+16. Doctor dashboard\par
+17. Doctor schedule\par
+18. Hospital onboarding\par
+19. Diagnostic center\par
+20. Ambulance\par
+21. Admin dashboard\par
+22. RBAC\par
+23. Complaints\par
+24. Account deactivation\par
+\par
+Fix only actual bugs.\par
+Do not add new features.\par
+Return a concise summary of fixed issues and remaining issues.\par
+```\par
+\par
+---\par
+\par
+## \f6\u-10179?\u-8576?\f5  \f1\lang1093\u2438?\u2478?\u2494?\u2480? \f0\lang1033 Recommended Execution Order\par
+\par
+Codex-\f1\lang1093\u2447? \u2447?\u2439? \f0\lang1033 order-\f1\lang1093\u2447? \u2453?\u2480?\u2476?\u2503?\u2472?:\par
+\par
+\f0\lang1033 ```text\par
+1. Project Audit\par
+2. Patient Auth\par
+3. Doctor Auth + Verification\par
+4. Doctor Search\par
+5. Doctor Profile\par
+6. Doctor Schedule\par
+7. Appointment Booking\par
+8. Reschedule\par
+9. Cancellation\par
+10. Payment\par
+11. Refund\par
+12. Patient Medical Records\par
+13. Prescription\par
+14. Messaging\par
+15. Reviews\par
+16. Doctor Dashboard\par
+17. Hospital/Clinic\par
+18. Diagnostic Center\par
+19. Ambulance\par
+20. Customer Support\par
+21. Admin Auth\par
+22. Admin Dashboard\par
+23. Admin Management\par
+24. RBAC\par
+25. Audit Logs\par
+26. CMS\par
+27. Reports/Analytics\par
+28. Complaint/Dispute\par
+29. Account Deactivation\par
+30. System Settings\par
+31. Workflow Status Standardization\par
+32. Integration Audit\par
+33. Security Audit\par
+34. Final QA\par
+```\par
+\par
+### \f7\u9889?\f5  \f0 Codex-\f1\lang1093\u2447? \u2470?\u2509?\u2480?\u2497?\u2468? \u2453?\u2494?\u2460? \u2453?\u2480?\u2494?\u2472?\u2507?\u2480? \u2488?\u2476?\u2458?\u2503?\u2527?\u2503? \u2455?\u2497?\u2480?\u2497?\u2468?\u2509?\u2476?\u2474?\u2498?\u2480?\u2509?\u2467? \u2472?\u2495?\u2527?\u2478?\f0\lang1033\par
+\par
+\f1\lang1093\u2474?\u2509?\u2480?\u2468?\u2495?\u2463?\u2495? \f0\lang1033 prompt-\f1\lang1093\u2447?\u2480? \u2486?\u2503?\u2487?\u2503? \u2447?\u2439? \u2471?\u2480?\u2472?\u2503?\u2480? \f0\lang1033 constraint \f1\lang1093\u2480?\u2494?\u2454?\u2476?\u2503?\u2472?:\par
+\par
+\f0\lang1033 ```text\par
+Keep this task small and focused.\par
+Do not modify unrelated features.\par
+Reuse existing architecture and components.\par
+Do not create duplicate models, APIs, or authentication systems.\par
+Do not use mock data if real database data exists.\par
+After implementation, run the relevant type check or tests.\par
+Keep the response concise and report only what was changed.\par
+```\par
+\par
+\f1\lang1093\u2447?\u2468?\u2503? \f0\lang1033 Codex-\f1\lang1093\u2447?\u2480? \u2453?\u2494?\u2460? \u2437?\u2472?\u2503?\u2453? \u2476?\u2503?\u2486?\u2495? **\f0\lang1033 focused** \f1\lang1093\u2489?\u2476?\u2503? \u2447?\u2476?\u2434? \u2447?\u2453?\u2503?\u2453?\u2463?\u2494? \f0\lang1033 task \f1\lang1093\u2459?\u2507?\u2463? \u2469?\u2494?\u2453?\u2476?\u2503?\u2404? \u2468?\u2476?\u2503? **2\f2\endash\f0\lang1033 5 \f1\lang1093\u2478?\u2495?\u2472?\u2495?\u2463?\u2503? \u2474?\u2509?\u2480?\u2468?\u2495?\u2463?\u2495? \f0\lang1033 task \f1\lang1093\u2486?\u2503?\u2487? \u2489?\u2476?\u2503?\f2\emdash\f1\u2447?\u2463?\u2494? \u2472?\u2495?\u2486?\u2509?\u2458?\u2495?\u2468? \u2453?\u2480?\u2494? \u2488?\u2478?\u2509?\u2477?\u2476? \u2472?\u2527?**; \f0\lang1033 codebase-\f1\lang1093\u2447?\u2480? \f0\lang1033 size, database migration, dependency installation \f1\lang1093\u2447?\u2476?\u2434? \f0\lang1033 test suite-\f1\lang1093\u2447?\u2480? \u2451?\u2474?\u2480? \u2488?\u2478?\u2479?\u2492? \u2472?\u2495?\u2480?\u2509?\u2477?\u2480? \u2453?\u2480?\u2476?\u2503?\u2404?\f0\lang9\par
+}
+ 
