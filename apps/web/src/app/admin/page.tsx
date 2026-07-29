@@ -37,7 +37,7 @@ type AdminUser = {
 };
 
 const API_BASE = "http://localhost:3001";
-const ADMIN_PORTAL_URL = "http://localhost:3002";
+const ADMIN_PORTAL_URL = "/admin/dashboard";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -89,7 +89,7 @@ export default function AdminPage() {
 
       setAdmin(result.user ?? null);
       localStorage.setItem("adminUser", JSON.stringify(result.user ?? null));
-      await loadQueue(storedToken);
+      router.replace("/admin/dashboard");
     } catch {
       setError("Could not reach the API. Make sure the backend is running on port 3001.");
     } finally {
@@ -123,7 +123,7 @@ export default function AdminPage() {
       document.cookie = `adminToken=${encodeURIComponent(result.token)}; path=/; max-age=2592000; SameSite=Lax`;
       setIdentifier("");
       setPassword("");
-      await loadQueue(result.token);
+      router.replace("/admin/dashboard");
     } catch {
       setError("Could not reach the API. Make sure the backend is running on port 3001.");
     } finally {
@@ -357,16 +357,16 @@ export default function AdminPage() {
                         <StatusBadge>{doctor.verificationStatus}</StatusBadge>
                       </div>
                       <p className="text-sm text-slate-600">
-                        {doctor.specialty} · {doctor.location} · {doctor.gender}
+                        {doctor.specialty} - {doctor.location} - {doctor.gender}
                       </p>
                       <p className="text-sm text-slate-600">
-                        {doctor.email ?? "No email"} · {doctor.phone ?? "No phone"}
+                        {doctor.email ?? "No email"} - {doctor.phone ?? "No phone"}
                       </p>
                       <p className="text-sm text-slate-700">
                         Experience: {doctor.experienceYears} years
                       </p>
                       <p className="text-sm text-slate-700">
-                        License: {doctor.licenseNumber ?? "N/A"} · {doctor.licenseIssuedBy ?? "N/A"}
+                        License: {doctor.licenseNumber ?? "N/A"} - {doctor.licenseIssuedBy ?? "N/A"}
                       </p>
                       <p className="text-sm leading-6 text-slate-600">
                         {doctor.profileSummary}
