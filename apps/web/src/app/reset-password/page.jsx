@@ -2,25 +2,28 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { apiFetch, clearAuthSession } from "@/lib/api";
 
 const initialForm = {
   token: "",
+  email: "",
   password: "",
   confirmPassword: "",
 };
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [form, setForm] = useState(initialForm);
+  const searchParams = useSearchParams();
+  const [form, setForm] = useState(() => ({
+    ...initialForm,
+    token: searchParams.get("token") ?? "",
+    email: searchParams.get("email") ?? "",
+  }));
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get("token") ?? "";
-    setForm((currentForm) => ({ ...currentForm, token }));
-  }, []);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -36,12 +39,12 @@ export default function ResetPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3001/patient/reset-password", {
+      const response = await apiFetch("/patient/reset-password", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          password_confirmation: form.confirmPassword,
+        }),
       });
       const result = await response.json();
 
@@ -50,8 +53,7 @@ export default function ResetPasswordPage() {
         return;
       }
 
-      localStorage.removeItem("patientToken");
-      localStorage.removeItem("patientUser");
+      clearAuthSession("patient");
       setMessage(result.message ?? "Password has been reset successfully.");
       setTimeout(() => router.push("/login"), 900);
     } catch {
@@ -102,6 +104,14 @@ export default function ResetPasswordPage() {
               error={errors.token}
               onChange={updateField}
               autoComplete="off"
+            />
+            <Field
+              label="Email"
+              name="email"
+              value={form.email}
+              error={errors.email}
+              onChange={updateField}
+              autoComplete="email"
             />
             <Field
               label="New password"

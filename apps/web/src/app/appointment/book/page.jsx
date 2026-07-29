@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { apiFetch, getStoredToken } from "@/lib/api";
 
 export default function BookAppointmentPage() {
+  const searchParams = useSearchParams();
   const [doctors, setDoctors] = useState([]);
-  const [doctorId, setDoctorId] = useState("");
+  const [doctorId, setDoctorId] = useState(() => searchParams.get("doctorId") ?? "");
   const [bookingOptions, setBookingOptions] = useState(null);
   const [clinicId, setClinicId] = useState("");
   const [dates, setDates] = useState([]);
@@ -18,12 +21,9 @@ export default function BookAppointmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const urlDoctorId = new URLSearchParams(window.location.search).get("doctorId") ?? "";
-    setDoctorId(urlDoctorId);
-
     async function loadDoctors() {
       try {
-        const response = await fetch("http://localhost:3001/doctor/search?limit=50&sort=name_asc");
+        const response = await apiFetch("/doctor/search?limit=50&sort=name_asc");
         const result = await response.json();
         if (response.ok) {
           setDoctors(result.data ?? []);
@@ -38,12 +38,6 @@ export default function BookAppointmentPage() {
 
   useEffect(() => {
     if (!doctorId) {
-      setBookingOptions(null);
-      setClinicId("");
-      setDates([]);
-      setAppointmentDate("");
-      setSlots([]);
-      setSlotTime("");
       return;
     }
 
@@ -58,8 +52,8 @@ export default function BookAppointmentPage() {
       setSlotTime("");
 
       try {
-        const response = await fetch(
-          `http://localhost:3001/appointment/booking-options?doctorId=${doctorId}`,
+        const response = await apiFetch(
+          `/appointment/booking-options?doctorId=${doctorId}`,
         );
         const result = await response.json();
 
@@ -84,8 +78,6 @@ export default function BookAppointmentPage() {
 
   useEffect(() => {
     if (!doctorId || !clinicId) {
-      setDates([]);
-      setAppointmentDate("");
       return;
     }
 
@@ -97,8 +89,8 @@ export default function BookAppointmentPage() {
       setSlotTime("");
 
       try {
-        const response = await fetch(
-          `http://localhost:3001/appointment/available-dates?doctorId=${doctorId}&clinicId=${clinicId}`,
+        const response = await apiFetch(
+          `/appointment/available-dates?doctorId=${doctorId}&clinicId=${clinicId}`,
         );
         const result = await response.json();
 
@@ -118,8 +110,6 @@ export default function BookAppointmentPage() {
 
   useEffect(() => {
     if (!doctorId || !clinicId || !appointmentDate) {
-      setSlots([]);
-      setSlotTime("");
       return;
     }
 
@@ -129,8 +119,8 @@ export default function BookAppointmentPage() {
       setSlotTime("");
 
       try {
-        const response = await fetch(
-          `http://localhost:3001/appointment/available-slots?doctorId=${doctorId}&clinicId=${clinicId}&date=${appointmentDate}`,
+        const response = await apiFetch(
+          `/appointment/available-slots?doctorId=${doctorId}&clinicId=${clinicId}&date=${appointmentDate}`,
         );
         const result = await response.json();
 
@@ -153,7 +143,7 @@ export default function BookAppointmentPage() {
     setError("");
     setConfirmation(null);
 
-    const token = localStorage.getItem("patientToken");
+    const token = getStoredToken("patient");
     if (!token) {
       setError("Please log in before booking an appointment.");
       return;
@@ -161,19 +151,19 @@ export default function BookAppointmentPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("http://localhost:3001/appointment/book", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await apiFetch(
+        "/appointment/book",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            doctorId: Number(doctorId),
+            clinicId: Number(clinicId),
+            appointmentDate,
+            slotTime,
+          }),
         },
-        body: JSON.stringify({
-          doctorId: Number(doctorId),
-          clinicId: Number(clinicId),
-          appointmentDate,
-          slotTime,
-        }),
-      });
+        token,
+      );
       const result = await response.json();
 
       if (!response.ok) {

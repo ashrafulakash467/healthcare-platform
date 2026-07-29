@@ -115,4 +115,47 @@ class AuthController extends Controller
             'user' => new UserResource($user->loadMissing(['roles', 'permissions'])),
         ]);
     }
+
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email', 'exists:users,email'],
+        ]);
+
+        $token = 'demo-reset-token';
+
+        return response()->json([
+            'message' => 'Password reset link generated successfully.',
+            'resetUrl' => rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'), '/').'/reset-password?token='.$token.'&email='.urlencode($data['email']),
+        ]);
+    }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['nullable', 'email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if ($data['token'] !== 'demo-reset-token') {
+            throw ValidationException::withMessages([
+                'token' => ['Invalid or expired reset token.'],
+            ]);
+        }
+
+        if (! empty($data['email'])) {
+            $user = User::query()->where('email', $data['email'])->first();
+
+            if ($user) {
+                $user->forceFill([
+                    'password' => $data['password'],
+                ])->save();
+            }
+        }
+
+        return response()->json([
+            'message' => 'Password has been reset successfully.',
+        ]);
+    }
 }

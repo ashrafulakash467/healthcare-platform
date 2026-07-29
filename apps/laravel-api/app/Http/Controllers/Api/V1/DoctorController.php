@@ -5,58 +5,13 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class DoctorController extends Controller
 {
     public function search(Request $request): JsonResponse
     {
-        $doctors = collect([
-            [
-                'id' => 1,
-                'name' => 'Dr. Amina Rahman',
-                'specialty' => 'Cardiology',
-                'location' => 'Dhaka',
-                'gender' => 'Female',
-                'isAvailable' => true,
-                'imageUrl' => '/vercel.svg',
-            ],
-            [
-                'id' => 2,
-                'name' => 'Dr. Tanvir Hasan',
-                'specialty' => 'Dermatology',
-                'location' => 'Chattogram',
-                'gender' => 'Male',
-                'isAvailable' => true,
-                'imageUrl' => '/next.svg',
-            ],
-            [
-                'id' => 3,
-                'name' => 'Dr. Nusrat Jahan',
-                'specialty' => 'Gynecology',
-                'location' => 'Dhaka',
-                'gender' => 'Female',
-                'isAvailable' => false,
-                'imageUrl' => '/globe.svg',
-            ],
-            [
-                'id' => 4,
-                'name' => 'Dr. Mahmudul Islam',
-                'specialty' => 'Pediatrics',
-                'location' => 'Sylhet',
-                'gender' => 'Male',
-                'isAvailable' => true,
-                'imageUrl' => '/window.svg',
-            ],
-            [
-                'id' => 5,
-                'name' => 'Dr. Sarah Khan',
-                'specialty' => 'Medicine',
-                'location' => 'Dhaka',
-                'gender' => 'Female',
-                'isAvailable' => false,
-                'imageUrl' => '/file.svg',
-            ],
-        ]);
+        $doctors = $this->doctorCatalog();
 
         $search = strtolower(trim((string) $request->query('search', '')));
         $specialty = strtolower(trim((string) $request->query('specialty', '')));
@@ -121,5 +76,102 @@ class DoctorController extends Controller
                 'totalPages' => $totalPages,
             ],
         ]);
+    }
+
+    public function show(string $doctorId): JsonResponse
+    {
+        $doctor = $this->doctorById($doctorId);
+
+        return response()->json([
+            'doctor' => $doctor,
+        ]);
+    }
+
+    private function doctorCatalog(): Collection
+    {
+        return collect([
+            $this->doctorById('1'),
+            $this->doctorById('2'),
+            $this->doctorById('3'),
+            [
+                'id' => 4,
+                'name' => 'Dr. Mahmudul Islam',
+                'email' => 'mahmudul.islam@example.com',
+                'phone' => '01710000004',
+                'specialty' => 'Pediatrics',
+                'location' => 'Sylhet',
+                'gender' => 'Male',
+                'isAvailable' => true,
+                'imageUrl' => '/window.svg',
+                'clinics' => [
+                    ['id' => 3, 'name' => 'Sylhet Care Center', 'location' => 'Sylhet'],
+                ],
+            ],
+            [
+                'id' => 5,
+                'name' => 'Dr. Sarah Khan',
+                'email' => 'sarah.khan@example.com',
+                'phone' => '01710000005',
+                'specialty' => 'Medicine',
+                'location' => 'Dhaka',
+                'gender' => 'Female',
+                'isAvailable' => false,
+                'imageUrl' => '/file.svg',
+                'clinics' => [
+                    ['id' => 1, 'name' => 'Central Care Hospital', 'location' => 'Dhaka'],
+                ],
+            ],
+        ]);
+    }
+
+    private function doctorById(string $doctorId): array
+    {
+        $doctors = [
+            '1' => [
+                'id' => 1,
+                'name' => 'Dr. Amina Rahman',
+                'email' => 'amina.rahman@example.com',
+                'phone' => '01710000001',
+                'specialty' => 'Cardiology',
+                'location' => 'Dhaka',
+                'gender' => 'Female',
+                'isAvailable' => true,
+                'imageUrl' => '/vercel.svg',
+                'clinics' => [
+                    ['id' => 1, 'name' => 'Central Care Hospital', 'location' => 'Dhaka'],
+                    ['id' => 2, 'name' => 'North Point Clinic', 'location' => 'Uttara'],
+                ],
+            ],
+            '2' => [
+                'id' => 2,
+                'name' => 'Dr. Tanvir Hasan',
+                'email' => 'tanvir.hasan@example.com',
+                'phone' => '01710000002',
+                'specialty' => 'Dermatology',
+                'location' => 'Chattogram',
+                'gender' => 'Male',
+                'isAvailable' => true,
+                'imageUrl' => '/next.svg',
+                'clinics' => [
+                    ['id' => 2, 'name' => 'City Medical Center', 'location' => 'Chattogram'],
+                ],
+            ],
+            '3' => [
+                'id' => 3,
+                'name' => 'Dr. Nusrat Jahan',
+                'email' => 'nusrat.jahan@example.com',
+                'phone' => '01710000003',
+                'specialty' => 'Gynecology',
+                'location' => 'Dhaka',
+                'gender' => 'Female',
+                'isAvailable' => false,
+                'imageUrl' => '/globe.svg',
+                'clinics' => [
+                    ['id' => 1, 'name' => 'Central Care Hospital', 'location' => 'Dhaka'],
+                ],
+            ],
+        ];
+
+        return $doctors[$doctorId] ?? $doctors['1'];
     }
 }

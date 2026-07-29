@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Database\Seeder;
 
 class AccessControlSeeder extends Seeder
@@ -13,6 +14,9 @@ class AccessControlSeeder extends Seeder
      */
     public function run(): void
     {
+        $guardName = config('auth.defaults.guard', 'web');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $permissions = [
             'access-admin-panel',
             'access-doctor-panel',
@@ -35,8 +39,13 @@ class AccessControlSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::findOrCreate($permission, 'web');
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => $guardName,
+            ]);
         }
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $roles = [
             'super-admin' => $permissions,
@@ -61,7 +70,10 @@ class AccessControlSeeder extends Seeder
         ];
 
         foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::findOrCreate($roleName, 'web');
+            $role = Role::firstOrCreate([
+                'name' => $roleName,
+                'guard_name' => $guardName,
+            ]);
             $role->syncPermissions($rolePermissions);
         }
     }

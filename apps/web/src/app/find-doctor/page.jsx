@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 const initialFilters = {
   search: "",
@@ -55,10 +56,9 @@ export default function FindDoctor() {
       setError("");
 
       try {
-        const response = await fetch(
-          `http://localhost:3001/doctor/search?${queryString}`,
-          { signal: controller.signal },
-        );
+        const response = await apiFetch(`/doctor/search?${queryString}`, {
+          signal: controller.signal,
+        });
         const result = await response.json();
 
         if (!response.ok) {
@@ -67,7 +67,7 @@ export default function FindDoctor() {
         }
 
         setDoctors(result.data ?? []);
-        setFilterOptions(result.filters ?? filterOptions);
+        setFilterOptions((currentFilterOptions) => result.filters ?? currentFilterOptions);
         setPagination((currentPagination) => ({
           ...currentPagination,
           ...(result.pagination ?? {}),

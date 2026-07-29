@@ -2,31 +2,28 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { apiFetch, persistAuthSession } from "@/lib/api";
 
 const ROUTES = {
   user: {
     login: "/login",
     register: "/register",
-    loginEndpoint: "http://localhost:3001/patient/login",
-    registerEndpoint: "http://localhost:3001/patient/register",
+    loginEndpoint: "/patient/login",
+    registerEndpoint: "/patient/register",
     dashboard: "/patient/dashboard",
-    tokenKey: "patientToken",
-    userKey: "patientUser",
   },
   doctor: {
     login: "/doctor/login",
     register: "/doctor/register",
-    loginEndpoint: "http://localhost:3001/doctor/login",
-    registerEndpoint: "http://localhost:3001/doctor/register",
+    loginEndpoint: "/doctor/login",
+    registerEndpoint: "/doctor/register",
     dashboard: "/doctor/dashboard",
-    tokenKey: "doctorToken",
-    userKey: "doctorUser",
   },
   admin: {
     login: "/login?role=admin",
     register: "/register?role=admin",
-    loginEndpoint: "http://localhost:3001/admin/login",
+    loginEndpoint: "/admin/login",
   },
 };
 
@@ -44,21 +41,11 @@ const ROLE_LABELS = {
 export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
   const router = useRouter();
   const normalizedInitialRole = normalizeRole(initialRole);
-  const [role, setRole] = useState(normalizedInitialRole);
+  const [role, setRole] = useState(() => normalizedInitialRole);
   const [form, setForm] = useState(() => createInitialForm(mode, normalizedInitialRole));
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    setRole(normalizeRole(initialRole));
-  }, [initialRole]);
-
-  useEffect(() => {
-    setForm(createInitialForm(mode, role));
-    setErrors({});
-    setMessage("");
-  }, [mode, role]);
 
   const isAdmin = role === "admin";
   const pageCopy = useMemo(() => {
@@ -148,11 +135,8 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
       }
 
       try {
-        const response = await fetch(ROUTES.admin.loginEndpoint, {
+        const response = await apiFetch(ROUTES.admin.loginEndpoint, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify(payload.body),
         });
         const result = await response.json();
@@ -162,8 +146,8 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
           return;
         }
 
-        persistAdminSession(result.token, result.user);
-        router.push("/admin");
+        persistAuthSession("admin", result.token, result.user);
+        router.push("/admin/dashboard");
         return;
       } catch {
         setErrors({
@@ -186,15 +170,9 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
     }
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         mode === "register" ? config.registerEndpoint : config.loginEndpoint,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload.body),
-        },
+        { method: "POST", body: JSON.stringify(payload.body) },
       );
       const result = await response.json();
 
@@ -203,10 +181,8 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
         return;
       }
 
-      if (mode === "login") {
-        localStorage.setItem(config.tokenKey, result.token);
-        localStorage.setItem(config.userKey, JSON.stringify(result.user));
-        window.dispatchEvent(new Event("auth-change"));
+      if (result.token && result.user) {
+        persistAuthSession(role, result.token, result.user);
         router.push(config.dashboard);
         return;
       }
@@ -614,10 +590,4 @@ function normalizeRole(value) {
   }
 
   return ["user", "doctor", "admin"].includes(value) ? value : "user";
-}
-
-function persistAdminSession(token, user) {
-  localStorage.setItem("adminToken", token);
-  localStorage.setItem("adminUser", JSON.stringify(user ?? null));
-  document.cookie = `adminToken=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
 }

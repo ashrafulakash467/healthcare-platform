@@ -9,6 +9,7 @@ import { Icon } from "../patient_layouts/dashboard-shared";
 import DashboardOverviewPage from "../patient_layouts/dashboardoverview-page";
 import MyAppointmentPage from "../patient_layouts/myappointment-page";
 import MedicalRecordsPage from "../patient_layouts/medicalrecords-page";
+import { apiFetch, getStoredToken } from "@/lib/api";
 
 export default function PatientDashboardPage() {
   const router = useRouter();
@@ -89,7 +90,7 @@ export default function PatientDashboardPage() {
 
   useEffect(() => {
     async function loadPatient() {
-      const token = localStorage.getItem("patientToken");
+      const token = getStoredToken("patient");
 
       if (!token) {
         router.replace("/login");
@@ -97,9 +98,7 @@ export default function PatientDashboardPage() {
       }
 
       try {
-        const response = await fetch("http://localhost:3001/patient/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await apiFetch("/patient/me", {}, token);
         const result = await response.json();
 
         if (!response.ok) {
@@ -141,7 +140,7 @@ export default function PatientDashboardPage() {
 
     if (appointments.length === 0) {
       if (selectedAppointmentId) {
-        setSelectedAppointmentId("");
+        queueMicrotask(() => setSelectedAppointmentId(""));
       }
       return;
     }
@@ -151,68 +150,32 @@ export default function PatientDashboardPage() {
     );
 
     if (!selectedStillExists) {
-      setSelectedAppointmentId(appointments[0].id);
+      queueMicrotask(() => setSelectedAppointmentId(appointments[0].id));
     }
   }, [activeTab, appointments, selectedAppointmentId]);
 
   useEffect(() => {
-    if (activeTab !== "appointments") {
-      return;
-    }
-
     const selectedAppointment = appointments.find(
       (appointment) => appointment.id === selectedAppointmentId,
     );
 
-    if (!selectedAppointment?.doctor?.id) {
-      setDoctorContact(null);
-      setDoctorContactError("");
+    if (!selectedAppointment?.doctor) {
+      queueMicrotask(() => {
+        setDoctorContact(null);
+        setDoctorContactError("");
+      });
       return;
     }
 
-    let isActive = true;
-
-    async function loadDoctorContact() {
-      setDoctorContact(null);
+    queueMicrotask(() => {
+      setDoctorContact(selectedAppointment.doctor);
       setDoctorContactError("");
-
-      try {
-        const response = await fetch(
-          `http://localhost:3001/doctor/dashboard?doctorId=${selectedAppointment.doctor.id}`,
-        );
-        const result = await response.json();
-
-        if (!response.ok) {
-          if (isActive) {
-            setDoctorContactError(
-              result.message ?? "Could not load doctor contact details.",
-            );
-          }
-          return;
-        }
-
-        if (isActive) {
-          setDoctorContact(result.doctor ?? null);
-        }
-      } catch {
-        if (isActive) {
-          setDoctorContactError("Could not load doctor contact details.");
-        }
-      }
-    }
-
-    loadDoctorContact();
-
-    return () => {
-      isActive = false;
-    };
-  }, [activeTab, appointments, selectedAppointmentId]);
+    });
+  }, [appointments, selectedAppointmentId]);
 
   async function loadAppointments(token) {
     try {
-      const response = await fetch("http://localhost:3001/appointment/my", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await apiFetch("/appointment/my", {}, token);
       const result = await response.json();
 
       if (response.ok) {
@@ -241,14 +204,14 @@ export default function PatientDashboardPage() {
     setActionMessage("");
 
     try {
-      const response = await fetch("http://localhost:3001/appointment/cancel", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
+      const response = await apiFetch(
+        "/appointment/cancel",
+        {
+          method: "POST",
+          body: JSON.stringify({ appointmentId, reason }),
         },
-        body: JSON.stringify({ appointmentId, reason }),
-      });
+        authToken,
+      );
       const result = await response.json();
 
       if (!response.ok) {
@@ -283,14 +246,10 @@ export default function PatientDashboardPage() {
     setActionMessage("");
 
     try {
-      const response = await fetch(
-        `http://localhost:3001/appointment/${appointmentId}/payment`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        },
+      const response = await apiFetch(
+        `/appointment/${appointmentId}/payment`,
+        { method: "POST" },
+        authToken,
       );
       const result = await response.json();
 

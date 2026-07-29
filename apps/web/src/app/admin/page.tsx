@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch, clearAllAuthSessions, getStoredToken, persistAuthSession } from "@/lib/api";
 
 type DoctorVerification = {
   id: string;
@@ -36,7 +37,6 @@ type AdminUser = {
   createdAt: string;
 };
 
-const API_BASE = "http://localhost:3001";
 const ADMIN_PORTAL_URL = "/admin/dashboard";
 
 export default function AdminPage() {
@@ -50,52 +50,53 @@ export default function AdminPage() {
   const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => Boolean(getStoredToken("admin")));
   const [savingId, setSavingId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("adminToken") ?? readCookie("adminToken");
+    const storedToken = getStoredToken("admin");
     const storedAdmin = localStorage.getItem("adminUser");
 
     if (!storedToken) {
-      setIsLoading(false);
       return;
     }
 
     if (storedAdmin) {
       try {
-        setAdmin(JSON.parse(storedAdmin));
+        queueMicrotask(() => {
+          setAdmin(JSON.parse(storedAdmin));
+        });
       } catch {
         // Ignore malformed cache.
       }
     }
 
-    setToken(storedToken);
-    verifySession(storedToken);
-  }, []);
+    async function verifySession() {
+      try {
+        const response = await apiFetch("/admin/me", {}, storedToken);
+        const result = await response.json();
 
-  async function verifySession(storedToken: string) {
-    try {
-      const response = await fetch(`${API_BASE}/admin/me`, {
-        headers: { Authorization: `Bearer ${storedToken}` },
-      });
-      const result = await response.json();
+        if (!response.ok) {
+          clearAdminSession();
+          return;
+        }
 
-      if (!response.ok) {
-        clearAdminSession();
-        return;
+        setAdmin(result.user ?? null);
+        localStorage.setItem("adminUser", JSON.stringify(result.user ?? null));
+        router.replace("/admin/dashboard");
+      } catch {
+        setError("Could not reach the API. Make sure the backend is running on port 3001.");
+      } finally {
+        setIsLoading(false);
       }
-
-      setAdmin(result.user ?? null);
-      localStorage.setItem("adminUser", JSON.stringify(result.user ?? null));
-      router.replace("/admin/dashboard");
-    } catch {
-      setError("Could not reach the API. Make sure the backend is running on port 3001.");
-    } finally {
-      setIsLoading(false);
     }
-  }
+
+    queueMicrotask(() => {
+      setToken(storedToken);
+      verifySession();
+    });
+  }, [router]);
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -104,9 +105,8 @@ export default function AdminPage() {
     setMessage("");
 
     try {
-      const response = await fetch(`${API_BASE}/admin/login`, {
+      const response = await apiFetch("/admin/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier, password }),
       });
       const result = await response.json();
@@ -118,9 +118,7 @@ export default function AdminPage() {
 
       setToken(result.token);
       setAdmin(result.user ?? null);
-      localStorage.setItem("adminToken", result.token);
-      localStorage.setItem("adminUser", JSON.stringify(result.user ?? null));
-      document.cookie = `adminToken=${encodeURIComponent(result.token)}; path=/; max-age=2592000; SameSite=Lax`;
+      persistAuthSession("admin", result.token, result.user ?? null);
       setIdentifier("");
       setPassword("");
       router.replace("/admin/dashboard");
@@ -136,9 +134,7 @@ export default function AdminPage() {
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE}/admin/doctor-verifications`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      const response = await apiFetch("/admin/doctor-verifications", {}, authToken);
       const result = await response.json();
 
       if (!response.ok) {
@@ -168,17 +164,17 @@ export default function AdminPage() {
     setMessage("");
 
     try {
-      const response = await fetch(`${API_BASE}/admin/doctor-verifications/${doctorId}/decision`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await apiFetch(
+        `/admin/doctor-verifications/${doctorId}/decision`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            decision,
+            rejectionReason: decision === "reject" ? rejectionReason : undefined,
+          }),
         },
-        body: JSON.stringify({
-          decision,
-          rejectionReason: decision === "reject" ? rejectionReason : undefined,
-        }),
-      });
+        token,
+      );
       const result = await response.json();
 
       if (!response.ok) {
@@ -201,9 +197,7 @@ export default function AdminPage() {
   }
 
   function clearAdminSession() {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminUser");
-    document.cookie = "adminToken=; path=/; max-age=0; SameSite=Lax";
+    clearAllAuthSessions();
     setAdmin(null);
     setToken("");
     setPendingDoctors([]);
@@ -437,21 +431,6 @@ export default function AdminPage() {
   );
 }
 
-function readCookie(name: string) {
-  if (typeof document === "undefined") {
-    return "";
-  }
-
-  const entry = document.cookie
-    .split("; ")
-    .find((part) => part.startsWith(`${name}=`));
-
-  if (!entry) {
-    return "";
-  }
-
-  return decodeURIComponent(entry.slice(name.length + 1));
-}
 
 function Field({
   label,
