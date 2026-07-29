@@ -1,16 +1,16 @@
 import { Suspense } from "react";
-import DoctorDashboardClient from "./DoctorDashboardClient";
+import AdminDashboard from "./AdminDashboard";
 
-export default function DoctorDashboardPage() {
+export default function AdminDashboardPage() {
   return (
     <Suspense
       fallback={
         <main className="flex min-h-screen items-center justify-center bg-white px-4 text-sm font-medium text-slate-500">
-          Loading doctor dashboard...
+          Loading admin dashboard...
         </main>
       }
     >
-      <DoctorDashboardClient />
+      <AdminDashboard />
     </Suspense>
   );
 }

@@ -72,3 +72,5 @@ npm run dev
 cd apps/api
 
 npm run start:dev
+
+hello

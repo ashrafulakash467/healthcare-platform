@@ -16,6 +16,38 @@ export function Icon({ name, className = "w-5 h-5" }) {
         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
       />
     ),
+    users: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+      />
+    ),
+    doctors: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+      />
+    ),
+    hospitals: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 21V7a2 2 0 012-2h5a2 2 0 012 2v14m0 0h5a2 2 0 002-2V11a2 2 0 00-2-2h-5m-5 12V9m0 12h5m-5-4h2m3 4h2"
+      />
+    ),
+    appointments: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+      />
+    ),
     calendar: (
       <path
         strokeLinecap="round"
@@ -24,12 +56,12 @@ export function Icon({ name, className = "w-5 h-5" }) {
         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
       />
     ),
-    clipboard: (
+    payments: (
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M9 5V4a1 1 0 011-1h4a1 1 0 011 1v1m-6 0H7a2 2 0 00-2 2v11a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-6 0h6m-6 0a1 1 0 001 1h4a1 1 0 001-1"
+        d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7zm13 5a1 1 0 100 2 1 1 0 000-2zm-2-1h5"
       />
     ),
     wallet: (
@@ -37,7 +69,31 @@ export function Icon({ name, className = "w-5 h-5" }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7zm13 5a1 1 0 100 2 1 1 0 000-2zm-2-1h5"
+        d="M21 12a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h14a2 2 0 002-2v-6zm0 0V8a2 2 0 00-2-2H6a2 2 0 00-2 2v4m17 0h-3a2 2 0 000 4h3"
+      />
+    ),
+    content: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 12h6m-6 4h6M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zm0 0v4h10V3"
+      />
+    ),
+    reports: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 19h16M6 17V9m4 8V5m4 12v-6m4 6V8"
+      />
+    ),
+    notifications: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.172V11a6 6 0 10-12 0v3.172a2.032 2.032 0 01-.595 1.423L4 17h5m6 0a3 3 0 11-6 0m6 0H9"
       />
     ),
     bell: (
@@ -48,12 +104,36 @@ export function Icon({ name, className = "w-5 h-5" }) {
         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.172V11a6 6 0 10-12 0v3.172a2.032 2.032 0 01-.595 1.423L4 17h5m6 0a3 3 0 11-6 0m6 0H9"
       />
     ),
-    doctors: (
+    support: (
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+        d="M8 10h8M8 14h5m1 7l-4-4H7a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1l-4 4z"
+      />
+    ),
+    roles: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 1l3 5 5 .75-3.5 3.4.83 5.1L12 12.9 6.67 15.25l.83-5.1L4 6.75 9 6l3-5z"
+      />
+    ),
+    settings: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.527-.88 3.31.902 2.43 2.43a1.724 1.724 0 001.066 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.88 1.527-.903 3.31-2.43 2.43a1.724 1.724 0 00-2.572 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.527.88-3.31-.903-2.43-2.43a1.724 1.724 0 00-1.066-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.88-1.527.903-3.31 2.43-2.43.958.552 2.18.055 2.573-1.066z"
+      />
+    ),
+    audit: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     ),
     logout: (
@@ -94,30 +174,6 @@ export function Icon({ name, className = "w-5 h-5" }) {
         strokeLinejoin="round"
         strokeWidth={2}
         d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-      />
-    ),
-    bell: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.172V11a6 6 0 10-12 0v3.172c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0m6 0H9"
-      />
-    ),
-    wallet: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M21 12a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h14a2 2 0 002-2v-6zm0 0V8a2 2 0 00-2-2H6a2 2 0 00-2 2v4m17 0h-3a2 2 0 000 4h3"
-      />
-    ),
-    clipboard: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M9 5h6m-6 4h6m-6 4h6M7 3a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2h-1.18A3 3 0 0013 1h-2a3 3 0 00-2.82 2H7z"
       />
     ),
     stethoscope: (
