@@ -5,11 +5,13 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
 } from '@nestjs/common';
 import { CancelAppointmentDto } from './dto/cancel-appointment.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { PaymentFailureDto } from './dto/payment-failure.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 import { AppointmentService } from './appointment.service';
 
@@ -96,5 +98,54 @@ export class AppointmentController {
     @Body() cancelAppointmentDto: CancelAppointmentDto,
   ) {
     return this.appointmentService.cancel(authorizationHeader, cancelAppointmentDto);
+  }
+
+  @Get(':appointmentId/payment')
+  getPayment(
+    @Headers('authorization') authorizationHeader: string | undefined,
+    @Param('appointmentId') appointmentId?: string,
+  ) {
+    return this.appointmentService.getAppointmentPayment(
+      authorizationHeader,
+      appointmentId,
+    );
+  }
+
+  @Post(':appointmentId/payment')
+  @HttpCode(HttpStatus.CREATED)
+  createPayment(
+    @Headers('authorization') authorizationHeader: string | undefined,
+    @Param('appointmentId') appointmentId?: string,
+  ) {
+    return this.appointmentService.createAppointmentPayment(
+      authorizationHeader,
+      appointmentId,
+    );
+  }
+
+  @Post(':appointmentId/payment/success')
+  @HttpCode(HttpStatus.OK)
+  markPaymentSuccessful(
+    @Headers('authorization') authorizationHeader: string | undefined,
+    @Param('appointmentId') appointmentId?: string,
+  ) {
+    return this.appointmentService.markAppointmentPaymentSuccessful(
+      authorizationHeader,
+      appointmentId,
+    );
+  }
+
+  @Post(':appointmentId/payment/failed')
+  @HttpCode(HttpStatus.OK)
+  markPaymentFailed(
+    @Headers('authorization') authorizationHeader: string | undefined,
+    @Param('appointmentId') appointmentId: string,
+    @Body() paymentFailureDto: PaymentFailureDto,
+  ) {
+    return this.appointmentService.markAppointmentPaymentFailed(
+      authorizationHeader,
+      appointmentId,
+      paymentFailureDto.reason,
+    );
   }
 }

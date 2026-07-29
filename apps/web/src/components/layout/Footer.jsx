@@ -29,7 +29,6 @@ const doctorLinks = [
   "Account Deletion",
 ];
 
-<<<<<<< HEAD
 const paymentBadges = [
   "VISA",
   "MC",
@@ -43,8 +42,6 @@ const paymentBadges = [
   "SSLCommerz",
 ];
 
-=======
->>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
 const socialLinks = [
   { label: "Facebook", icon: <FacebookIcon /> },
   { label: "LinkedIn", icon: <LinkedInIcon /> },
@@ -56,30 +53,24 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#3b423a] text-black">
+    <footer className="relative overflow-hidden bg-[#3b423a] text-white">
       <div className="absolute inset-x-0 top-0 h-1 bg-[#a7f0dd]" />
-      <div className="absolute -left-24 top-10 h-48 w-48 rounded-full bg-[#9cac54]/20 blur-3xl" />
-      <div className="absolute right-0 top-40 h-56 w-56 rounded-full bg-[#a7f0dd]/10 blur-3xl" />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr_0.9fr_1fr]">
           <section className="space-y-6">
             <Link href="/" className="flex items-center gap-3">
               <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-lg font-semibold text-brand-foreground shadow-lg shadow-brand/25">
-            HC
+                HC
               </span>
               <span className="leading-tight">
-                <span className="block text-base font-semibold tracking-wide text-brand">
-<<<<<<< HEAD
-              HealthGHYHUT Care
-=======
-              Health Care
->>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
-            </span>
-            <span className="block text-xs uppercase tracking-[0.24em] text-slate-500">
-              Wellness made simple
-            </span>
-          </span>
+                <span className="block text-base font-semibold tracking-wide text-white">
+                  Health Care
+                </span>
+                <span className="block text-xs uppercase tracking-[0.24em] text-white/60">
+                  Wellness made simple
+                </span>
+              </span>
             </Link>
 
             <p className="max-w-sm text-base leading-7 text-white/90">
@@ -91,11 +82,7 @@ export default function Footer() {
               {socialLinks.map((item) => (
                 <Link
                   key={item.label}
-<<<<<<< HEAD
                   href="#"
-=======
-                  href="/facebook.com"
->>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
                   aria-label={item.label}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-white text-[#345c32] transition hover:-translate-y-0.5 hover:bg-[#a7f0dd]"
                 >
@@ -105,20 +92,20 @@ export default function Footer() {
             </div>
 
             <div className="space-y-3 pt-2">
-              <Link
-                href="#"
+              <a
+                href="tel:09611530530"
                 className="flex items-center gap-3 text-lg font-bold text-white transition hover:text-[#a7f0dd]"
               >
                 <PhoneIcon className="h-5 w-5 text-[#a7f0dd]" />
                 09611 530 530
-              </Link>
-              <Link
-                href="#"
+              </a>
+              <a
+                href="tel:01405600700"
                 className="flex items-center gap-3 text-lg font-bold text-white transition hover:text-[#a7f0dd]"
               >
                 <AmbulanceIcon className="h-5 w-5 text-[#a7f0dd]" />
                 01405 600 700
-              </Link>
+              </a>
             </div>
           </section>
 
@@ -127,7 +114,6 @@ export default function Footer() {
           <FooterColumn title="For Doctors/Organisations" links={doctorLinks} />
         </div>
 
-<<<<<<< HEAD
         <div className="mt-12 border-t border-white/10 pt-8">
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
             <span className="mr-2">Pay with</span>
@@ -142,11 +128,7 @@ export default function Footer() {
           </div>
 
           <p className="mt-10 text-center text-sm text-white/70">
-=======
-        <div className="mt-6 border-t border-white/10 pt-8">
-          <p className="mt-6 text-center text-sm text-white/70">
->>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
-            Copyright © 2026 Health Care Limited. All rights reserved.
+            Copyright 2026 Health Care Limited. All rights reserved.
           </p>
         </div>
       </div>

@@ -1,21 +1,9 @@
 {
   "name": "healthcare-platform",
-<<<<<<< HEAD
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
-=======
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "apps/web"
+    "apps/*"
   ],
   "scripts": {
     "dev": "npm run dev:web",
@@ -27,9 +15,13 @@
     "start:api": "node dist/main.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
+    "@fortawesome/react-fontawesome": "^3.5.0",
     "@nestjs/common": "^11.1.28",
     "@nestjs/core": "^11.1.28",
     "@nestjs/platform-express": "^11.1.28",
+    "mongoose": "^9.8.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -39,5 +31,4 @@
     "@types/node": "^24.0.0",
     "typescript": "^5.9.3"
   }
->>>>>>> 907910e (add health care patient login,dashboard,booking system,add doctors)
 }

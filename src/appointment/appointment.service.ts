@@ -12,6 +12,10 @@ import { CancelAppointmentDto } from './dto/cancel-appointment.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 
+const DEFAULT_APPOINTMENT_PAYMENT_CENTS = 150000;
+const DEFAULT_APPOINTMENT_PAYMENT_CURRENCY = 'BDT';
+const MANUAL_PAYMENT_PROVIDER = 'manual';
+
 @Injectable()
 export class AppointmentService {
   constructor(
@@ -99,6 +103,10 @@ export class AppointmentService {
           appointments.appointment_date as appointmentDate,
           appointments.slot_time as slotTime,
           appointments.status,
+          appointments.payment_status as paymentStatus,
+          appointments.payment_id as paymentId,
+          appointments.payment_amount_cents as paymentAmountCents,
+          appointments.payment_currency as paymentCurrency,
           appointments.cancellation_reason as cancellationReason,
           appointments.cancelled_at as cancelledAt,
           appointments.created_at as createdAt,
@@ -121,6 +129,10 @@ export class AppointmentService {
         appointmentDate: appointment.appointmentDate,
         slotTime: appointment.slotTime,
         status: appointment.status,
+        paymentStatus: appointment.paymentStatus,
+        paymentId: appointment.paymentId,
+        paymentAmountCents: appointment.paymentAmountCents,
+        paymentCurrency: appointment.paymentCurrency,
         cancellationReason: appointment.cancellationReason,
         cancelledAt: appointment.cancelledAt,
         createdAt: appointment.createdAt,
@@ -208,6 +220,8 @@ export class AppointmentService {
       const doctor = this.findDoctor(doctorId);
       const clinic = this.assertDoctorClinic(doctorId, clinicId);
       this.assertSlotExists(doctorId, clinicId, appointmentDate, slotTime);
+      const paymentAmountCents = DEFAULT_APPOINTMENT_PAYMENT_CENTS;
+      const paymentCurrency = DEFAULT_APPOINTMENT_PAYMENT_CURRENCY;
 
       const existingAppointment = this.databaseService.db
         .prepare(
@@ -237,13 +251,16 @@ export class AppointmentService {
             id,
             patient_id,
             doctor_id,
-            clinic_id,
-            appointment_date,
-            slot_time,
-            status,
-            created_at
+          clinic_id,
+          appointment_date,
+          slot_time,
+          status,
+          payment_status,
+          payment_amount_cents,
+          payment_currency,
+          created_at
           )
-          VALUES (?, ?, ?, ?, ?, ?, 'confirmed', ?)
+          VALUES (?, ?, ?, ?, ?, ?, 'confirmed', 'unpaid', ?, ?, ?)
         `,
         )
         .run(
@@ -253,6 +270,8 @@ export class AppointmentService {
           clinicId,
           appointmentDate,
           slotTime,
+          paymentAmountCents,
+          paymentCurrency,
           new Date().toISOString(),
         );
 
@@ -270,6 +289,16 @@ export class AppointmentService {
         )
         .run(patient.id, doctorId, appointmentId, new Date().toISOString());
 
+      this.recordDoctorMessage({
+        doctorId,
+        appointmentId,
+        patientName: patient.name,
+        messageType: 'appointment',
+        title: 'New appointment booked',
+        body: `${patient.name} booked an appointment for ${appointmentDate} at ${slotTime}.`,
+        createdAt: new Date().toISOString(),
+      });
+
       this.databaseService.db.exec('COMMIT');
 
       return {
@@ -278,12 +307,329 @@ export class AppointmentService {
         appointment: {
           id: appointmentId,
           status: 'confirmed',
+          paymentStatus: 'unpaid',
+          paymentAmountCents,
+          paymentCurrency,
           patient,
           doctor,
           clinic,
           appointmentDate,
           slotTime,
         },
+      };
+    } catch (error) {
+      this.databaseService.db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+
+  getAppointmentPayment(
+    authorizationHeader: string | undefined,
+    appointmentId: string | undefined,
+  ) {
+    const patient = this.patientService.getAuthenticatedPatient(authorizationHeader).user;
+    const appointment = this.findPatientAppointment(patient.id, appointmentId);
+    const payment = this.findPaymentByAppointmentId(appointment.id);
+
+    return {
+      success: true,
+      appointment: this.toAppointmentDetail(appointment),
+      payment: payment ? this.toPaymentSummary(payment) : null,
+    };
+  }
+
+  createAppointmentPayment(
+    authorizationHeader: string | undefined,
+    appointmentId: string | undefined,
+  ) {
+    const patient = this.patientService.getAuthenticatedPatient(authorizationHeader).user;
+    const appointment = this.findPatientAppointment(patient.id, appointmentId);
+    this.assertPaymentEligible(appointment);
+
+    const now = new Date().toISOString();
+    const paymentAmountCents =
+      appointment.paymentAmountCents > 0
+        ? appointment.paymentAmountCents
+        : DEFAULT_APPOINTMENT_PAYMENT_CENTS;
+    const paymentCurrency =
+      appointment.paymentCurrency?.trim() || DEFAULT_APPOINTMENT_PAYMENT_CURRENCY;
+    const existingPayment = this.findPaymentByAppointmentId(appointment.id);
+    const paymentReference = `pay_${Date.now()}_${randomBytes(4).toString('hex')}`;
+
+    this.databaseService.db.exec('BEGIN IMMEDIATE');
+    try {
+      let paymentId = existingPayment?.id ?? paymentReference;
+
+      if (existingPayment) {
+        if (existingPayment.status === 'pending' || existingPayment.status === 'succeeded') {
+          throw new ConflictException({
+            success: false,
+            message: 'A payment already exists for this appointment.',
+          });
+        }
+
+        this.databaseService.db
+          .prepare(
+            `
+            UPDATE appointment_payments
+            SET amount_cents = ?,
+                currency = ?,
+                provider = ?,
+                provider_reference = ?,
+                status = 'pending',
+                attempt_count = attempt_count + 1,
+                failure_reason = NULL,
+                updated_at = ?,
+                paid_at = NULL,
+                failed_at = NULL
+            WHERE id = ?
+          `,
+          )
+          .run(
+            paymentAmountCents,
+            paymentCurrency,
+            MANUAL_PAYMENT_PROVIDER,
+            paymentReference,
+            now,
+            existingPayment.id,
+          );
+      } else {
+        this.databaseService.db
+          .prepare(
+            `
+            INSERT INTO appointment_payments (
+              id,
+              appointment_id,
+              patient_id,
+              amount_cents,
+              currency,
+              provider,
+              provider_reference,
+              status,
+              attempt_count,
+              failure_reason,
+              created_at,
+              updated_at,
+              paid_at,
+              failed_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 1, NULL, ?, ?, NULL, NULL)
+          `,
+          )
+          .run(
+            paymentId,
+            appointment.id,
+            patient.id,
+            paymentAmountCents,
+            paymentCurrency,
+            MANUAL_PAYMENT_PROVIDER,
+            paymentReference,
+            now,
+            now,
+          );
+      }
+
+      this.databaseService.db
+        .prepare(
+          `
+          UPDATE appointments
+          SET payment_status = 'pending',
+              payment_id = ?,
+              payment_amount_cents = ?,
+              payment_currency = ?,
+              payment_created_at = COALESCE(payment_created_at, ?),
+              payment_updated_at = ?
+          WHERE id = ?
+        `,
+        )
+        .run(paymentId, paymentAmountCents, paymentCurrency, now, now, appointment.id);
+
+      this.recordDoctorMessage({
+        doctorId: Number(appointment.doctorId),
+        appointmentId: appointment.id,
+        patientName: patient.name,
+        messageType: 'payment',
+        title: 'Appointment payment pending',
+        body: `A payment was created for ${patient.name}. The status is pending.`,
+        createdAt: now,
+      });
+
+      this.databaseService.db.exec('COMMIT');
+
+      const updatedAppointment = this.findAppointmentById(appointment.id);
+      const payment = this.findPaymentByAppointmentId(appointment.id);
+
+      return {
+        success: true,
+        message: 'Payment created successfully.',
+        paymentProvider: MANUAL_PAYMENT_PROVIDER,
+        appointment: this.toAppointmentDetail(updatedAppointment),
+        payment: payment ? this.toPaymentSummary(payment) : null,
+      };
+    } catch (error) {
+      this.databaseService.db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+
+  markAppointmentPaymentSuccessful(
+    authorizationHeader: string | undefined,
+    appointmentId: string | undefined,
+  ) {
+    const patient = this.patientService.getAuthenticatedPatient(authorizationHeader).user;
+    const appointment = this.findPatientAppointment(patient.id, appointmentId);
+    const payment = this.findPaymentByAppointmentId(appointment.id);
+
+    if (!payment) {
+      throw new NotFoundException({
+        success: false,
+        message: 'Payment was not found.',
+      });
+    }
+
+    if (payment.status !== 'pending') {
+      throw new ConflictException({
+        success: false,
+        message: 'Only pending payments can be marked as successful.',
+      });
+    }
+
+    const now = new Date().toISOString();
+
+    this.databaseService.db.exec('BEGIN IMMEDIATE');
+    try {
+      this.databaseService.db
+        .prepare(
+          `
+          UPDATE appointment_payments
+          SET status = 'succeeded',
+              failure_reason = NULL,
+              updated_at = ?,
+              paid_at = ?,
+              failed_at = NULL
+          WHERE id = ?
+        `,
+        )
+        .run(now, now, payment.id);
+
+      this.databaseService.db
+        .prepare(
+          `
+          UPDATE appointments
+          SET payment_status = 'paid',
+              payment_id = ?,
+              payment_updated_at = ?,
+              payment_succeeded_at = ?,
+              payment_failed_at = NULL,
+              status = CASE WHEN status = 'requested' THEN 'confirmed' ELSE status END
+          WHERE id = ?
+        `,
+        )
+        .run(payment.id, now, now, appointment.id);
+
+      this.recordDoctorMessage({
+        doctorId: Number(appointment.doctorId),
+        appointmentId: appointment.id,
+        patientName: patient.name,
+        messageType: 'payment',
+        title: 'Payment completed',
+        body: `Payment was marked as successful for ${patient.name}.`,
+        createdAt: now,
+      });
+
+      this.databaseService.db.exec('COMMIT');
+
+      const updatedAppointment = this.findAppointmentById(appointment.id);
+      const updatedPayment = this.findPaymentByAppointmentId(appointment.id);
+
+      return {
+        success: true,
+        message: 'Payment marked as successful.',
+        appointment: this.toAppointmentDetail(updatedAppointment),
+        payment: updatedPayment ? this.toPaymentSummary(updatedPayment) : null,
+      };
+    } catch (error) {
+      this.databaseService.db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+
+  markAppointmentPaymentFailed(
+    authorizationHeader: string | undefined,
+    appointmentId: string | undefined,
+    failureReason?: string,
+  ) {
+    const patient = this.patientService.getAuthenticatedPatient(authorizationHeader).user;
+    const appointment = this.findPatientAppointment(patient.id, appointmentId);
+    const payment = this.findPaymentByAppointmentId(appointment.id);
+
+    if (!payment) {
+      throw new NotFoundException({
+        success: false,
+        message: 'Payment was not found.',
+      });
+    }
+
+    if (payment.status !== 'pending') {
+      throw new ConflictException({
+        success: false,
+        message: 'Only pending payments can be marked as failed.',
+      });
+    }
+
+    const now = new Date().toISOString();
+    const parsedFailureReason = this.parsePaymentFailureReason(failureReason);
+
+    this.databaseService.db.exec('BEGIN IMMEDIATE');
+    try {
+      this.databaseService.db
+        .prepare(
+          `
+          UPDATE appointment_payments
+          SET status = 'failed',
+              failure_reason = ?,
+              updated_at = ?,
+              failed_at = ?,
+              paid_at = NULL
+          WHERE id = ?
+        `,
+        )
+        .run(parsedFailureReason, now, now, payment.id);
+
+      this.databaseService.db
+        .prepare(
+          `
+          UPDATE appointments
+          SET payment_status = 'failed',
+              payment_id = ?,
+              payment_updated_at = ?,
+              payment_failed_at = ?,
+              payment_succeeded_at = NULL
+          WHERE id = ?
+        `,
+        )
+        .run(payment.id, now, now, appointment.id);
+
+      this.recordDoctorMessage({
+        doctorId: Number(appointment.doctorId),
+        appointmentId: appointment.id,
+        patientName: patient.name,
+        messageType: 'payment',
+        title: 'Payment failed',
+        body: `Payment failed for ${patient.name}.`,
+        createdAt: now,
+      });
+
+      this.databaseService.db.exec('COMMIT');
+
+      const updatedAppointment = this.findAppointmentById(appointment.id);
+      const updatedPayment = this.findPaymentByAppointmentId(appointment.id);
+
+      return {
+        success: true,
+        message: 'Payment marked as failed.',
+        appointment: this.toAppointmentDetail(updatedAppointment),
+        payment: updatedPayment ? this.toPaymentSummary(updatedPayment) : null,
       };
     } catch (error) {
       this.databaseService.db.exec('ROLLBACK');
@@ -381,6 +727,16 @@ export class AppointmentService {
           patient.id,
           new Date().toISOString(),
         );
+
+      this.recordDoctorMessage({
+        doctorId: Number(appointment.doctorId),
+        appointmentId: appointment.id,
+        patientName: patient.name,
+        messageType: 'appointment',
+        title: 'Appointment rescheduled',
+        body: `${patient.name} rescheduled the appointment to ${appointmentDate} at ${slotTime}.`,
+        createdAt: new Date().toISOString(),
+      });
 
       this.databaseService.db.exec('COMMIT');
 
@@ -494,6 +850,19 @@ export class AppointmentService {
             now,
           );
       }
+
+      this.recordDoctorMessage({
+        doctorId: Number(appointment.doctorId),
+        appointmentId: appointment.id,
+        patientName: actor.role,
+        messageType: 'appointment',
+        title: 'Appointment cancelled',
+        body:
+          actor.role === 'patient'
+            ? `The patient cancelled the appointment.`
+            : `An ${actor.role} cancelled the appointment.`,
+        createdAt: now,
+      });
 
       this.databaseService.db.exec('COMMIT');
 
@@ -684,16 +1053,35 @@ export class AppointmentService {
           appointments.appointment_date as appointmentDate,
           appointments.slot_time as slotTime,
           appointments.status,
+          appointments.payment_status as paymentStatus,
+          appointments.payment_id as paymentId,
+          appointments.payment_amount_cents as paymentAmountCents,
+          appointments.payment_currency as paymentCurrency,
+          appointments.payment_created_at as paymentCreatedAt,
+          appointments.payment_updated_at as paymentUpdatedAt,
+          appointments.payment_succeeded_at as paymentSucceededAt,
+          appointments.payment_failed_at as paymentFailedAt,
           appointments.cancellation_reason as cancellationReason,
           appointments.cancelled_at as cancelledAt,
           appointments.created_at as createdAt,
           doctors.name as doctorName,
           doctors.specialty as doctorSpecialty,
           doctor_clinics.name as clinicName,
-          doctor_clinics.location as clinicLocation
+          doctor_clinics.location as clinicLocation,
+          appointment_payments.id as paymentRecordId,
+          appointment_payments.provider as paymentProvider,
+          appointment_payments.provider_reference as paymentProviderReference,
+          appointment_payments.status as paymentRecordStatus,
+          appointment_payments.attempt_count as paymentAttemptCount,
+          appointment_payments.failure_reason as paymentFailureReason,
+          appointment_payments.created_at as paymentRecordCreatedAt,
+          appointment_payments.updated_at as paymentRecordUpdatedAt,
+          appointment_payments.paid_at as paymentPaidAt,
+          appointment_payments.failed_at as paymentRecordFailedAt
         FROM appointments
         INNER JOIN doctors ON doctors.id = appointments.doctor_id
         INNER JOIN doctor_clinics ON doctor_clinics.id = appointments.clinic_id
+        LEFT JOIN appointment_payments ON appointment_payments.appointment_id = appointments.id
         WHERE appointments.id = ?
       `,
       )
@@ -746,6 +1134,14 @@ export class AppointmentService {
       appointmentDate: appointment.appointmentDate,
       slotTime: appointment.slotTime,
       status: appointment.status,
+      paymentStatus: appointment.paymentStatus,
+      paymentId: appointment.paymentId,
+      paymentAmountCents: appointment.paymentAmountCents,
+      paymentCurrency: appointment.paymentCurrency,
+      paymentCreatedAt: appointment.paymentCreatedAt,
+      paymentUpdatedAt: appointment.paymentUpdatedAt,
+      paymentSucceededAt: appointment.paymentSucceededAt,
+      paymentFailedAt: appointment.paymentFailedAt,
       cancellationReason: appointment.cancellationReason,
       cancelledAt: appointment.cancelledAt,
       createdAt: appointment.createdAt,
@@ -761,6 +1157,103 @@ export class AppointmentService {
         name: appointment.clinicName,
         location: appointment.clinicLocation,
       },
+      payment: appointment.paymentRecordId
+        ? this.toPaymentSummary(appointment)
+        : null,
+    };
+  }
+
+  private findPaymentByAppointmentId(appointmentId: string) {
+    return this.databaseService.db
+      .prepare(
+        `
+        SELECT
+          id,
+          appointment_id as appointmentId,
+          patient_id as patientId,
+          amount_cents as amountCents,
+          currency,
+          provider,
+          provider_reference as providerReference,
+          status,
+          attempt_count as attemptCount,
+          failure_reason as failureReason,
+          created_at as createdAt,
+          updated_at as updatedAt,
+          paid_at as paidAt,
+          failed_at as failedAt
+        FROM appointment_payments
+        WHERE appointment_id = ?
+      `,
+      )
+      .get(appointmentId) as PaymentRow | undefined;
+  }
+
+  private assertPaymentEligible(appointment: AppointmentDetailRow) {
+    if (appointment.status === 'cancelled') {
+      throw new BadRequestException({
+        success: false,
+        message: 'Cancelled appointments cannot be paid.',
+      });
+    }
+
+    if (!['requested', 'confirmed'].includes(appointment.status)) {
+      throw new BadRequestException({
+        success: false,
+        message: 'This appointment is not eligible for payment.',
+      });
+    }
+
+    if (appointment.paymentStatus === 'pending') {
+      throw new ConflictException({
+        success: false,
+        message: 'A payment is already pending for this appointment.',
+      });
+    }
+
+    if (appointment.paymentStatus === 'paid') {
+      throw new ConflictException({
+        success: false,
+        message: 'This appointment has already been paid.',
+      });
+    }
+  }
+
+  private toPaymentSummary(payment: PaymentRow | AppointmentDetailRow) {
+    if ('paymentRecordId' in payment) {
+      return {
+        id: payment.paymentRecordId,
+        appointmentId: payment.id,
+        patientId: payment.patientId,
+        amountCents: payment.paymentAmountCents,
+        currency: payment.paymentCurrency,
+        provider: payment.paymentProvider,
+        providerReference: payment.paymentProviderReference,
+        status: payment.paymentRecordStatus,
+        attemptCount: payment.paymentAttemptCount,
+        failureReason: payment.paymentFailureReason,
+        createdAt: payment.paymentRecordCreatedAt,
+        updatedAt: payment.paymentRecordUpdatedAt,
+        paidAt: payment.paymentPaidAt,
+        failedAt: payment.paymentRecordFailedAt,
+      };
+    }
+
+    return {
+      id: payment.id,
+      appointmentId: payment.appointmentId,
+      patientId: payment.patientId,
+      amountCents: payment.amountCents,
+      currency: payment.currency,
+      provider: payment.provider,
+      providerReference: payment.providerReference,
+      status: payment.status,
+      attemptCount: payment.attemptCount,
+      failureReason: payment.failureReason,
+      createdAt: payment.createdAt,
+      updatedAt: payment.updatedAt,
+      paidAt: payment.paidAt,
+      failedAt: payment.failedAt,
     };
   }
 
@@ -824,6 +1317,51 @@ export class AppointmentService {
     return reason;
   }
 
+  private parsePaymentFailureReason(value: string | undefined) {
+    const reason = value?.trim();
+
+    if (!reason) {
+      return 'Payment failed.';
+    }
+
+    if (reason.length > 500) {
+      throw new BadRequestException({
+        success: false,
+        message: 'Payment failure reason must be 500 characters or fewer.',
+        field: 'reason',
+      });
+    }
+
+    return reason;
+  }
+
+  private recordDoctorMessage(message: DoctorMessageInput) {
+    this.databaseService.db
+      .prepare(
+        `
+        INSERT INTO doctor_messages (
+          doctor_id,
+          appointment_id,
+          patient_name,
+          message_type,
+          title,
+          body,
+          created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `,
+      )
+      .run(
+        message.doctorId,
+        message.appointmentId ?? null,
+        message.patientName ?? null,
+        message.messageType,
+        message.title,
+        message.body,
+        message.createdAt,
+      );
+  }
+
   private formatDate(date: Date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -851,11 +1389,16 @@ type ClinicRow = {
 type AppointmentEligibility = {
   appointmentDate: string;
   status: string;
+  paymentStatus?: string;
 };
 
 type AppointmentListRow = AppointmentEligibility & {
   id: string;
   slotTime: string;
+  paymentStatus: string;
+  paymentId: string | null;
+  paymentAmountCents: number;
+  paymentCurrency: string;
   cancellationReason: string | null;
   cancelledAt: string | null;
   createdAt: string;
@@ -869,6 +1412,37 @@ type AppointmentListRow = AppointmentEligibility & {
 
 type AppointmentDetailRow = AppointmentListRow & {
   patientId: string;
+  paymentCreatedAt: string | null;
+  paymentUpdatedAt: string | null;
+  paymentSucceededAt: string | null;
+  paymentFailedAt: string | null;
+  paymentRecordId: string | null;
+  paymentProvider: string | null;
+  paymentProviderReference: string | null;
+  paymentRecordStatus: string | null;
+  paymentAttemptCount: number | null;
+  paymentFailureReason: string | null;
+  paymentRecordCreatedAt: string | null;
+  paymentRecordUpdatedAt: string | null;
+  paymentPaidAt: string | null;
+  paymentRecordFailedAt: string | null;
+};
+
+type PaymentRow = {
+  id: string;
+  appointmentId: string;
+  patientId: string;
+  amountCents: number;
+  currency: string;
+  provider: string;
+  providerReference: string;
+  status: string;
+  attemptCount: number;
+  failureReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  paidAt: string | null;
+  failedAt: string | null;
 };
 
 type CancellationActorRole = 'patient' | 'doctor' | 'admin';
@@ -876,4 +1450,14 @@ type CancellationActorRole = 'patient' | 'doctor' | 'admin';
 type CancellationActor = {
   id: string;
   role: CancellationActorRole;
+};
+
+type DoctorMessageInput = {
+  doctorId: number;
+  appointmentId?: string;
+  patientName?: string;
+  messageType: string;
+  title: string;
+  body: string;
+  createdAt: string;
 };

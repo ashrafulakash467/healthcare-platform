@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
+import { DatabaseService } from '../database/database.service';
 
 describe('AdminController', () => {
   let controller: AdminController;
@@ -8,7 +9,22 @@ describe('AdminController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminController],
-      providers: [AdminService],
+      providers: [
+        AdminService,
+        {
+          provide: DatabaseService,
+          useValue: {
+            db: {
+              prepare: jest.fn().mockReturnValue({
+                get: jest.fn(),
+                all: jest.fn().mockReturnValue([]),
+                run: jest.fn(),
+              }),
+              exec: jest.fn(),
+            },
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<AdminController>(AdminController);
