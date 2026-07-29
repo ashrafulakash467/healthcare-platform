@@ -1,0 +1,51 @@
+<?php
+
+use App\Http\Controllers\Api\V1\AdminController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\DoctorController;
+use App\Http\Controllers\Api\V1\ProfileController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'service' => 'laravel-api',
+    ]);
+});
+
+Route::post('patient/login', [AuthController::class, 'login'])->defaults('role', 'patient');
+Route::post('patient/register', [AuthController::class, 'register'])->defaults('role', 'patient');
+Route::post('doctor/login', [AuthController::class, 'login'])->defaults('role', 'doctor');
+Route::post('doctor/register', [AuthController::class, 'register'])->defaults('role', 'doctor');
+Route::post('admin/login', [AuthController::class, 'login'])->defaults('role', 'admin');
+Route::get('doctor/search', [DoctorController::class, 'search']);
+
+Route::middleware('auth:sanctum')->group(function (): void {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me', [AuthController::class, 'me']);
+    Route::get('profile', [ProfileController::class, 'show']);
+
+    Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('patient/me', [AuthController::class, 'me'])->middleware('role:patient|admin|super-admin');
+    Route::get('doctor/me', [AuthController::class, 'me'])->middleware('role:doctor|admin|super-admin');
+    Route::get('admin/me', [AuthController::class, 'me'])->middleware('role:admin|super-admin');
+
+    Route::middleware('role:admin|super-admin')->group(function (): void {
+        Route::get('admin/dashboard', [DashboardController::class, 'admin']);
+        Route::get('admin/doctor-verifications', [AdminController::class, 'index']);
+        Route::patch('admin/doctor-verifications/{doctorId}/decision', [AdminController::class, 'decision']);
+    });
+
+    Route::middleware('role:doctor|admin|super-admin')->group(function (): void {
+        Route::get('doctor/dashboard', [DashboardController::class, 'doctor']);
+    });
+
+    Route::middleware('role:patient|admin|super-admin')->group(function (): void {
+        Route::get('patient/dashboard', [DashboardController::class, 'patient']);
+    });
+
+    Route::middleware('role:hospital|admin|super-admin')->group(function (): void {
+        Route::get('hospital/dashboard', [DashboardController::class, 'hospital']);
+    });
+});
