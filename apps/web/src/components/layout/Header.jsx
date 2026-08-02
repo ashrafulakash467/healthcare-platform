@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { clearAllAuthSessions, getActiveDashboardPath } from "@/lib/api";
 const utilityLinks = [
   "Health Checkup & Insurance",
   "Domiciliary Services",
@@ -21,10 +22,13 @@ const primaryLinks = [
 export default function Header() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [dashboardPath, setDashboardPath] = useState("/patient/dashboard");
 
   useEffect(() => {
     function syncAuth() {
-      setIsLoggedIn(Boolean(localStorage.getItem("patientToken")));
+      const activePath = getActiveDashboardPath();
+      setIsLoggedIn(activePath !== "/login");
+      setDashboardPath(activePath);
     }
 
     syncAuth();
@@ -33,11 +37,16 @@ export default function Header() {
   }, []);
 
   function handleLogout() {
-    localStorage.removeItem("patientToken");
-    localStorage.removeItem("patientUser");
+    const nextLoginPath = dashboardPath.startsWith("/admin")
+      ? "/login?role=admin"
+      : dashboardPath.startsWith("/doctor")
+        ? "/doctor/login"
+        : "/login";
+
+    clearAllAuthSessions();
     setIsLoggedIn(false);
     window.dispatchEvent(new Event("auth-change"));
-    router.push("/login");
+    router.push(nextLoginPath);
   }
 
   return (
@@ -93,7 +102,7 @@ export default function Header() {
         {isLoggedIn ? (
           <div className="flex items-center gap-3">
             <Link
-              href="/patient/dashboard"
+              href={dashboardPath}
               className="inline-flex items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:bg-brand-hover"
             >
               Dashboard

@@ -8,6 +8,7 @@ import DashboardOverviewPage from "./doctor_layouts/dashboardoverview-page";
 import MyAppointmentPage from "./doctor_layouts/myappointment-page";
 import MedicalRecordsPage from "./doctor_layouts/medicalrecords-page";
 import ScheduleManagementPage from "./doctor_layouts/schedule-management-page";
+import { apiFetch, getStoredToken } from "@/lib/api";
 
 const tabItems = [
   { key: "dashboard", label: "Dashboard", icon: "dashboard" },
@@ -46,7 +47,7 @@ export default function DoctorDashboardClient() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [recordCategory, setRecordCategory] = useState("diagnostics");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState("");
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   const [records] = useState({
     prescriptions: [
@@ -96,9 +97,22 @@ export default function DoctorDashboardClient() {
     ],
   });
 
+  function loadAppointments(token) {
+    return apiFetch("/appointment/my", {}, token)
+      .then((response) => response.json().then((result) => ({ response, result })))
+      .then(({ response, result }) => {
+        if (response.ok) {
+          setAppointments(result.appointments ?? []);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch appointments:", error);
+      });
+  }
+
   useEffect(() => {
     async function loadDoctor() {
-      const token = localStorage.getItem("doctorToken");
+      const token = getStoredToken("doctor");
 
       if (!token) {
         window.location.replace("/doctor/login");
@@ -106,9 +120,7 @@ export default function DoctorDashboardClient() {
       }
 
       try {
-        const response = await fetch("http://localhost:3001/doctor/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await apiFetch("/doctor/me", {}, token);
         const result = await response.json();
 
         if (!response.ok) {
@@ -145,7 +157,7 @@ export default function DoctorDashboardClient() {
     if (!selectedAppointmentId) {
       const firstAppointment = getAppointmentsForActiveTab(activeTab, appointments)[0];
       if (firstAppointment) {
-        setSelectedAppointmentId(firstAppointment.id);
+        queueMicrotask(() => setSelectedAppointmentId(firstAppointment.id));
       }
       return;
     }
@@ -156,7 +168,7 @@ export default function DoctorDashboardClient() {
     );
 
     if (!stillVisible && visibleAppointments[0]) {
-      setSelectedAppointmentId(visibleAppointments[0].id);
+      queueMicrotask(() => setSelectedAppointmentId(visibleAppointments[0].id));
     }
   }, [activeTab, appointments, selectedAppointmentId]);
 
@@ -243,21 +255,6 @@ export default function DoctorDashboardClient() {
     }
 
     return activeTab === tabKey;
-  }
-
-  function loadAppointments(token) {
-    return fetch("http://localhost:3001/appointment/my", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => response.json().then((result) => ({ response, result })))
-      .then(({ response, result }) => {
-        if (response.ok) {
-          setAppointments(result.appointments ?? []);
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to fetch appointments:", error);
-      });
   }
 
   if (isLoading) {

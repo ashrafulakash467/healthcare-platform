@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 const specialties = [
   { title: "Gynecologist & Obstetrician", icon: <GyneIcon /> },
@@ -363,8 +364,8 @@ export default function HeroCard() {
   useEffect(() => {
     async function loadDoctors() {
       try {
-        const response = await fetch(
-          "http://localhost:3001/doctor/search?page=1&limit=50&sort=name_asc"
+        const response = await apiFetch(
+          "/doctor/search?page=1&limit=50&sort=name_asc",
         );
 
         const result = await response.json();

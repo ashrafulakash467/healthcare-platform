@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { apiFetch, getStoredToken } from "@/lib/api";
 
 export default function RescheduleAppointmentPage() {
   const router = useRouter();
-  const [appointmentId, setAppointmentId] = useState("");
+  const searchParams = useSearchParams();
+  const [appointmentId] = useState(() => searchParams.get("appointmentId") ?? "");
   const [appointment, setAppointment] = useState(null);
   const [dates, setDates] = useState([]);
   const [appointmentDate, setAppointmentDate] = useState("");
@@ -18,18 +21,12 @@ export default function RescheduleAppointmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const urlAppointmentId =
-      new URLSearchParams(window.location.search).get("appointmentId") ?? "";
-    setAppointmentId(urlAppointmentId);
-  }, []);
-
-  useEffect(() => {
     if (!appointmentId) {
       return;
     }
 
     async function loadOptions() {
-      const token = localStorage.getItem("patientToken");
+      const token = getStoredToken("patient");
       if (!token) {
         router.replace("/login");
         return;
@@ -39,13 +36,10 @@ export default function RescheduleAppointmentPage() {
       setError("");
 
       try {
-        const response = await fetch(
-          `http://localhost:3001/appointment/reschedule-options?appointmentId=${appointmentId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
+        const response = await apiFetch(
+          `/appointment/reschedule-options?appointmentId=${appointmentId}`,
+          {},
+          token,
         );
         const result = await response.json();
 
@@ -68,25 +62,20 @@ export default function RescheduleAppointmentPage() {
 
   useEffect(() => {
     if (!appointmentId || !appointmentDate) {
-      setSlots([]);
-      setSlotTime("");
       return;
     }
 
     async function loadSlots() {
-      const token = localStorage.getItem("patientToken");
+      const token = getStoredToken("patient");
       setError("");
       setSlots([]);
       setSlotTime("");
 
       try {
-        const response = await fetch(
-          `http://localhost:3001/appointment/reschedule-slots?appointmentId=${appointmentId}&date=${appointmentDate}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
+        const response = await apiFetch(
+          `/appointment/reschedule-slots?appointmentId=${appointmentId}&date=${appointmentDate}`,
+          {},
+          token,
         );
         const result = await response.json();
 
@@ -106,7 +95,7 @@ export default function RescheduleAppointmentPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const token = localStorage.getItem("patientToken");
+    const token = getStoredToken("patient");
     if (!token) {
       router.replace("/login");
       return;
@@ -117,18 +106,18 @@ export default function RescheduleAppointmentPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3001/appointment/reschedule", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await apiFetch(
+        "/appointment/reschedule",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            appointmentId,
+            appointmentDate,
+            slotTime,
+          }),
         },
-        body: JSON.stringify({
-          appointmentId,
-          appointmentDate,
-          slotTime,
-        }),
-      });
+        token,
+      );
       const result = await response.json();
 
       if (!response.ok) {
