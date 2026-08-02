@@ -56,4 +56,19 @@ class User extends Authenticatable
             return $this->username ?: $this->email;
         });
     }
+
+    public function doctor()
+    {
+        return $this->hasOne(Doctor::class);
+    }
+
+    public function patient()
+    {
+        return $this->hasOne(Patient::class);
+    }
+
+    public function createdHospitals()
+    {
+        return $this->hasMany(Hospital::class, 'created_by_user_id');
+    }
 }

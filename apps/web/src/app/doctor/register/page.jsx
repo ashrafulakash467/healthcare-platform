@@ -1,5 +1,5 @@
-import UnifiedAuthPage from "../../../components/auth/UnifiedAuthPage";
+import { redirect } from "next/navigation";
 
 export default function DoctorRegisterPage() {
-  return <UnifiedAuthPage mode="register" initialRole="doctor" />;
+  redirect("/doctor/login");
 }

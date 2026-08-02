@@ -2,6 +2,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Icon, formatCurrency } from "./admin_layouts/dashboard-shared";
+import UsersPage from "./admin_layouts/users-page";
+import DoctorsPage from "./admin_layouts/doctors-page";
+import ReportsPage from "./admin_layouts/reports-page";
+import HospitalsPage from "./admin_layouts/hospitals-page";
+import AppointmentsPage from "./admin_layouts/appointments-page";
+import PaymentsPage from "./admin_layouts/payments-page";
+import ContentPage from "./admin_layouts/content-page";
+import NotificationsPage from "./admin_layouts/notifications-page";
+import SupportPage from "./admin_layouts/support-page";
+import RolesPage from "./admin_layouts/roles-page";
+import SettingsPage from "./admin_layouts/settings-page";
+import AuditPage from "./admin_layouts/audit-page";
+import { apiFetch, getStoredToken } from "@/lib/api";
 
 const tabItems = [
   { key: "dashboard", label: "Dashboard Overview", icon: "dashboard" },
@@ -223,23 +236,26 @@ export default function AdminDashboard() {
   const [admin, setAdmin] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [doctorDecisions, setDoctorDecisions] = useState({});
-  const [doctorRejectionReasons, setDoctorRejectionReasons] = useState({});
-  const [selectedDoctorId, setSelectedDoctorId] = useState(doctorsSeed[0].id);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
   const [statusMessage, setStatusMessage] = useState("");
+  const [doctors, setDoctors] = useState([]);
+  const [doctorsLoading, setDoctorsLoading] = useState(false);
+  const [editingDoctor, setEditingDoctor] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("adminToken");
-    const storedAdmin = localStorage.getItem("adminUser");
 
     if (!storedToken) {
       window.location.replace("/admin");
       return;
     }
+
+    const storedAdmin = localStorage.getItem("adminUser");
 
     if (storedAdmin) {
       try {
@@ -253,6 +269,252 @@ export default function AdminDashboard() {
 
     setIsReady(true);
   }, []);
+
+  async function loadDoctors() {
+    const token = getStoredToken("admin");
+    if (!token) return;
+
+    setDoctorsLoading(true);
+    try {
+      const response = await apiFetch("/admin/doctors", {}, token);
+      const result = await response.json();
+      if (response.ok) {
+        setDoctors(result.doctors ?? []);
+      } else {
+        setStatusMessage("Failed to load doctors.");
+      }
+    } catch {
+      setStatusMessage("Failed to load doctors from the server.");
+    } finally {
+      setDoctorsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === "doctors") {
+      const timer = window.setTimeout(() => {
+        void loadDoctors();
+      }, 0);
+
+      return () => window.clearTimeout(timer);
+    }
+  }, [activeTab]);
+
+  async function handleUpdateDoctor(doctorId, formData) {
+    const token = getStoredToken("admin");
+    if (!token) return;
+
+    const hasImageFile = formData?.imageFile instanceof File;
+    const isCreateMode = !doctorId;
+
+    if (hasImageFile) {
+      const payload = new FormData();
+
+      const appendValue = (key, value) => {
+        if (value !== undefined && value !== null && value !== "") {
+          payload.append(key, value);
+        }
+      };
+
+      appendValue("name", formData.name ?? "");
+      appendValue("email", formData.email ?? "");
+      appendValue("phone", formData.phone ?? "");
+      appendValue("specialty", formData.specialty ?? "");
+      appendValue("sub_specialty", formData.subSpecialty ?? "");
+      appendValue("qualification", formData.qualification ?? "");
+      appendValue("bio", formData.bio ?? "");
+      appendValue("gender", formData.gender ?? "");
+      appendValue(
+        "consultation_fee",
+        formData.consultationFee === "" || formData.consultationFee === null || formData.consultationFee === undefined
+          ? ""
+          : formData.consultationFee,
+      );
+      appendValue(
+        "follow_up_fee",
+        formData.followUpFee === "" || formData.followUpFee === null || formData.followUpFee === undefined
+          ? ""
+          : formData.followUpFee,
+      );
+      appendValue("chamber_address", formData.chamberAddress ?? "");
+      appendValue("city", formData.city ?? "");
+      appendValue("license_no", formData.licenseNo ?? "");
+      appendValue("verification_status", formData.verificationStatus ?? "");
+      appendValue("status", formData.status ?? "");
+      payload.append("image", formData.imageFile);
+
+      if (!isCreateMode) {
+        payload.append("_method", "PUT");
+      }
+
+      try {
+        const response = await apiFetch(
+          isCreateMode ? "/admin/doctors" : `/admin/doctors/${doctorId}`,
+          {
+            method: isCreateMode ? "POST" : "POST",
+            body: payload,
+          },
+          token,
+        );
+        const result = await response.json();
+
+        if (response.ok) {
+          setDoctors((current) =>
+            isCreateMode
+              ? [result.doctor, ...current]
+              : current.map((doctor) => (doctor.id === doctorId ? result.doctor : doctor)),
+          );
+          setEditingDoctor(null);
+          setEditForm({});
+          setStatusMessage(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
+        } else {
+          setStatusMessage(result.message ?? (isCreateMode ? "Failed to create doctor." : "Failed to update doctor."));
+        }
+      } catch {
+        setStatusMessage(isCreateMode ? "Failed to create doctor." : "Failed to update doctor.");
+      }
+
+      return;
+    }
+
+    const payload = {
+      name: formData.name ?? "",
+      email: formData.email ?? "",
+      phone: formData.phone ?? "",
+      specialty: formData.specialty ?? "",
+      sub_specialty: formData.subSpecialty ?? null,
+      qualification: formData.qualification ?? null,
+      bio: formData.bio ?? null,
+      gender: formData.gender ?? null,
+      consultation_fee:
+        formData.consultationFee === "" || formData.consultationFee === null || formData.consultationFee === undefined
+          ? null
+          : formData.consultationFee,
+      follow_up_fee:
+        formData.followUpFee === "" || formData.followUpFee === null || formData.followUpFee === undefined
+          ? null
+          : formData.followUpFee,
+      chamber_address: formData.chamberAddress ?? null,
+      city: formData.city ?? null,
+      license_no: formData.licenseNo ?? null,
+      verification_status: formData.verificationStatus ?? undefined,
+      status: formData.status ?? undefined,
+    };
+
+    if (formData.imagePath) {
+      payload.image_path = formData.imagePath;
+    }
+
+    try {
+      const response = await apiFetch(isCreateMode ? "/admin/doctors" : `/admin/doctors/${doctorId}`, {
+        method: isCreateMode ? "POST" : "PUT",
+        body: JSON.stringify(payload),
+      }, token);
+      const result = await response.json();
+
+      if (response.ok) {
+        setDoctors((current) =>
+          isCreateMode
+            ? [result.doctor, ...current]
+            : current.map((doctor) => (doctor.id === doctorId ? result.doctor : doctor)),
+        );
+        setEditingDoctor(null);
+        setEditForm({});
+        setStatusMessage(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
+      } else {
+        setStatusMessage(result.message ?? (isCreateMode ? "Failed to create doctor." : "Failed to update doctor."));
+      }
+    } catch {
+      setStatusMessage(isCreateMode ? "Failed to create doctor." : "Failed to update doctor.");
+    }
+  }
+
+  async function handleDeleteDoctor(doctorId) {
+    const token = getStoredToken("admin");
+    if (!token) return;
+
+    try {
+      const response = await apiFetch(`/admin/doctors/${doctorId}`, {
+        method: "DELETE",
+      }, token);
+      const result = await response.json();
+
+      if (response.ok) {
+        setDoctors((current) => current.filter((doctor) => doctor.id !== doctorId));
+        setDeleteConfirmId(null);
+        setStatusMessage("Doctor deleted successfully.");
+      } else {
+        setStatusMessage(result.message ?? "Failed to delete doctor.");
+      }
+    } catch {
+      setStatusMessage("Failed to delete doctor.");
+    }
+  }
+
+  function openEditDoctor(doctor) {
+    setEditingDoctor(doctor);
+    setEditForm({
+      name: doctor.name ?? "",
+      email: doctor.email ?? "",
+      phone: doctor.phone ?? "",
+      specialty: doctor.specialty ?? "",
+      subSpecialty: doctor.subSpecialty ?? "",
+      qualification: doctor.qualification ?? "",
+      gender: doctor.gender ?? "",
+      consultationFee: doctor.consultationFee ?? "",
+      followUpFee: doctor.followUpFee ?? "",
+      chamberAddress: doctor.chamberAddress ?? "",
+      city: doctor.city ?? "",
+      licenseNo: doctor.licenseNo ?? "",
+      verificationStatus: doctor.verificationStatus ?? "pending",
+      status: doctor.status ?? "active",
+      imagePath: doctor.imagePath ?? doctor.imageUrl ?? "",
+      imageFile: null,
+      imagePreviewUrl: doctor.imageUrl ?? doctor.imagePath ?? "",
+    });
+  }
+
+  function openNewDoctor() {
+    setEditingDoctor({
+      id: null,
+      name: "",
+      email: "",
+      phone: "",
+      specialty: "",
+      subSpecialty: "",
+      qualification: "",
+      gender: "",
+      consultationFee: "",
+      followUpFee: "",
+      chamberAddress: "",
+      city: "",
+      licenseNo: "",
+      verificationStatus: "pending",
+      status: "active",
+      imagePath: "",
+      imageUrl: "",
+    });
+    setEditForm({
+      name: "",
+      email: "",
+      phone: "",
+      specialty: "",
+      subSpecialty: "",
+      qualification: "",
+      gender: "",
+      consultationFee: "",
+      followUpFee: "",
+      chamberAddress: "",
+      city: "",
+      licenseNo: "",
+      verificationStatus: "pending",
+      status: "active",
+      imagePath: "",
+      imageFile: null,
+      imagePreviewUrl: "",
+    });
+    setActiveTab("doctors");
+  }
 
   const totals = useMemo(() => {
     const pendingDoctors = doctorsSeed.filter((item) =>
@@ -360,51 +622,60 @@ export default function AdminDashboard() {
           {activeTab === "dashboard" && (
             <DashboardOverviewPanel admin={admin} totals={totals} onNavigate={openModule} />
           )}
-          {activeTab === "users" && <UsersPanel users={usersSeed} />}
+          {activeTab === "users" && <UsersPage users={usersSeed} />}
           {activeTab === "doctors" && (
-            <DoctorsPanel
-              doctors={doctorsSeed}
-              selectedDoctorId={selectedDoctorId}
-              onSelectDoctor={setSelectedDoctorId}
-              decisions={doctorDecisions}
-              rejectionReasons={doctorRejectionReasons}
-              onSetDecision={setDoctorDecisions}
-              onSetRejectionReasons={setDoctorRejectionReasons}
+            <DoctorsPage
+              doctors={doctors}
+              loading={doctorsLoading}
+              editingDoctor={editingDoctor}
+              editForm={editForm}
+              setEditForm={setEditForm}
+              deleteConfirmId={deleteConfirmId}
+              setDeleteConfirmId={setDeleteConfirmId}
+              onEdit={openEditDoctor}
+              onAddNew={openNewDoctor}
+              onUpdate={handleUpdateDoctor}
+              onDelete={handleDeleteDoctor}
+              onRefresh={loadDoctors}
+              onCancelEdit={() => {
+                setEditingDoctor(null);
+                setEditForm({});
+              }}
               onMessage={setStatusMessage}
             />
           )}
-          {activeTab === "hospitals" && <HospitalsPanel hospitals={hospitalsSeed} />}
+          {activeTab === "hospitals" && <HospitalsPage hospitals={hospitalsSeed} />}
           {activeTab === "appointments" && (
-            <AppointmentsPanel
+            <AppointmentsPage
               appointments={appointmentsSeed}
               selectedAppointmentId={selectedAppointmentId}
               onSelectAppointment={setSelectedAppointmentId}
               onMessage={setStatusMessage}
             />
           )}
-          {activeTab === "payments" && <PaymentsPanel payments={paymentsSeed} />}
-          {activeTab === "content" && <ContentPanel content={contentSeed} />}
+          {activeTab === "payments" && <PaymentsPage payments={paymentsSeed} />}
+          {activeTab === "content" && <ContentPage content={contentSeed} />}
           {activeTab === "reports" && (
-            <ReportsPanel
+            <ReportsPage
               reports={reportsSeed}
               selectedReportId={selectedReportId}
               onSelectReport={setSelectedReportId}
             />
           )}
-          {activeTab === "notifications" && <NotificationsPanel notifications={notificationsSeed} />}
+          {activeTab === "notifications" && <NotificationsPage notifications={notificationsSeed} />}
           {activeTab === "support" && (
-            <SupportPanel
+            <SupportPage
               tickets={supportSeed}
               selectedTicketId={selectedTicketId}
               onSelectTicket={setSelectedTicketId}
               onMessage={setStatusMessage}
             />
           )}
-          {activeTab === "roles" && <RolesPanel roles={rolesSeed} />}
+          {activeTab === "roles" && <RolesPage roles={rolesSeed} />}
           {activeTab === "settings" && (
-            <SettingsPanel settings={systemSettings} onToggleSetting={toggleSetting} />
+            <SettingsPage settings={systemSettings} onToggleSetting={toggleSetting} />
           )}
-          {activeTab === "audit" && <AuditPanel logs={auditSeed} />}
+          {activeTab === "audit" && <AuditPage logs={auditSeed} />}
         </main>
       </div>
     </main>
@@ -499,501 +770,6 @@ function DashboardOverviewPanel({ admin, totals, onNavigate }) {
   );
 }
 
-function UsersPanel({ users }) {
-  return (
-    <PanelCard eyebrow="User Management" title="Users" description="Monitor patients, doctors, hospital admins, and support roles.">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {users.map((user) => (
-          <div key={user.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-base font-bold text-slate-950">{user.name}</p>
-                <p className="mt-1 text-sm text-slate-500">{user.email}</p>
-              </div>
-              <Badge tone={user.status}>{user.status}</Badge>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Tag>{user.role}</Tag>
-              <Tag>{user.channel}</Tag>
-            </div>
-          </div>
-        ))}
-      </div>
-    </PanelCard>
-  );
-}
-
-function DoctorsPanel({
-  doctors,
-  selectedDoctorId,
-  onSelectDoctor,
-  decisions,
-  rejectionReasons,
-  onSetDecision,
-  onSetRejectionReasons,
-  onMessage,
-}) {
-  const selectedDoctor = doctors.find((doctor) => doctor.id === selectedDoctorId) ?? doctors[0];
-  const selectedDoctorStatus = decisions[selectedDoctor?.id] ?? selectedDoctor?.status ?? "Waiting";
-
-  function approveDoctor(doctorId) {
-    onSetDecision((current) => ({ ...current, [doctorId]: "Approved" }));
-    onMessage("Doctor verification approved.");
-  }
-
-  function rejectDoctor(doctorId) {
-    const reason = (rejectionReasons[doctorId] ?? "").trim();
-    if (!reason) {
-      onMessage("Add a rejection reason before rejecting.");
-      return;
-    }
-
-    onSetDecision((current) => ({ ...current, [doctorId]: "Rejected" }));
-    onMessage("Doctor verification rejected.");
-  }
-
-  return (
-    <PanelCard eyebrow="Doctor Management" title="Doctor Verification Queue" description="Review onboarding records, approve qualified doctors, or reject applications with a reason.">
-      <div className="grid gap-6 xl:grid-cols-[1fr_0.95fr]">
-        <section className="space-y-3">
-          {doctors.map((doctor) => (
-            <button
-              key={doctor.id}
-              type="button"
-              onClick={() => onSelectDoctor(doctor.id)}
-              className={`w-full rounded-2xl border p-5 text-left transition ${
-                selectedDoctor?.id === doctor.id
-                  ? "border-slate-950 bg-slate-950 text-white"
-                  : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-base font-bold">{doctor.name}</p>
-                  <p className="mt-1 text-sm opacity-80">{doctor.specialty} - {doctor.hospital}</p>
-                </div>
-                <Badge tone={doctor.status}>{decisions[doctor.id] ?? doctor.status}</Badge>
-              </div>
-              <p className="mt-3 text-sm opacity-80">{doctor.notes}</p>
-            </button>
-          ))}
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Doctor</p>
-              <h3 className="mt-2 text-xl font-bold text-slate-950">{selectedDoctor?.name}</h3>
-            </div>
-            <Badge tone={selectedDoctorStatus}>{selectedDoctorStatus}</Badge>
-          </div>
-
-          <div className="mt-5 grid gap-3 text-sm text-slate-600">
-            <InfoRow label="Specialty" value={selectedDoctor?.specialty} />
-            <InfoRow label="Hospital" value={selectedDoctor?.hospital} />
-            <InfoRow label="License" value={selectedDoctor?.license} />
-            <InfoRow label="Decision" value={decisions[selectedDoctor?.id] ?? "Waiting"} />
-          </div>
-
-          <label className="mt-5 block">
-            <span className="text-sm font-semibold text-slate-700">Rejection reason</span>
-            <textarea
-              rows={4}
-              value={rejectionReasons[selectedDoctor?.id] ?? ""}
-              onChange={(event) =>
-                onSetRejectionReasons((current) => ({
-                  ...current,
-                  [selectedDoctor.id]: event.target.value,
-                }))
-              }
-              placeholder="Add the exact reason before rejecting"
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-            />
-          </label>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => approveDoctor(selectedDoctor.id)}
-              className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              Approve
-            </button>
-            <button
-              type="button"
-              onClick={() => rejectDoctor(selectedDoctor.id)}
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-            >
-              Reject
-            </button>
-          </div>
-        </section>
-      </div>
-    </PanelCard>
-  );
-}
-
-function HospitalsPanel({ hospitals }) {
-  return (
-    <PanelCard eyebrow="Hospital Management" title="Hospitals" description="Track onboarding status, location coverage, and operational size.">
-      <div className="grid gap-4 lg:grid-cols-3">
-        {hospitals.map((hospital) => (
-          <div key={hospital.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-base font-bold text-slate-950">{hospital.name}</p>
-                <p className="mt-1 text-sm text-slate-500">{hospital.city}</p>
-              </div>
-              <Badge tone={hospital.status}>{hospital.status}</Badge>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <MiniMetric label="Doctors" value={hospital.doctors} tone="emerald" />
-              <MiniMetric label="Beds" value={hospital.beds} tone="blue" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </PanelCard>
-  );
-}
-
-function AppointmentsPanel({ appointments, selectedAppointmentId, onSelectAppointment, onMessage }) {
-  const selectedAppointment = appointments.find((appointment) => appointment.id === selectedAppointmentId) ?? appointments[0];
-
-  return (
-    <PanelCard eyebrow="Appointment Management" title="Appointments" description="Open bookings, review details, and process accept, reject, or reschedule actions.">
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <section className="space-y-3">
-          {appointments.map((appointment) => (
-            <button
-              key={appointment.id}
-              type="button"
-              onClick={() => onSelectAppointment(appointment.id)}
-              className={`w-full rounded-2xl border p-5 text-left transition ${
-                selectedAppointment?.id === appointment.id
-                  ? "border-slate-950 bg-slate-950 text-white"
-                  : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-base font-bold">{appointment.patient}</p>
-                <Badge tone={appointment.status}>{appointment.status}</Badge>
-              </div>
-              <p className="mt-2 text-sm opacity-80">{appointment.doctor} - {appointment.type}</p>
-              <p className="mt-1 text-sm opacity-80">{appointment.time} - Payment {appointment.payment}</p>
-            </button>
-          ))}
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <SectionHeader
-            eyebrow="Open Appointment"
-            title={selectedAppointment?.patient ?? "Select appointment"}
-            description="Review the selected appointment and move it through the workflow."
-          />
-
-          {selectedAppointment ? (
-            <>
-              <div className="mt-5 grid gap-3 text-sm text-slate-600">
-                <InfoRow label="Doctor" value={selectedAppointment.doctor} />
-                <InfoRow label="Time" value={selectedAppointment.time} />
-                <InfoRow label="Type" value={selectedAppointment.type} />
-                <InfoRow label="Payment" value={selectedAppointment.payment} />
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => onMessage("Patient details reviewed.")}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Review Patient Details
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onMessage("Appointment accepted.")}
-                  className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                >
-                  Accept
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onMessage("Appointment rejected.")}
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-                >
-                  Reject
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onMessage("Appointment moved to reschedule queue.")}
-                  className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
-                >
-                  Reschedule
-                </button>
-              </div>
-            </>
-          ) : null}
-        </section>
-      </div>
-    </PanelCard>
-  );
-}
-
-function PaymentsPanel({ payments }) {
-  const totalRevenue = payments
-    .filter((payment) => payment.status === "Paid" || payment.status === "Settled")
-    .reduce((sum, payment) => sum + payment.amountCents, 0);
-
-  return (
-    <PanelCard eyebrow="Payment & Finance" title="Payments" description="Track revenue, refunds, and settlement batches.">
-      <div className="grid gap-4 md:grid-cols-3">
-        <MiniMetric label="Revenue" value={formatCurrency(totalRevenue, "BDT")} tone="emerald" />
-        <MiniMetric label="Refund Queue" value={payments.filter((item) => item.status.includes("Refund")).length} tone="amber" />
-        <MiniMetric label="Settlement Batches" value={payments.filter((item) => item.status === "Settled").length} tone="blue" />
-      </div>
-
-      <div className="mt-6 space-y-3">
-        {payments.map((payment) => (
-          <div key={payment.id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-bold text-slate-950">{payment.reference}</p>
-              <p className="mt-1 text-sm text-slate-500">{payment.note}</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-base font-bold text-slate-950">{formatCurrency(payment.amountCents, "BDT")}</p>
-              <Badge tone={payment.status}>{payment.status}</Badge>
-            </div>
-          </div>
-        ))}
-      </div>
-    </PanelCard>
-  );
-}
-
-function ContentPanel({ content }) {
-  return (
-    <PanelCard eyebrow="CMS" title="Content" description="Manage marketing pages, help docs, and onboarding content.">
-      <div className="grid gap-4 md:grid-cols-3">
-        {content.map((item) => (
-          <div key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-base font-bold text-slate-950">{item.title}</p>
-            <p className="mt-2 text-sm text-slate-500">Owner: {item.owner}</p>
-            <div className="mt-4 flex items-center justify-between gap-3">
-              <Badge tone={item.status}>{item.status}</Badge>
-              <button type="button" className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
-                Edit
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </PanelCard>
-  );
-}
-
-function ReportsPanel({ reports, selectedReportId, onSelectReport }) {
-  const selectedReport = reports.find((report) => report.id === selectedReportId) ?? reports[0];
-
-  return (
-    <PanelCard eyebrow="Reports & Analytics" title="Reports" description="View high level exports and analytics deliverables.">
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <section className="space-y-3">
-          {reports.map((report) => (
-            <button
-              key={report.id}
-              type="button"
-              onClick={() => onSelectReport(report.id)}
-              className={`w-full rounded-2xl border p-5 text-left transition ${
-                selectedReport?.id === report.id
-                  ? "border-slate-950 bg-slate-950 text-white"
-                  : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
-            >
-              <p className="text-base font-bold">{report.title}</p>
-              <p className="mt-1 text-sm opacity-80">Owner: {report.owner}</p>
-              <p className="mt-3 text-sm opacity-80">Status: {report.status}</p>
-            </button>
-          ))}
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <SectionHeader
-            eyebrow="Selected Report"
-            title={selectedReport?.title ?? "Select report"}
-            description="Use the report workspace to prepare downloads and exports."
-          />
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <MiniMetric label="Owner" value={selectedReport?.owner ?? "-"} tone="blue" />
-            <MiniMetric label="Status" value={selectedReport?.status ?? "-"} tone="emerald" />
-          </div>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <button type="button" className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
-              Download
-            </button>
-            <button type="button" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-              Share
-            </button>
-          </div>
-        </section>
-      </div>
-    </PanelCard>
-  );
-}
-
-function NotificationsPanel({ notifications }) {
-  return (
-    <PanelCard eyebrow="Notifications" title="Notifications" description="Broadcasts, reminders, and system messages.">
-      <div className="space-y-3">
-        {notifications.map((item) => (
-          <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-slate-950">{item.title}</p>
-            <p className="mt-1 text-sm text-slate-500">{item.message}</p>
-          </article>
-        ))}
-      </div>
-    </PanelCard>
-  );
-}
-
-function SupportPanel({ tickets, selectedTicketId, onSelectTicket, onMessage }) {
-  const selectedTicket = tickets.find((ticket) => ticket.id === selectedTicketId) ?? tickets[0];
-
-  return (
-    <PanelCard eyebrow="Support" title="Support Tickets" description="Handle urgent issues, follow-ups, and customer support requests.">
-      <div className="grid gap-6 xl:grid-cols-[1fr_0.95fr]">
-        <section className="space-y-3">
-          {tickets.map((ticket) => (
-            <button
-              key={ticket.id}
-              type="button"
-              onClick={() => onSelectTicket(ticket.id)}
-              className={`w-full rounded-2xl border p-5 text-left transition ${
-                selectedTicket?.id === ticket.id
-                  ? "border-slate-950 bg-slate-950 text-white"
-                  : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-base font-bold">{ticket.subject}</p>
-                  <p className="mt-1 text-sm opacity-80">{ticket.requester}</p>
-                </div>
-                <Badge tone={ticket.priority}>{ticket.priority}</Badge>
-              </div>
-              <p className="mt-3 text-sm opacity-80">Status: {ticket.status}</p>
-            </button>
-          ))}
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <SectionHeader
-            eyebrow="Ticket Detail"
-            title={selectedTicket?.subject ?? "Select a ticket"}
-            description="Read the issue and respond with support actions."
-          />
-          {selectedTicket ? (
-            <>
-              <div className="mt-5 grid gap-3 text-sm text-slate-600">
-                <InfoRow label="Requester" value={selectedTicket.requester} />
-                <InfoRow label="Priority" value={selectedTicket.priority} />
-                <InfoRow label="Status" value={selectedTicket.status} />
-              </div>
-              <div className="mt-5 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => onMessage("Support ticket marked in progress.")}
-                  className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
-                >
-                  Mark In Progress
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onMessage("Reply drafted for support ticket.")}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Draft Reply
-                </button>
-              </div>
-            </>
-          ) : null}
-        </section>
-      </div>
-    </PanelCard>
-  );
-}
-
-function RolesPanel({ roles }) {
-  return (
-    <PanelCard eyebrow="Roles & Permissions" title="Roles" description="RBAC groups and allowed actions for each admin role.">
-      <div className="grid gap-4 lg:grid-cols-2">
-        {roles.map((item) => (
-          <div key={item.role} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-base font-bold text-slate-950">{item.role}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {item.permissions.map((permission) => (
-                <Tag key={permission}>{permission}</Tag>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </PanelCard>
-  );
-}
-
-function SettingsPanel({ settings, onToggleSetting }) {
-  return (
-    <PanelCard eyebrow="System Settings" title="Settings" description="Turn platform controls on or off and keep security policies in sync.">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <ToggleCard
-          title="MFA Enforcement"
-          detail="Require OTP or a second factor for all admin logins."
-          enabled={settings.mfaEnabled}
-          onToggle={() => onToggleSetting("mfaEnabled")}
-        />
-        <ToggleCard
-          title="Doctor Auto Review"
-          detail="Automatically approve doctors that pass policy checks."
-          enabled={settings.doctorAutoReview}
-          onToggle={() => onToggleSetting("doctorAutoReview")}
-        />
-        <ToggleCard
-          title="Patient Signup"
-          detail="Allow new patients to register from the public portal."
-          enabled={settings.patientSignupOpen}
-          onToggle={() => onToggleSetting("patientSignupOpen")}
-        />
-        <ToggleCard
-          title="Maintenance Mode"
-          detail="Temporarily pause public access for planned maintenance."
-          enabled={settings.maintenanceMode}
-          onToggle={() => onToggleSetting("maintenanceMode")}
-        />
-      </div>
-    </PanelCard>
-  );
-}
-
-function AuditPanel({ logs }) {
-  return (
-    <PanelCard eyebrow="Audit Logs" title="Audit Trail" description="Track critical actions taken across the admin portal.">
-      <div className="space-y-3">
-        {logs.map((entry) => (
-          <div key={entry.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-bold text-slate-950">{entry.action}</p>
-                <p className="mt-1 text-sm text-slate-500">Actor: {entry.actor}</p>
-              </div>
-              <Tag>{entry.time}</Tag>
-            </div>
-          </div>
-        ))}
-      </div>
-    </PanelCard>
-  );
-}
-
 function PanelCard({ eyebrow, title, description, children }) {
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
@@ -1045,7 +821,7 @@ function KpiCard({ label, value, detail, tone = "slate", onClick }) {
       <p className="text-xs font-semibold uppercase tracking-wide text-current/70">{label}</p>
       <p className="mt-2 text-3xl font-bold text-current">{value}</p>
       <p className="mt-2 text-sm text-current/80">{detail}</p>
-    </button>
+     </button>
   );
 }
 
@@ -1061,7 +837,9 @@ function MiniMetric({ label, value, tone = "slate" }) {
 
   return (
     <div className={`rounded-2xl px-4 py-3 ${toneClasses}`}>
-      <p className="text-xs font-semibold uppercase tracking-wide opacity-70">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide opacity-70">
+        {label}
+      </p>
       <p className="mt-1 text-base font-bold">{value}</p>
     </div>
   );
@@ -1070,7 +848,9 @@ function MiniMetric({ label, value, tone = "slate" }) {
 function QuickStat({ label, value, detail }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        {label}
+      </p>
       <p className="mt-2 text-xl font-bold text-slate-950">{value}</p>
       <p className="mt-1 text-xs text-slate-500">{detail}</p>
     </div>
@@ -1087,62 +867,4 @@ function ActionChip({ label, onClick }) {
       {label}
     </button>
   );
-}
-
-function Tag({ children }) {
-  return (
-    <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
-      {children}
-    </span>
-  );
-}
-
-function Badge({ children, tone }) {
-  return <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${badgeTone(tone)}`}>{children}</span>;
-}
-
-function ToggleCard({ title, detail, enabled, onToggle }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-base font-bold text-slate-950">{title}</p>
-          <p className="mt-1 text-sm text-slate-500">{detail}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onToggle}
-          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${enabled ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}
-        >
-          {enabled ? "Enabled" : "Disabled"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function InfoRow({ label, value }) {
-  return (
-    <div className="flex items-start justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3">
-      <span className="text-slate-500">{label}</span>
-      <span className="text-right font-semibold text-slate-900">{value}</span>
-    </div>
-  );
-}
-
-function badgeTone(value) {
-  const text = String(value ?? "").toLowerCase();
-  if (text.includes("approved") || text.includes("paid") || text.includes("settled") || text.includes("active") || text.includes("onboarded") || text.includes("ready")) {
-    return "bg-emerald-50 text-emerald-700";
-  }
-  if (text.includes("pending") || text.includes("review") || text.includes("refund") || text.includes("otp") || text.includes("high")) {
-    return "bg-amber-50 text-amber-700";
-  }
-  if (text.includes("reject") || text.includes("suspend")) {
-    return "bg-red-50 text-red-700";
-  }
-  if (text.includes("open") || text.includes("draft")) {
-    return "bg-blue-50 text-blue-700";
-  }
-  return "bg-slate-100 text-slate-700";
 }
