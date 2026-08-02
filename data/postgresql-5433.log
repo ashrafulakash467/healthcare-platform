@@ -2,3 +2,10 @@
 2026-07-29 20:07:01.611 +06 [6828] LOG:  listening on IPv4 address "127.0.0.1", port 5433
 2026-07-29 20:07:01.678 +06 [4652] LOG:  database system was shut down at 2026-07-29 20:05:12 +06
 2026-07-29 20:07:01.715 +06 [6828] LOG:  database system is ready to accept connections
+2026-07-29 20:08:38.696 +06 [10652] ERROR:  duplicate key value violates unique constraint "permissions_name_guard_name_unique"
+2026-07-29 20:08:38.696 +06 [10652] DETAIL:  Key (name, guard_name)=(access-admin-panel, web) already exists.
+2026-07-29 20:08:38.696 +06 [10652] STATEMENT:  insert into "permissions" ("guard_name", "name", "updated_at", "created_at") values ($1, $2, $3, $4) returning "id"
+2026-07-29 20:12:01.673 +06 [20076] LOG:  checkpoint starting: time
+2026-07-29 20:14:12.008 +06 [20076] LOG:  checkpoint complete: wrote 1159 buffers (7.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=127.671 s, sync=2.634 s, total=130.335 s; sync files=551, longest=0.116 s, average=0.005 s; distance=5946 kB, estimate=5946 kB; lsn=0/1B3C2E8, redo lsn=0/1B3C2B0
+2026-08-01 11:57:09.027 +06 [20076] LOG:  checkpoint starting: time
+2026-08-01 11:57:10.094 +06 [20076] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.764 s, sync=0.088 s, total=1.067 s; sync files=8, longest=0.044 s, average=0.011 s; distance=5 kB, estimate=5352 kB; lsn=0/1B3D718, redo lsn=0/1B3D6E0

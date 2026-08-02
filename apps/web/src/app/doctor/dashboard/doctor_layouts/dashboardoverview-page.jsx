@@ -95,6 +95,20 @@ export default function DashboardOverviewPage({
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
+            onClick={() => onNavigateTab("records")}
+            className="inline-flex items-center rounded-lg border border-red-500 bg-white px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+          >
+            All Doc
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigateTab("earnings")}
+            className="inline-flex items-center rounded-lg border border-red-500 bg-white px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+          >
+            Reports
+          </button>
+          <button
+            type="button"
             onClick={() => onNavigateTab("today")}
             className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
           >

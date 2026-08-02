@@ -6,10 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Doctor;
+use App\Models\Hospital;
+use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -86,6 +91,47 @@ class AuthController extends Controller
         ]);
 
         $user->assignRole($role);
+
+        if ($role === 'doctor') {
+            Doctor::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'specialty' => 'General Medicine',
+                    'sub_specialty' => null,
+                    'bio' => null,
+                    'qualification' => null,
+                    'gender' => null,
+                    'consultation_fee' => 0,
+                    'follow_up_fee' => null,
+                    'image_path' => null,
+                    'chamber_address' => null,
+                    'city' => null,
+                    'state' => null,
+                    'country' => null,
+                    'verification_status' => 'pending',
+                    'status' => 'active',
+                ],
+            );
+        } elseif ($role === 'patient') {
+            Patient::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'status' => 'active',
+                ],
+            );
+        } elseif ($role === 'hospital') {
+            Hospital::updateOrCreate(
+                ['created_by_user_id' => $user->id],
+                [
+                    'name' => $data['name'].' Hospital',
+                    'slug' => Str::slug($data['name'].'-'.$user->id),
+                    'code' => 'HSP-'.$user->id,
+                    'type' => 'clinic',
+                    'status' => 'active',
+                ],
+            );
+        }
+
         $user->refresh()->load(['roles', 'permissions']);
 
         $token = $user->createToken('healthcare-api', [$role])->plainTextToken;
@@ -122,7 +168,15 @@ class AuthController extends Controller
             'email' => ['required', 'email', 'exists:users,email'],
         ]);
 
-        $token = 'demo-reset-token';
+        $token = Str::random(64);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $data['email']],
+            [
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ],
+        );
 
         return response()->json([
             'message' => 'Password reset link generated successfully.',
@@ -138,21 +192,28 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        if ($data['token'] !== 'demo-reset-token') {
+        if (blank($data['email'])) {
+            throw ValidationException::withMessages([
+                'email' => ['Email is required to reset the password.'],
+            ]);
+        }
+
+        $tokenRecord = DB::table('password_reset_tokens')
+            ->where('email', $data['email'])
+            ->first();
+
+        if (! $tokenRecord || ! Hash::check($data['token'], $tokenRecord->token)) {
             throw ValidationException::withMessages([
                 'token' => ['Invalid or expired reset token.'],
             ]);
         }
 
-        if (! empty($data['email'])) {
-            $user = User::query()->where('email', $data['email'])->first();
+        $user = User::query()->where('email', $data['email'])->firstOrFail();
+        $user->forceFill([
+            'password' => $data['password'],
+        ])->save();
 
-            if ($user) {
-                $user->forceFill([
-                    'password' => $data['password'],
-                ])->save();
-            }
-        }
+        DB::table('password_reset_tokens')->where('email', $data['email'])->delete();
 
         return response()->json([
             'message' => 'Password has been reset successfully.',

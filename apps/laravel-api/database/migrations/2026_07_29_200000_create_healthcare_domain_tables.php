@@ -117,7 +117,7 @@ return new class extends Migration
             $table->text('reason')->nullable();
             $table->string('status')->default('active')->index();
             $table->timestamps();
-            $table->index(['doctor_schedule_id', 'exception_date']);
+            $table->index(['doctor_schedule_id', 'exception_date'], 'dse_sched_date_idx');
         });
 
         Schema::create('appointment_slots', function (Blueprint $table): void {
@@ -134,7 +134,7 @@ return new class extends Migration
             $table->string('status')->default('available')->index();
             $table->timestamp('generated_at')->nullable();
             $table->timestamps();
-            $table->unique(['doctor_schedule_id', 'slot_date', 'start_time']);
+            $table->unique(['doctor_schedule_id', 'slot_date', 'start_time'], 'aps_schedule_date_start_unique');
         });
 
         Schema::create('appointments', function (Blueprint $table): void {
@@ -164,8 +164,8 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            $table->index(['doctor_id', 'appointment_date', 'status']);
-            $table->index(['patient_id', 'appointment_date', 'status']);
+            $table->index(['doctor_id', 'appointment_date', 'status'], 'apt_doc_date_status_idx');
+            $table->index(['patient_id', 'appointment_date', 'status'], 'apt_patient_date_status_idx');
         });
 
         Schema::create('medical_records', function (Blueprint $table): void {
@@ -183,7 +183,7 @@ return new class extends Migration
             $table->json('attachments')->nullable();
             $table->timestamp('recorded_at')->nullable()->index();
             $table->timestamps();
-            $table->index(['patient_id', 'doctor_id', 'recorded_at']);
+            $table->index(['patient_id', 'doctor_id', 'recorded_at'], 'mr_patient_doctor_recorded_idx');
         });
 
         Schema::create('prescriptions', function (Blueprint $table): void {
@@ -212,7 +212,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('quantity')->nullable();
             $table->text('instructions')->nullable();
             $table->timestamps();
-            $table->index(['prescription_id', 'medicine_name']);
+            $table->index(['prescription_id', 'medicine_name'], 'pi_prescription_medicine_idx');
         });
 
         Schema::create('payments', function (Blueprint $table): void {
@@ -236,8 +236,8 @@ return new class extends Migration
             $table->timestamp('paid_at')->nullable()->index();
             $table->json('meta')->nullable();
             $table->timestamps();
-            $table->index(['patient_id', 'status']);
-            $table->index(['doctor_id', 'status']);
+            $table->index(['patient_id', 'status'], 'pay_patient_status_idx');
+            $table->index(['doctor_id', 'status'], 'pay_doctor_status_idx');
         });
 
         Schema::create('notifications', function (Blueprint $table): void {
@@ -265,7 +265,7 @@ return new class extends Migration
             $table->timestamp('closed_at')->nullable()->index();
             $table->json('meta')->nullable();
             $table->timestamps();
-            $table->index(['status', 'priority']);
+            $table->index(['status', 'priority'], 'st_status_priority_idx');
         });
 
         Schema::create('support_ticket_messages', function (Blueprint $table): void {
@@ -276,7 +276,7 @@ return new class extends Migration
             $table->json('attachments')->nullable();
             $table->boolean('is_internal')->default(false)->index();
             $table->timestamps();
-            $table->index(['support_ticket_id', 'created_at']);
+            $table->index(['support_ticket_id', 'created_at'], 'stm_ticket_created_idx');
         });
 
         Schema::create('reports', function (Blueprint $table): void {
@@ -323,7 +323,7 @@ return new class extends Migration
             $table->text('url')->nullable();
             $table->integer('status_code')->nullable();
             $table->timestamps();
-            $table->index(['auditable_type', 'auditable_id']);
+            $table->index(['auditable_type', 'auditable_id'], 'audit_type_id_idx');
         });
     }
 

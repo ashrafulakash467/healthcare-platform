@@ -176,6 +176,22 @@ export function Icon({ name, className = "w-5 h-5" }) {
         d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
       />
     ),
+    pencil: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M16.862 4.487a2.1 2.1 0 113 2.97L7.5 19.82 3 21l1.18-4.5L16.862 4.487zM14 7l3 3"
+      />
+    ),
+    trash2: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m-8 0h8m-8 0v14a2 2 0 002 2h4a2 2 0 002-2V6M10 11v6m4-6v6"
+      />
+    ),
     stethoscope: (
       <path
         strokeLinecap="round"

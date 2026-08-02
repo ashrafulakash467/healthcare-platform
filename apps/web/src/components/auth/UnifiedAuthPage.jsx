@@ -15,14 +15,12 @@ const ROUTES = {
   },
   doctor: {
     login: "/doctor/login",
-    register: "/doctor/register",
     loginEndpoint: "/doctor/login",
     registerEndpoint: "/doctor/register",
     dashboard: "/doctor/dashboard",
   },
   admin: {
     login: "/login?role=admin",
-    register: "/register?role=admin",
     loginEndpoint: "/admin/login",
   },
 };
@@ -48,6 +46,7 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isAdmin = role === "admin";
+  const canRegister = role === "user";
   const pageCopy = useMemo(() => {
     if (mode === "register" && role === "doctor") {
       return {
@@ -92,6 +91,10 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
   }
 
   function switchMode(nextMode) {
+    if (nextMode === "register" && !canRegister) {
+      return;
+    }
+
     const route = ROUTES[role]?.[nextMode];
     if (!route) {
       return;
@@ -222,7 +225,7 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
           <div className="mb-5 flex flex-row gap-3">
             <SelectField
               label="Mode"
-              options={["login", "register"]}
+              options={canRegister ? ["login", "register"] : ["login"]}
               value={mode}
               onChange={switchMode}
             />
@@ -299,7 +302,7 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
             </button>
           ) : null}
 
-          {mode === "register" && role !== "admin" ? (
+          {mode === "register" && role !== "admin" && canRegister ? (
             <button
               type="submit"
               disabled={isSubmitting}
@@ -332,7 +335,7 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
                   Create an account
                 </button>
               </>
-            ) : (
+            ) : canRegister ? (
               <>
                 <span className="text-slate-500">
                   Already have an account?
@@ -345,6 +348,10 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
                   Log in
                 </button>
               </>
+            ) : (
+              <span className="text-slate-500">
+                Doctor registration is managed by the admin team.
+              </span>
             )}
           </div>
         </form>

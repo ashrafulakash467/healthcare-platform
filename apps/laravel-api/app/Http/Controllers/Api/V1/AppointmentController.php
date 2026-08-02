@@ -3,67 +3,92 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
+use App\Models\AppointmentSlot;
+use App\Models\Doctor;
+use App\Models\Hospital;
+use App\Models\Patient;
+use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AppointmentController extends Controller
 {
     public function my(Request $request): JsonResponse
     {
+        $appointments = $this->appointmentsForUser($request->user())
+            ->map(fn (Appointment $appointment) => $this->formatAppointment($appointment))
+            ->values();
+
         return response()->json([
-            'appointments' => $this->appointmentsFor($request->user()?->getRoleNames()->first()),
+            'appointments' => $appointments,
         ]);
     }
 
     public function bookingOptions(Request $request): JsonResponse
     {
-        $doctorId = (string) $request->query('doctorId', '1');
-        $doctor = $this->doctorById($doctorId);
+        $doctorId = (string) $request->query('doctorId', '');
+        $doctor = $doctorId !== ''
+            ? Doctor::query()->with(['user', 'primaryHospital', 'hospitals', 'schedules'])->findOrFail($doctorId)
+            : Doctor::query()->with(['user', 'primaryHospital', 'hospitals', 'schedules'])->where('status', 'active')->firstOrFail();
+
+        $clinics = $this->clinicsForDoctor($doctor);
+        $schedule = $doctor->schedules->firstWhere('is_active', true) ?? $doctor->schedules->first();
 
         return response()->json([
-            'doctor' => $doctor,
-            'clinics' => $doctor['clinics'],
+            'doctor' => $this->formatDoctor($doctor, $clinics),
+            'clinics' => $clinics,
             'schedule' => [
-                'consultationType' => 'in_person',
-                'slotDurationMinutes' => 15,
-                'timezone' => 'Asia/Dhaka',
+                'consultationType' => $schedule?->consultation_type ?? 'in_person',
+                'slotDurationMinutes' => $schedule?->slot_duration_minutes ?? 15,
+                'timezone' => $schedule?->timezone ?? 'Asia/Dhaka',
             ],
         ]);
     }
 
     public function availableDates(Request $request): JsonResponse
     {
-        $doctorId = (string) $request->query('doctorId', '1');
-        $clinicId = (string) $request->query('clinicId', '1');
+        $doctorId = (string) $request->query('doctorId', '');
+        $clinicId = (string) $request->query('clinicId', '');
+
+        $slots = $this->slotQuery($doctorId, $clinicId)
+            ->whereDate('slot_date', '>=', now()->toDateString())
+            ->orderBy('slot_date')
+            ->get();
 
         return response()->json([
             'doctorId' => $doctorId,
             'clinicId' => $clinicId,
-            'dates' => [
-                now()->addDay()->toDateString(),
-                now()->addDays(2)->toDateString(),
-                now()->addDays(3)->toDateString(),
-                now()->addDays(5)->toDateString(),
-            ],
+            'dates' => $slots->pluck('slot_date')->map(fn ($date) => Carbon::parse($date)->toDateString())->unique()->values(),
         ]);
     }
 
     public function availableSlots(Request $request): JsonResponse
     {
+        $doctorId = (string) $request->query('doctorId', '');
+        $clinicId = (string) $request->query('clinicId', '');
         $date = (string) $request->query('date', now()->toDateString());
+
+        $slots = $this->slotQuery($doctorId, $clinicId)
+            ->whereDate('slot_date', $date)
+            ->orderBy('start_time')
+            ->get()
+            ->map(function (AppointmentSlot $slot): array {
+                return [
+                    'time' => Carbon::createFromFormat('H:i:s', $slot->start_time)->format('h:i A'),
+                    'isBooked' => $slot->booked_count >= $slot->capacity || ! $slot->is_bookable || $slot->status !== 'available',
+                ];
+            })
+            ->values();
 
         return response()->json([
             'date' => $date,
-            'slots' => [
-                ['time' => '09:00 AM', 'isBooked' => false],
-                ['time' => '09:30 AM', 'isBooked' => false],
-                ['time' => '10:00 AM', 'isBooked' => true],
-                ['time' => '11:00 AM', 'isBooked' => false],
-                ['time' => '04:00 PM', 'isBooked' => false],
-            ],
+            'slots' => $slots,
         ]);
     }
 
@@ -76,25 +101,53 @@ class AppointmentController extends Controller
             'slotTime' => ['required', 'string'],
         ]);
 
-        $doctor = $this->doctorById((string) $data['doctorId']);
-        $clinic = $this->clinicById((string) $data['clinicId']);
+        $doctor = Doctor::query()->with(['user', 'primaryHospital', 'hospitals', 'schedules'])->findOrFail($data['doctorId']);
+        $clinic = Hospital::query()->findOrFail($data['clinicId']);
+        $patient = $this->resolvePatient($request->user());
+        $slot = $this->slotForBooking($doctor->id, $clinic->id, $data['appointmentDate'], $data['slotTime']);
+
+        if (! $slot) {
+            throw ValidationException::withMessages([
+                'slotTime' => ['Selected time slot is not available.'],
+            ]);
+        }
+
+        if ($slot->booked_count >= $slot->capacity || ! $slot->is_bookable || $slot->status !== 'available') {
+            throw ValidationException::withMessages([
+                'slotTime' => ['Selected time slot is already booked.'],
+            ]);
+        }
+
+        $appointment = Appointment::create([
+            'appointment_no' => $this->newAppointmentNumber(),
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'hospital_id' => $clinic->id,
+            'appointment_slot_id' => $slot->id,
+            'consultation_type' => $slot->schedule?->consultation_type ?? 'in_person',
+            'appointment_date' => $data['appointmentDate'],
+            'start_time' => $slot->start_time,
+            'end_time' => $slot->end_time,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'channel' => 'web',
+            'reason' => 'General consultation',
+            'symptoms' => null,
+            'meta' => [
+                'source' => 'web',
+            ],
+        ]);
+
+        $slot->forceFill([
+            'booked_count' => $slot->booked_count + 1,
+            'status' => $slot->booked_count + 1 >= $slot->capacity ? 'booked' : $slot->status,
+        ])->save();
+
+        $appointment->loadMissing(['patient.user', 'doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital']);
 
         return response()->json([
             'message' => 'Appointment booked successfully.',
-            'appointment' => $this->createAppointmentPayload(
-                id: 'apt-'.now()->format('YmdHis'),
-                doctor: $doctor,
-                clinic: $clinic,
-                patient: $this->demoPatient(),
-                appointmentDate: $data['appointmentDate'],
-                slotTime: $data['slotTime'],
-                status: 'confirmed',
-                paymentStatus: 'paid',
-                paymentAmountCents: 15000,
-                paymentCurrency: 'BDT',
-                isReschedulable: true,
-                isCancellable: true
-            ),
+            'appointment' => $this->formatAppointment($appointment),
         ], 201);
     }
 
@@ -105,6 +158,21 @@ class AppointmentController extends Controller
             'reason' => ['required', 'string', 'min:3'],
         ]);
 
+        $appointment = $this->findAppointmentForCurrentUser($request->user(), $data['appointmentId']);
+
+        if (! $appointment) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['Appointment not found.'],
+            ]);
+        }
+
+        $this->releaseSlotIfNeeded($appointment);
+
+        $appointment->forceFill([
+            'status' => 'cancelled',
+            'cancel_reason' => $data['reason'],
+        ])->save();
+
         return response()->json([
             'message' => 'Appointment cancelled successfully.',
             'appointmentId' => $data['appointmentId'],
@@ -112,43 +180,106 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function payment(string $appointmentId): JsonResponse
+    public function payment(string $appointmentId, Request $request): JsonResponse
     {
+        $appointment = $this->findAppointmentForCurrentUser($request->user(), $appointmentId);
+
+        if (! $appointment) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['Appointment not found.'],
+            ]);
+        }
+
+        $appointment->loadMissing(['doctor', 'patient', 'hospital', 'payment']);
+        $amount = $this->appointmentAmount($appointment);
+
+        $payment = Payment::updateOrCreate(
+            ['appointment_id' => $appointment->id],
+            [
+                'transaction_no' => $this->newTransactionNumber($appointment->appointment_no),
+                'patient_id' => $appointment->patient_id,
+                'doctor_id' => $appointment->doctor_id,
+                'hospital_id' => $appointment->hospital_id,
+                'payer_user_id' => $request->user()?->id,
+                'provider' => 'manual',
+                'method' => 'cash',
+                'currency' => 'BDT',
+                'amount' => $amount / 100,
+                'discount_amount' => 0,
+                'tax_amount' => 0,
+                'total_amount' => $amount / 100,
+                'paid_amount' => $amount / 100,
+                'due_amount' => 0,
+                'status' => 'paid',
+                'paid_at' => now(),
+            ],
+        );
+
+        $appointment->forceFill([
+            'payment_status' => 'paid',
+        ])->save();
+
         return response()->json([
             'message' => 'Payment created successfully.',
             'payment' => [
-                'id' => 'pay-'.$appointmentId,
-                'appointmentId' => $appointmentId,
-                'status' => 'pending',
-                'amountCents' => 15000,
-                'currency' => 'BDT',
+                'id' => (string) $payment->id,
+                'appointmentId' => (string) $appointment->id,
+                'status' => $payment->status,
+                'amountCents' => (int) round(((float) $payment->paid_amount) * 100),
+                'currency' => $payment->currency,
             ],
         ]);
     }
 
     public function rescheduleOptions(Request $request): JsonResponse
     {
-        $appointmentId = (string) $request->query('appointmentId', 'apt-1');
+        $appointmentId = (string) $request->query('appointmentId', '');
+        $appointment = $this->findAppointmentForCurrentUser($request->user(), $appointmentId);
+
+        if (! $appointment) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['Appointment not found.'],
+            ]);
+        }
+
+        $appointment->loadMissing(['doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital', 'patient.user']);
+        $slots = $this->slotQuery((string) $appointment->doctor_id, (string) $appointment->hospital_id)
+            ->whereDate('slot_date', '>=', now()->toDateString())
+            ->orderBy('slot_date')
+            ->get();
 
         return response()->json([
-            'appointment' => $this->appointmentsFor('patient')->firstWhere('id', $appointmentId) ?? $this->appointmentsFor('patient')->first(),
-            'dates' => [
-                now()->addDays(2)->toDateString(),
-                now()->addDays(4)->toDateString(),
-                now()->addDays(6)->toDateString(),
-            ],
+            'appointment' => $this->formatAppointment($appointment),
+            'dates' => $slots->pluck('slot_date')->map(fn ($date) => Carbon::parse($date)->toDateString())->unique()->values(),
         ]);
     }
 
     public function rescheduleSlots(Request $request): JsonResponse
     {
+        $appointmentId = (string) $request->query('appointmentId', '');
+        $date = (string) $request->query('date', now()->toDateString());
+        $appointment = $this->findAppointmentForCurrentUser($request->user(), $appointmentId);
+
+        if (! $appointment) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['Appointment not found.'],
+            ]);
+        }
+
+        $slots = $this->slotQuery((string) $appointment->doctor_id, (string) $appointment->hospital_id)
+            ->whereDate('slot_date', $date)
+            ->orderBy('start_time')
+            ->get()
+            ->map(function (AppointmentSlot $slot): array {
+                return [
+                    'time' => Carbon::createFromFormat('H:i:s', $slot->start_time)->format('h:i A'),
+                    'isBooked' => $slot->booked_count >= $slot->capacity || ! $slot->is_bookable || $slot->status !== 'available',
+                ];
+            })
+            ->values();
+
         return response()->json([
-            'slots' => [
-                ['time' => '10:30 AM', 'isBooked' => false],
-                ['time' => '11:30 AM', 'isBooked' => false],
-                ['time' => '02:30 PM', 'isBooked' => false],
-                ['time' => '04:30 PM', 'isBooked' => false],
-            ],
+            'slots' => $slots,
         ]);
     }
 
@@ -160,7 +291,7 @@ class AppointmentController extends Controller
             'slotTime' => ['required', 'string'],
         ]);
 
-        $appointment = $this->appointmentsFor('patient')->firstWhere('id', $data['appointmentId']);
+        $appointment = $this->findAppointmentForCurrentUser($request->user(), $data['appointmentId']);
 
         if (! $appointment) {
             throw ValidationException::withMessages([
@@ -168,167 +299,341 @@ class AppointmentController extends Controller
             ]);
         }
 
+        $appointment->loadMissing(['doctor.schedules', 'hospital']);
+        $slot = $this->slotForBooking((int) $appointment->doctor_id, (int) $appointment->hospital_id, $data['appointmentDate'], $data['slotTime']);
+
+        if (! $slot) {
+            throw ValidationException::withMessages([
+                'slotTime' => ['Selected time slot is not available.'],
+            ]);
+        }
+
+        if ($slot->booked_count >= $slot->capacity || ! $slot->is_bookable || $slot->status !== 'available') {
+            throw ValidationException::withMessages([
+                'slotTime' => ['Selected time slot is already booked.'],
+            ]);
+        }
+
+        $this->releaseSlotIfNeeded($appointment);
+
+        $appointment->forceFill([
+            'appointment_slot_id' => $slot->id,
+            'appointment_date' => $data['appointmentDate'],
+            'start_time' => $slot->start_time,
+            'end_time' => $slot->end_time,
+            'rescheduled_at' => now(),
+            'status' => $appointment->status === 'cancelled' ? 'pending' : $appointment->status,
+        ])->save();
+
+        $slot->forceFill([
+            'booked_count' => $slot->booked_count + 1,
+            'status' => $slot->booked_count + 1 >= $slot->capacity ? 'booked' : $slot->status,
+        ])->save();
+
+        $appointment->loadMissing(['patient.user', 'doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital']);
+
         return response()->json([
             'message' => 'Appointment rescheduled successfully.',
-            'appointment' => array_merge($appointment, [
+            'appointment' => $this->formatAppointment($appointment, [
                 'appointmentDate' => $data['appointmentDate'],
-                'slotTime' => $data['slotTime'],
+                'slotTime' => $this->displaySlotTime($slot),
                 'rescheduledAt' => now()->toISOString(),
             ]),
         ]);
     }
 
-    private function appointmentsFor(?string $role): Collection
+    private function appointmentsForUser(?\Illuminate\Contracts\Auth\Authenticatable $user): Collection
     {
-        $appointments = collect([
-            $this->createAppointmentPayload(
-                id: 'apt-1001',
-                doctor: $this->doctorById('1'),
-                clinic: $this->clinicById('1'),
-                patient: $this->demoPatient(),
-                appointmentDate: now()->toDateString(),
-                slotTime: '09:30 AM',
-                status: 'confirmed',
-                paymentStatus: 'paid',
-                paymentAmountCents: 15000,
-                paymentCurrency: 'BDT',
-                isReschedulable: true,
-                isCancellable: true
-            ),
-            $this->createAppointmentPayload(
-                id: 'apt-1002',
-                doctor: $this->doctorById('2'),
-                clinic: $this->clinicById('2'),
-                patient: $this->demoPatient('Nusrat Jahan', 'nusrat@example.com', '01711112222'),
-                appointmentDate: now()->addDay()->toDateString(),
-                slotTime: '11:00 AM',
-                status: 'pending',
-                paymentStatus: 'pending',
-                paymentAmountCents: 12500,
-                paymentCurrency: 'BDT',
-                isReschedulable: true,
-                isCancellable: true
-            ),
-            $this->createAppointmentPayload(
-                id: 'apt-1003',
-                doctor: $this->doctorById('3'),
-                clinic: $this->clinicById('1'),
-                patient: $this->demoPatient('Sabbir Ahmed', 'sabbir@example.com', '01733334444'),
-                appointmentDate: now()->addDays(3)->toDateString(),
-                slotTime: '04:00 PM',
-                status: 'upcoming',
-                paymentStatus: 'unpaid',
-                paymentAmountCents: 17500,
-                paymentCurrency: 'BDT',
-                isReschedulable: true,
-                isCancellable: false
-            ),
+        if (! $user instanceof \App\Models\User) {
+            return collect();
+        }
+
+        $query = Appointment::query()->with([
+            'patient.user',
+            'doctor.user',
+            'doctor.primaryHospital',
+            'doctor.hospitals',
+            'hospital',
+            'slot',
+            'payment',
+        ])->latest();
+
+        if ($user->hasRole('doctor') && $user->doctor) {
+            $query->where('doctor_id', $user->doctor->id);
+        } elseif ($user->hasRole('hospital')) {
+            $hospital = $user->createdHospitals()->latest()->first();
+            if ($hospital) {
+                $query->where('hospital_id', $hospital->id);
+            } else {
+                return collect();
+            }
+        } else {
+            $patient = $user->patient;
+            if ($patient) {
+                $query->where('patient_id', $patient->id);
+            } else {
+                return collect();
+            }
+        }
+
+        return $query->get();
+    }
+
+    private function resolvePatient(?\Illuminate\Contracts\Auth\Authenticatable $user): Patient
+    {
+        if (! $user instanceof \App\Models\User) {
+            throw ValidationException::withMessages([
+                'patient' => ['Unable to resolve the current patient.'],
+            ]);
+        }
+
+        if ($user->patient) {
+            return $user->patient;
+        }
+
+        return Patient::create([
+            'user_id' => $user->id,
+            'status' => 'active',
         ]);
-
-        return $appointments;
     }
 
-    private function doctorById(string $doctorId): array
+    private function findAppointmentForCurrentUser(?\Illuminate\Contracts\Auth\Authenticatable $user, string $appointmentId): ?Appointment
     {
-        $doctors = [
-            '1' => [
-                'id' => 1,
-                'name' => 'Dr. Amina Rahman',
-                'email' => 'amina.rahman@example.com',
-                'phone' => '01710000001',
-                'specialty' => 'Cardiology',
-                'location' => 'Dhaka',
-                'gender' => 'Female',
-                'isAvailable' => true,
-                'imageUrl' => '/vercel.svg',
-                'clinics' => [
-                    ['id' => 1, 'name' => 'Central Care Hospital', 'location' => 'Dhaka'],
-                    ['id' => 2, 'name' => 'North Point Clinic', 'location' => 'Uttara'],
-                ],
-            ],
-            '2' => [
-                'id' => 2,
-                'name' => 'Dr. Tanvir Hasan',
-                'email' => 'tanvir.hasan@example.com',
-                'phone' => '01710000002',
-                'specialty' => 'Dermatology',
-                'location' => 'Chattogram',
-                'gender' => 'Male',
-                'isAvailable' => true,
-                'imageUrl' => '/next.svg',
-                'clinics' => [
-                    ['id' => 2, 'name' => 'City Medical Center', 'location' => 'Chattogram'],
-                ],
-            ],
-            '3' => [
-                'id' => 3,
-                'name' => 'Dr. Nusrat Jahan',
-                'email' => 'nusrat.jahan@example.com',
-                'phone' => '01710000003',
-                'specialty' => 'Gynecology',
-                'location' => 'Dhaka',
-                'gender' => 'Female',
-                'isAvailable' => false,
-                'imageUrl' => '/globe.svg',
-                'clinics' => [
-                    ['id' => 1, 'name' => 'Central Care Hospital', 'location' => 'Dhaka'],
-                ],
-            ],
-        ];
+        if (! $user instanceof \App\Models\User) {
+            return null;
+        }
 
-        return $doctors[$doctorId] ?? $doctors['1'];
+        $query = Appointment::query()->with([
+            'patient.user',
+            'doctor.user',
+            'doctor.primaryHospital',
+            'doctor.hospitals',
+            'hospital',
+            'slot',
+            'payment',
+        ])->where('appointment_no', $appointmentId);
+
+        if ($user->hasRole('doctor') && $user->doctor) {
+            $query->where('doctor_id', $user->doctor->id);
+        } elseif ($user->hasRole('hospital')) {
+            $hospital = $user->createdHospitals()->latest()->first();
+            if ($hospital) {
+                $query->where('hospital_id', $hospital->id);
+            }
+        } else {
+            $patient = $user->patient;
+            if ($patient) {
+                $query->where('patient_id', $patient->id);
+            }
+        }
+
+        return $query->first();
     }
 
-    private function clinicById(string $clinicId): array
+    private function slotQuery(string $doctorId, string $clinicId)
     {
-        return match ($clinicId) {
-            '2' => ['id' => 2, 'name' => 'City Medical Center', 'location' => 'Chattogram'],
-            default => ['id' => 1, 'name' => 'Central Care Hospital', 'location' => 'Dhaka'],
-        };
+        return AppointmentSlot::query()
+            ->with(['schedule', 'doctor.user', 'hospital'])
+            ->where('doctor_id', $doctorId)
+            ->where('hospital_id', $clinicId);
     }
 
-    private function demoPatient(
-        string $name = 'Nadia Rahman',
-        string $email = 'nadia@example.com',
-        string $phone = '01700000001'
-    ): array {
-        return [
-            'id' => 1,
-            'name' => $name,
-            'email' => $email,
-            'phone' => $phone,
-        ];
+    private function slotForBooking(int $doctorId, int $clinicId, string $appointmentDate, string $slotTime): ?AppointmentSlot
+    {
+        $normalizedTime = $this->normalizeSlotTime($slotTime);
+
+        return $this->slotQuery((string) $doctorId, (string) $clinicId)
+            ->whereDate('slot_date', $appointmentDate)
+            ->where('start_time', $normalizedTime)
+            ->first();
     }
 
-    private function createAppointmentPayload(
-        string $id,
-        array $doctor,
-        array $clinic,
-        array $patient,
-        string $appointmentDate,
-        string $slotTime,
-        string $status,
-        string $paymentStatus,
-        int $paymentAmountCents,
-        string $paymentCurrency,
-        bool $isReschedulable,
-        bool $isCancellable
-    ): array {
-        return [
-            'id' => $id,
-            'patient' => $patient,
-            'patientName' => $patient['name'],
-            'doctor' => $doctor,
-            'clinic' => $clinic,
+    private function formatAppointment(Appointment $appointment, array $overrides = []): array
+    {
+        $doctor = $appointment->doctor;
+        $hospital = $appointment->hospital;
+        $patient = $appointment->patient;
+        $payment = $appointment->payment;
+
+        $appointmentDate = $overrides['appointmentDate'] ?? $appointment->appointment_date?->toDateString() ?? (string) $appointment->appointment_date;
+        $slotTime = $overrides['slotTime'] ?? $this->displayTime($appointment->start_time);
+
+        return array_merge([
+            'id' => (string) $appointment->appointment_no,
+            'patient' => $patient ? [
+                'id' => (string) $patient->id,
+                'name' => $patient->user?->name ?? '',
+                'email' => $patient->user?->email ?? '',
+                'phone' => $patient->user?->phone ?? '',
+            ] : null,
+            'patientName' => $patient?->user?->name ?? '',
+            'doctor' => $this->formatDoctor($doctor, $this->clinicsForDoctor($doctor)),
+            'clinic' => $hospital ? [
+                'id' => (string) $hospital->id,
+                'name' => $hospital->name,
+                'location' => $hospital->city ?? '',
+            ] : null,
             'appointmentDate' => $appointmentDate,
             'slotTime' => $slotTime,
-            'status' => $status,
-            'paymentStatus' => $paymentStatus,
-            'paymentAmountCents' => $paymentAmountCents,
-            'paymentCurrency' => $paymentCurrency,
-            'isReschedulable' => $isReschedulable,
-            'isCancellable' => $isCancellable,
-            'cancellationReason' => null,
+            'status' => $appointment->status,
+            'paymentStatus' => $appointment->payment_status,
+            'paymentAmountCents' => $this->appointmentAmount($appointment),
+            'paymentCurrency' => 'BDT',
+            'isReschedulable' => ! in_array($appointment->status, ['cancelled', 'completed'], true),
+            'isCancellable' => ! in_array($appointment->status, ['cancelled', 'completed'], true),
+            'cancellationReason' => $appointment->cancel_reason,
+        ], $overrides);
+    }
+
+    private function formatDoctor(?Doctor $doctor, array $clinics = []): array
+    {
+        if (! $doctor) {
+            return [
+                'id' => '',
+                'name' => 'Unknown Doctor',
+                'email' => '',
+                'phone' => '',
+                'specialty' => 'General Medicine',
+                'location' => 'Unavailable',
+                'gender' => 'Unspecified',
+                'isAvailable' => false,
+                'imageUrl' => '/globe.svg',
+                'clinics' => [],
+            ];
+        }
+
+        return [
+            'id' => (string) $doctor->id,
+            'name' => $doctor->user?->name ?? 'Unknown Doctor',
+            'email' => $doctor->user?->email ?? '',
+            'phone' => $doctor->user?->phone ?? '',
+            'specialty' => $doctor->specialty ?? 'General Medicine',
+            'location' => $doctor->city ?: $doctor->primaryHospital?->city ?: 'Unavailable',
+            'gender' => $doctor->gender ?? 'Unspecified',
+            'isAvailable' => $doctor->status === 'active' && $doctor->verification_status === 'approved',
+            'imageUrl' => $this->doctorImageUrl($doctor->image_path),
+            'clinics' => $clinics,
         ];
+    }
+
+    private function doctorImageUrl(?string $imagePath): string
+    {
+        if (blank($imagePath)) {
+            return '/globe.svg';
+        }
+
+        if (str_starts_with($imagePath, 'http://') || str_starts_with($imagePath, 'https://')) {
+            return $imagePath;
+        }
+
+        if (str_starts_with($imagePath, '/')) {
+            return url(ltrim($imagePath, '/'));
+        }
+
+        $filename = basename($imagePath);
+        $localPath = dirname(dirname(base_path())).DIRECTORY_SEPARATOR.'Stroage'.DIRECTORY_SEPARATOR.'doctors'.DIRECTORY_SEPARATOR.$filename;
+
+        if (is_file($localPath)) {
+            return url('/api/doctor-images/'.$filename);
+        }
+
+        return Storage::disk('public')->url($imagePath);
+    }
+
+    private function clinicsForDoctor(?Doctor $doctor): array
+    {
+        if (! $doctor) {
+            return [];
+        }
+
+        $clinics = $doctor->hospitals->map(function (Hospital $hospital): array {
+            return [
+                'id' => (string) $hospital->id,
+                'name' => $hospital->name,
+                'location' => $hospital->city ?? '',
+            ];
+        })->values()->all();
+
+        if (empty($clinics) && $doctor->primaryHospital) {
+            $clinics[] = [
+                'id' => (string) $doctor->primaryHospital->id,
+                'name' => $doctor->primaryHospital->name,
+                'location' => $doctor->primaryHospital->city ?? '',
+            ];
+        }
+
+        return $clinics;
+    }
+
+    private function appointmentAmount(Appointment $appointment): int
+    {
+        if ($appointment->payment) {
+            return (int) round(((float) $appointment->payment->paid_amount) * 100);
+        }
+
+        return (int) round(((float) ($appointment->doctor?->consultation_fee ?? 0)) * 100);
+    }
+
+    private function newAppointmentNumber(): string
+    {
+        do {
+            $number = 'APT-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
+        } while (Appointment::query()->where('appointment_no', $number)->exists());
+
+        return $number;
+    }
+
+    private function newTransactionNumber(string $appointmentNo): string
+    {
+        return 'TRX-'.$appointmentNo.'-'.Str::upper(Str::random(4));
+    }
+
+    private function normalizeSlotTime(string $slotTime): string
+    {
+        $formats = ['h:i A', 'H:i', 'H:i:s'];
+
+        foreach ($formats as $format) {
+            try {
+                return Carbon::createFromFormat($format, $slotTime)->format('H:i:s');
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        $parsed = Carbon::parse($slotTime);
+
+        return $parsed->format('H:i:s');
+    }
+
+    private function displayTime(?string $time): string
+    {
+        if (! $time) {
+            return '';
+        }
+
+        return Carbon::createFromFormat('H:i:s', $time)->format('h:i A');
+    }
+
+    private function displaySlotTime(AppointmentSlot $slot): string
+    {
+        return Carbon::createFromFormat('H:i:s', $slot->start_time)->format('h:i A');
+    }
+
+    private function releaseSlotIfNeeded(Appointment $appointment): void
+    {
+        if (! $appointment->appointment_slot_id) {
+            return;
+        }
+
+        $slot = AppointmentSlot::query()->find($appointment->appointment_slot_id);
+
+        if (! $slot) {
+            return;
+        }
+
+        $slot->forceFill([
+            'booked_count' => max(0, $slot->booked_count - 1),
+            'status' => max(0, $slot->booked_count - 1) === 0 ? 'available' : $slot->status,
+        ])->save();
     }
 }

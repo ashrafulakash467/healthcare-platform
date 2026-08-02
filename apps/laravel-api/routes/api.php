@@ -24,6 +24,7 @@ Route::post('patient/forgot-password', [AuthController::class, 'forgotPassword']
 Route::post('patient/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('doctor/search', [DoctorController::class, 'search']);
 Route::get('doctor/public/{doctorId}', [DoctorController::class, 'show']);
+Route::get('doctor-images/{filename}', [DoctorController::class, 'image']);
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -40,6 +41,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('admin/dashboard', [DashboardController::class, 'admin']);
         Route::get('admin/doctor-verifications', [AdminController::class, 'index']);
         Route::patch('admin/doctor-verifications/{doctorId}/decision', [AdminController::class, 'decision']);
+        Route::get('admin/doctors', [DoctorController::class, 'adminIndex']);
+        Route::post('admin/doctors', [DoctorController::class, 'adminStore']);
+        Route::put('admin/doctors/{doctorId}', [DoctorController::class, 'adminUpdate']);
+        Route::delete('admin/doctors/{doctorId}', [DoctorController::class, 'adminDestroy']);
     });
 
     Route::middleware('role:doctor|admin|super-admin')->group(function (): void {
