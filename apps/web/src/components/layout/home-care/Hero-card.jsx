@@ -1,4 +1,7 @@
 import Link from "next/link";
+import DoctorCard from "@/components/shared/DoctorCard";
+import HomeHeroBanner from "./HomeHeroBanner";
+import { apiUrl } from "@/lib/api";
 
 const specialties = [
   { title: "Gynecologist & Obstetrician", icon: <GyneIcon /> },
@@ -47,45 +50,6 @@ const diagnostics = [
   "X-Ray",
   "Microbiology",
 ];
-
-const recentSearches = [
-  "Physical Medicine Specialist",
-  "Arthritis and Pain Management",
-];
-
-const services = [
-  {
-    title: "Video Consultancy",
-    description: "Start a consultation from anywhere.",
-    accent: "from-brand-soft to-brand-muted",
-    icon: "VC",
-  },
-  {
-    title: "Chamber Appointment",
-    description: "Book a clinic visit in a few taps.",
-    accent: "from-brand-muted to-brand-strong",
-    icon: "CA",
-  },
-  {
-    title: "Doctor At Your Home",
-    description: "Get clinical care where you are.",
-    accent: "from-brand-strong to-brand",
-    icon: "DH",
-  },
-  {
-    title: "Ambulance Service",
-    description: "Fast response when every minute counts.",
-    accent: "from-brand-soft to-brand",
-    icon: "AS",
-  },
-  {
-    title: "Domiciliary Service",
-    description: "Rehab and support tailored at home.",
-    accent: "from-brand-muted to-brand-soft",
-    icon: "DS",
-  },
-];
-
 function CheckIcon({ className = "" }) {
   return (
     <svg
@@ -119,6 +83,23 @@ function ArrowRightIcon({ className = "" }) {
       <path d="m13 6 6 6-6 6" />
     </svg>
   );
+}
+
+async function loadDoctors() {
+  try {
+    const response = await fetch(apiUrl("/doctor/search?limit=8&sort=name_asc"), {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const result = await response.json();
+    return Array.isArray(result?.data) ? result.data.slice(0, 8) : [];
+  } catch {
+    return [];
+  }
 }
 
 function SpecialtyIconShell({ children }) {
@@ -354,99 +335,15 @@ function DiagnosticIcon({ index }) {
 
 
 
-export default function HeroCard() {
+export default async function HeroCard() {
+  const doctors = await loadDoctors();
+
   return (
     <main className="bg-white">
-      <section className="relative overflow-hidden bg-[linear-gradient(180deg,var(--brand-soft)_0%,#eff8ff_52%,#ffffff_100%)]">
-      <div className="absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top_left,rgba(167,240,221,0.7),transparent_38%),radial-gradient(circle_at_top_right,rgba(156,172,84,0.22),transparent_30%)]" />
-
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <div className="rounded-[2rem] border border-white/80 bg-white/70 px-5 py-10 shadow-[0_24px_90px_rgba(52,92,50,0.12)] backdrop-blur-md sm:px-8 lg:px-14 lg:py-14">
-          <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-strong/30 bg-brand-soft px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brand">
-              Home care booking
-            </span>
-            <h1 className="max-w-4xl text-4xl font-extrabold tracking-tight text-brand sm:text-5xl lg:text-6xl">
-              Book care faster with a calm, nature-inspired interface.
-            </h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-              Use the new palette to make the experience feel trusted, fresh,
-              and easy to scan while keeping the home-care journey front and
-              center.
-            </p>
-
-            <div className="mt-10 w-full max-w-3xl">
-              <div className="flex items-center gap-3 rounded-full border border-white bg-white px-4 py-3 shadow-[0_18px_40px_rgba(52,92,50,0.10)]">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="m20 20-3.5-3.5" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search doctors, hospitals, clinics..."
-                  className="w-full border-0 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400 sm:text-base"
-                />
-                <button className="hidden rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground transition hover:bg-brand-hover sm:inline-flex">
-                  Search
-                </button>
-              </div>
-
-              <div className="mt-4 flex flex-col items-center gap-3 text-sm sm:flex-row sm:justify-center">
-                <span className="text-slate-500">Recent:</span>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {recentSearches.map((item) => (
-                    <Link
-                      key={item}
-                      href="#"
-                      className="rounded-full border border-brand-strong bg-brand-soft px-4 py-2 text-brand transition hover:bg-brand-soft"
-                    >
-                      {item}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            {services.map((service) => (
-              <article
-                key={service.title}
-                className="group overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_50px_rgba(52,92,50,0.08)] ring-1 ring-brand/8 transition-transform duration-300 hover:-translate-y-1"
-              >
-                <div
-                  className={`relative flex h-56 items-center justify-center bg-gradient-to-br ${service.accent}`}
-                >
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.45),transparent_28%),radial-gradient(circle_at_70%_70%,rgba(255,255,255,0.2),transparent_25%)]" />
-                  <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.8rem] border border-white/60 bg-white/40 text-center text-lg font-black tracking-[0.2em] text-white shadow-lg backdrop-blur-sm">
-                    {service.icon}
-                  </div>
-                  <div className="absolute bottom-4 left-4 rounded-full bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-brand">
-                    Home care
-                  </div>
-                </div>
-                <div className="p-5 text-center">
-                  <h2 className="text-xl font-extrabold text-slate-900">
-                    {service.title}
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {service.description}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </div>
+      <section className="relative w-full overflow-hidden">
+        <div className="relative">
+          <HomeHeroBanner />
         </div>
-      </div>
       </section>
       <section className="bg-[#dff0ff] py-10">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -486,6 +383,43 @@ export default function HeroCard() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section id="all-doctor" className="bg-white py-14">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-[2.1rem]">
+                All Doctor
+              </h2>
+              <p className="mt-2 text-base text-slate-600">
+                Browse available doctors and open the full directory.
+              </p>
+            </div>
+            <Link
+              href="/find-doctor"
+              className="inline-flex items-center gap-2 rounded-full border border-[#0b63c8] px-5 py-2.5 text-sm font-semibold text-[#0b63c8] transition hover:bg-[#0b63c8] hover:text-white"
+            >
+              View all
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {doctors.length > 0 ? (
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {doctors.map((doctor) => (
+                <DoctorCard
+                  key={doctor.id}
+                  doctor={doctor}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center text-slate-600">
+              No doctors available right now.
+            </div>
+          )}
         </div>
       </section>
 

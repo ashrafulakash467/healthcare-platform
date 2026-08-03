@@ -162,12 +162,17 @@ class DoctorController extends Controller
             'consultation_fee' => ['nullable', 'numeric', 'min:0'],
             'follow_up_fee' => ['nullable', 'numeric', 'min:0'],
             'chamber_address' => ['nullable', 'string', 'max:500'],
+            'available_dates' => ['nullable'],
+            'available_time_slots' => ['nullable'],
             'city' => ['nullable', 'string', 'max:255'],
             'license_no' => ['nullable', 'string', 'max:255', 'unique:doctors,license_no'],
             'image' => ['nullable', 'image', 'max:4096'],
             'verification_status' => ['nullable', Rule::in(['pending', 'approved', 'suspended', 'unavailable'])],
             'status' => ['nullable', Rule::in(['active', 'offline', 'unavailable'])],
         ]);
+
+        $availableDates = $this->normalizeListField($data['available_dates'] ?? null);
+        $availableTimeSlots = $this->normalizeListField($data['available_time_slots'] ?? null);
 
         $doctor = DB::transaction(function () use ($data, $request): Doctor {
             $password = Str::random(16);
@@ -195,6 +200,8 @@ class DoctorController extends Controller
                 'follow_up_fee' => $data['follow_up_fee'] ?? null,
                 'image_path' => null,
                 'chamber_address' => $data['chamber_address'] ?? null,
+                'available_dates' => $availableDates,
+                'available_time_slots' => $availableTimeSlots,
                 'city' => $data['city'] ?? null,
                 'state' => null,
                 'country' => null,
@@ -231,6 +238,8 @@ class DoctorController extends Controller
             'consultation_fee' => ['sometimes', 'numeric', 'min:0'],
             'follow_up_fee' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'chamber_address' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'available_dates' => ['sometimes', 'nullable'],
+            'available_time_slots' => ['sometimes', 'nullable'],
             'city' => ['sometimes', 'nullable', 'string', 'max:255'],
             'license_no' => ['sometimes', 'nullable', 'string', 'max:255'],
             'image' => ['sometimes', 'nullable', 'image', 'max:4096'],
@@ -238,6 +247,13 @@ class DoctorController extends Controller
             'verification_status' => ['sometimes', Rule::in(['pending', 'approved', 'suspended', 'unavailable'])],
             'status' => ['sometimes', Rule::in(['active', 'offline', 'unavailable', 'inactive', 'suspended', 'deleted'])],
         ]);
+
+        $data['available_dates'] = array_key_exists('available_dates', $data)
+            ? $this->normalizeListField($data['available_dates'])
+            : null;
+        $data['available_time_slots'] = array_key_exists('available_time_slots', $data)
+            ? $this->normalizeListField($data['available_time_slots'])
+            : null;
 
         $doctor = Doctor::query()->with('user')->findOrFail($doctorId);
 
@@ -263,6 +279,8 @@ class DoctorController extends Controller
             'consultation_fee',
             'follow_up_fee',
             'chamber_address',
+            'available_dates',
+            'available_time_slots',
             'city',
             'license_no',
             'image_path',
@@ -318,6 +336,8 @@ class DoctorController extends Controller
             'isAvailable' => $this->isDoctorAvailable($doctor),
             'imagePath' => $doctor->image_path,
             'imageUrl' => $this->doctorImageUrl($doctor),
+            'availableDates' => $this->normalizeListField($doctor->available_dates),
+            'availableTimeSlots' => $this->normalizeListField($doctor->available_time_slots),
             'clinics' => $clinics,
         ];
     }
@@ -342,6 +362,8 @@ class DoctorController extends Controller
             'followUpFee' => $doctor->follow_up_fee,
             'licenseNo' => $doctor->license_no,
             'chamberAddress' => $doctor->chamber_address,
+            'availableDates' => $this->normalizeListField($doctor->available_dates),
+            'availableTimeSlots' => $this->normalizeListField($doctor->available_time_slots),
             'city' => $doctor->city,
             'state' => $doctor->state,
             'country' => $doctor->country,
@@ -436,6 +458,40 @@ class DoctorController extends Controller
     private function isDoctorAvailable(Doctor $doctor): bool
     {
         return $doctor->status === 'active' && $doctor->verification_status === 'approved';
+    }
+
+    private function normalizeListField(mixed $value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map(
+                static fn ($item) => trim((string) $item),
+                $value,
+            )));
+        }
+
+        if (! is_string($value)) {
+            return [];
+        }
+
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return [];
+        }
+
+        $decoded = json_decode($trimmed, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return array_values(array_filter(array_map(
+                static fn ($item) => trim((string) $item),
+                $decoded,
+            )));
+        }
+
+        $parts = preg_split('/[\r\n,]+/', $trimmed) ?: [];
+
+        return array_values(array_filter(array_map(
+            static fn ($item) => trim((string) $item),
+            $parts,
+        )));
     }
 
     public function image(string $filename)

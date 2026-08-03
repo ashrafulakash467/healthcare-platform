@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { apiFetch, apiUrl } from "@/lib/api";
+import DoctorCard from "@/components/shared/DoctorCard";
+import { apiFetch } from "@/lib/api";
 
 const initialFilters = {
   search: "",
@@ -13,66 +13,6 @@ const initialFilters = {
   availability: "",
   sort: "name_asc",
 };
-
-function resolveDoctorImageSrc(doctorOrUrl) {
-  const candidates = [];
-
-  if (typeof doctorOrUrl === "string") {
-    candidates.push(doctorOrUrl);
-  } else if (doctorOrUrl && typeof doctorOrUrl === "object") {
-    candidates.push(doctorOrUrl.imageUrl, doctorOrUrl.imagePath, doctorOrUrl.avatar);
-  }
-
-  for (const candidate of candidates) {
-    if (typeof candidate !== "string") {
-      continue;
-    }
-
-    const value = candidate.trim();
-    if (!value) {
-      continue;
-    }
-
-    if (value.startsWith("http://") || value.startsWith("https://")) {
-      return value;
-    }
-
-    if (value.startsWith("/")) {
-      return encodeURI(value);
-    }
-
-    if (value.startsWith("images/doctors/")) {
-      return encodeURI(`/${value}`);
-    }
-
-    if (value.startsWith("doctors/")) {
-      return apiUrl(`/api/doctor-images/${value.split("/").pop()}`);
-    }
-
-    return apiUrl(`/api/doctor-images/${value}`);
-  }
-
-  return "/globe.svg";
-}
-
-function formatConsultationFee(value) {
-  if (value === null || value === undefined || value === "") {
-    return "Consultation fee not available";
-  }
-
-  const numericValue =
-    typeof value === "string"
-      ? Number(value.replace(/[^0-9.-]/g, ""))
-      : Number(value);
-
-  if (!Number.isFinite(numericValue)) {
-    return String(value);
-  }
-
-  return `Consultation fee: BDT ${new Intl.NumberFormat("en-BD", {
-    maximumFractionDigits: 0,
-  }).format(Math.round(numericValue))}`;
-}
 
 export default function FindDoctor() {
   const [filters, setFilters] = useState(initialFilters);
@@ -301,62 +241,9 @@ export default function FindDoctor() {
             ) : null}
 
             {!isLoading && !error && doctors.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {doctors.map((doctor) => (
-                  <article
-                    key={doctor.id}
-                    className="overflow-hidden rounded-lg border border-blue-200 bg-white transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(60,108,201,0.12)]"
-                  >
-                    <div className="relative flex aspect-[1.02] items-end justify-center bg-[#edf2ff]">
-                      <Image
-                        src={resolveDoctorImageSrc(doctor)}
-                        alt={doctor.name}
-                        fill
-                        sizes="(min-width: 1280px) 132px, (min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                        className="object-contain object-bottom px-2 pt-3"
-                      />
-                    </div>
-
-                    <div className="px-3 py-3">
-                      <div
-                        className={`flex items-center gap-1.5 text-[10px] font-medium ${
-                          doctor.isAvailable ? "text-green-600" : "text-slate-500"
-                        }`}
-                      >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            doctor.isAvailable ? "bg-green-500" : "bg-slate-400"
-                          }`}
-                        />
-                        {doctor.isAvailable ? "Available" : "Unavailable"}
-                      </div>
-
-                      <h2 className="mt-1 text-sm font-semibold leading-5 text-slate-950">
-                        {doctor.name}
-                      </h2>
-
-                      <p className="mt-0.5 text-[11px] leading-4 text-slate-600">
-                        {doctor.specialty}
-                      </p>
-
-                      <p className="mt-1 text-[11px] font-semibold leading-4 text-emerald-600">
-                        {formatConsultationFee(
-                          doctor.consultationFee ?? doctor.consultation_fee,
-                        )}
-                      </p>
-
-                      <p className="mt-1 text-[10px] leading-4 text-slate-500">
-                        {doctor.location} | {doctor.gender}
-                      </p>
-
-                      <Link
-                        href={`/appointment/book?doctorId=${doctor.id}`}
-                        className="mt-3 inline-flex h-8 w-full items-center justify-center rounded bg-brand text-[11px] font-semibold text-brand-foreground transition hover:bg-brand-hover"
-                      >
-                        Book
-                      </Link>
-                    </div>
-                  </article>
+                  <DoctorCard key={doctor.id} doctor={doctor} />
                 ))}
               </div>
             ) : null}

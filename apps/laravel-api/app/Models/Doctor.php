@@ -26,6 +26,8 @@ class Doctor extends Model
         'follow_up_fee',
         'image_path',
         'chamber_address',
+        'available_dates',
+        'available_time_slots',
         'city',
         'state',
         'country',
@@ -37,6 +39,8 @@ class Doctor extends Model
     protected $casts = [
         'consultation_fee' => 'decimal:2',
         'follow_up_fee' => 'decimal:2',
+        'available_dates' => 'array',
+        'available_time_slots' => 'array',
         'verified_at' => 'datetime',
     ];
 

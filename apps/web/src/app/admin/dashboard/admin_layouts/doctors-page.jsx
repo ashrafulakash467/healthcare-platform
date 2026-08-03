@@ -2,20 +2,8 @@
 
 import Image from "next/image";
 import { apiUrl } from "@/lib/api";
-import { useEffect, useMemo, useRef, useState } from "react";
-
-const verificationStatusOptions = [
-  { value: "approved", label: "Approved" },
-  { value: "pending", label: "Pending" },
-  { value: "suspended", label: "Suspended" },
-  { value: "unavailable", label: "Unavailable" },
-];
-
-const statusOptions = [
-  { value: "active", label: "Active" },
-  { value: "offline", label: "Offline" },
-  { value: "unavailable", label: "Unavailable" },
-];
+import { useMemo, useState } from "react";
+import UpdateDoctorPage from "./update-doctor-page";
 
 const DOCTOR_IMAGE_FALLBACK = "/images/doctors/doc1.png";
 
@@ -57,7 +45,8 @@ export default function DoctorsPage({
         doctor.email,
         doctor.specialty,
         doctor.speciality,
-        doctor.subSpecialty,
+        doctor.chamberAddress,
+        doctor.chamber_address,
         doctor.phone,
         doctor.city,
         doctor.licenseNo,
@@ -574,245 +563,8 @@ function DoctorPreviewCard({ doctor, onClose, onEdit, onDelete }) {
   );
 }
 
-function DoctorEditForm({ doctor, form, setForm, onSave, onCancel }) {
-  const fileInputRef = useRef(null);
-  const initialImagePreviewSrc = resolveDoctorImageSrc(doctor);
-  const imagePreviewRef = useRef(initialImagePreviewSrc);
-  const [showImageControls, setShowImageControls] = useState(true);
-  const [imagePreviewSrc, setImagePreviewSrc] = useState(initialImagePreviewSrc);
-
-  const currentValue = (key, fallback = "") => {
-    const value = form?.[key];
-    if (value !== undefined && value !== null && value !== "") {
-      return value;
-    }
-    return fallback;
-  };
-
-  const updateField = (key, value) => {
-    setForm((current) => ({
-      ...current,
-      [key]: value,
-    }));
-  };
-
-  const imagePath = currentValue("imagePath", doctor.imagePath ?? "");
-  const formPreviewUrl = currentValue("imagePreviewUrl", "");
-  const imagePreviewUrl = imagePreviewSrc || formPreviewUrl || resolveDoctorImageSrc(doctor);
-  const selectedImageLabel =
-    form?.imageFile?.name || (imagePath ? imagePath.split("/").filter(Boolean).pop() : "No image selected");
-
-  useEffect(() => {
-    return () => {
-      const currentPreview = imagePreviewRef.current;
-      if (typeof currentPreview === "string" && currentPreview.startsWith("blob:")) {
-        URL.revokeObjectURL(currentPreview);
-      }
-    };
-  }, []);
-
-  const updatePreviewSrc = (nextPreview) => {
-    const currentPreview = imagePreviewRef.current;
-
-    if (typeof currentPreview === "string" && currentPreview.startsWith("blob:")) {
-      URL.revokeObjectURL(currentPreview);
-    }
-
-    imagePreviewRef.current = nextPreview;
-    setImagePreviewSrc(nextPreview);
-  };
-
-  const handleImageChange = (event) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    const previewUrl = URL.createObjectURL(file);
-    updatePreviewSrc(previewUrl);
-    setForm((current) => ({
-      ...current,
-      imageFile: file,
-      imagePreviewUrl: previewUrl,
-      imagePath: "",
-    }));
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-            {doctor?.id ? "Edit Doctor" : "Add New Doctor"}
-          </p>
-          <h3 className="mt-1 text-lg font-bold text-slate-900">
-            {doctor?.id ? (doctor.name ?? "Unnamed Doctor") : "Create a new doctor"}
-          </h3>
-        </div>
-
-        <Badge tone={badgeTone(form?.verificationStatus ?? doctor.verificationStatus ?? doctor.status).color}>
-          {form?.verificationStatus ?? doctor.verificationStatus ?? doctor.status ?? "Pending"}
-        </Badge>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field
-          label="Name"
-          value={currentValue("name", doctor.name)}
-          onChange={(value) => updateField("name", value)}
-          placeholder="Doctor name"
-        />
-        <Field
-          label="Email"
-          value={currentValue("email", doctor.email)}
-          onChange={(value) => updateField("email", value)}
-          placeholder="doctor@example.com"
-          type="email"
-        />
-        <Field
-          label="Specialty"
-          value={currentValue("specialty", doctor.specialty ?? doctor.speciality)}
-          onChange={(value) => updateField("specialty", value)}
-          placeholder="Cardiology"
-        />
-        <Field
-          label="Sub Specialty"
-          value={currentValue("subSpecialty", doctor.subSpecialty)}
-          onChange={(value) => updateField("subSpecialty", value)}
-          placeholder="Interventional Cardiology"
-        />
-        <Field
-          label="Consultation Fee"
-          value={currentValue("consultationFee", doctor.consultationFee ?? "")}
-          onChange={(value) => updateField("consultationFee", value)}
-          placeholder="1200"
-          type="number"
-        />
-        <Field
-          label="Follow-up Fee"
-          value={currentValue("followUpFee", doctor.followUpFee ?? "")}
-          onChange={(value) => updateField("followUpFee", value)}
-          placeholder="600"
-          type="number"
-        />
-        <Field
-          label="Phone"
-          value={currentValue("phone", doctor.phone)}
-          onChange={(value) => updateField("phone", value)}
-          placeholder="01700000000"
-        />
-        <Field
-          label="City"
-          value={currentValue("city", doctor.city)}
-          onChange={(value) => updateField("city", value)}
-          placeholder="Dhaka"
-        />
-        <Field
-          label="License No"
-          value={currentValue("licenseNo", doctor.licenseNo)}
-          onChange={(value) => updateField("licenseNo", value)}
-          placeholder="BMDC-123456"
-        />
-        <SelectField
-          label="Verification Status"
-          value={currentValue("verificationStatus", doctor.verificationStatus ?? "pending")}
-          onChange={(value) => updateField("verificationStatus", value)}
-          options={verificationStatusOptions}
-        />
-        <SelectField
-          label="Status"
-          value={currentValue("status", doctor.status ?? "active")}
-          onChange={(value) => updateField("status", value)}
-          options={statusOptions}
-        />
-        <div className="md:col-span-2">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Doctor Image
-              </p>
-              {showImageControls ? (
-                <p className="mt-1 text-sm text-slate-500">
-                  Upload a doctor image from your computer.
-                </p>
-              ) : null}
-            </div>
-            <p className="text-xs font-medium text-slate-600">
-              Selected: {selectedImageLabel}
-            </p>
-          </div>
-
-          <div className="mt-3 flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <div className="relative h-28 w-full overflow-hidden rounded-xl border border-slate-200 bg-white sm:h-36">
-              {/* Use a plain image tag so blob previews render instantly during upload. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imagePreviewUrl || DOCTOR_IMAGE_FALLBACK}
-                alt={doctor.name ?? "Doctor"}
-                className="h-full w-full object-contain p-3"
-              />
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowImageControls((current) => !current);
-                }}
-                className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              >
-                {showImageControls ? "Hide Image" : "Choose Image"}
-              </button>
-            </div>
-
-            {showImageControls ? (
-              <div className="space-y-3">
-                <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
-                  <span>Choose image file</span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                    Browse
-                  </span>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
-                </label>
-
-                <p className="text-xs text-slate-500">
-                  Pick an image file from your computer. It will be saved in the doctor record.
-                </p>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={onSave}
-          className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-        >
-          {doctor?.id ? "Save Changes" : "Create Doctor"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
+function DoctorEditForm(props) {
+  return <UpdateDoctorPage {...props} />;
 }
 
 function DoctorReportCard({ label, value, tone = "slate", detail }) {
@@ -864,46 +616,6 @@ function InfoPair({ label, value }) {
       </p>
       <p className="mt-1 text-sm font-semibold text-slate-800">{value}</p>
     </div>
-  );
-}
-
-function Field({ label, value, onChange, placeholder, type = "text" }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {label}
-      </span>
-      <input
-        type={type}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-
-           
-        placeholder={placeholder}
-        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
-      />
-    </label>
-  );
-}
-
-function SelectField({ label, value, onChange, options }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {label}
-      </span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
   );
 }
 
@@ -1117,3 +829,4 @@ function MailIcon(props) {
     </SvgIcon>
   );
 }
+

@@ -232,6 +232,48 @@ const systemSettingsSeed = {
   maintenanceMode: false,
 };
 
+function formatDoctorListValue(value) {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean).join("\n");
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return "";
+}
+
+function normalizeDoctorDateList(value) {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (Array.isArray(parsed)) {
+      return parsed.filter(Boolean);
+    }
+  } catch {
+    // fall through to line/comma splitting
+  }
+
+  return trimmed
+    .split(/[\n,]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export default function AdminDashboard() {
   const [admin, setAdmin] = useState(null);
   const [isReady, setIsReady] = useState(false);
@@ -337,6 +379,8 @@ export default function AdminDashboard() {
           : formData.followUpFee,
       );
       appendValue("chamber_address", formData.chamberAddress ?? "");
+      appendValue("available_dates", formData.availableDates ?? "");
+      appendValue("available_time_slots", formData.availableTimeSlots ?? "");
       appendValue("city", formData.city ?? "");
       appendValue("license_no", formData.licenseNo ?? "");
       appendValue("verification_status", formData.verificationStatus ?? "");
@@ -395,6 +439,8 @@ export default function AdminDashboard() {
           ? null
           : formData.followUpFee,
       chamber_address: formData.chamberAddress ?? null,
+      available_dates: formData.availableDates ?? null,
+      available_time_slots: formData.availableTimeSlots ?? null,
       city: formData.city ?? null,
       license_no: formData.licenseNo ?? null,
       verification_status: formData.verificationStatus ?? undefined,
@@ -463,7 +509,9 @@ export default function AdminDashboard() {
       gender: doctor.gender ?? "",
       consultationFee: doctor.consultationFee ?? "",
       followUpFee: doctor.followUpFee ?? "",
-      chamberAddress: doctor.chamberAddress ?? "",
+      chamberAddress: doctor.chamberAddress ?? doctor.chamber_address ?? "",
+      availableDates: normalizeDoctorDateList(doctor.availableDates ?? doctor.available_dates),
+      availableTimeSlots: formatDoctorListValue(doctor.availableTimeSlots ?? doctor.available_time_slots),
       city: doctor.city ?? "",
       licenseNo: doctor.licenseNo ?? "",
       verificationStatus: doctor.verificationStatus ?? "pending",
@@ -487,6 +535,8 @@ export default function AdminDashboard() {
       consultationFee: "",
       followUpFee: "",
       chamberAddress: "",
+      availableDates: [],
+      availableTimeSlots: "",
       city: "",
       licenseNo: "",
       verificationStatus: "pending",
@@ -505,6 +555,8 @@ export default function AdminDashboard() {
       consultationFee: "",
       followUpFee: "",
       chamberAddress: "",
+      availableDates: [],
+      availableTimeSlots: "",
       city: "",
       licenseNo: "",
       verificationStatus: "pending",

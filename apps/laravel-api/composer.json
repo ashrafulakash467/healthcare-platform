@@ -40,6 +40,7 @@
             "@php artisan key:generate",
             "@php artisan migrate --force",
             "npm install --ignore-scripts",
+            "dev" , "php artisan serve --port=3001",
             "npm run build"
         ],
         "dev": [

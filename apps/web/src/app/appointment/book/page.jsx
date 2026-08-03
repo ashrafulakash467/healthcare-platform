@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import DoctorCardDetails from "@/components/shared/DoctorCardDetails";
 import { apiFetch, getStoredToken } from "@/lib/api";
 
 export default function BookAppointmentPage() {
@@ -19,6 +20,11 @@ export default function BookAppointmentPage() {
   const [confirmation, setConfirmation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsPatientLoggedIn(Boolean(getStoredToken("patient")));
+  }, []);
 
   useEffect(() => {
     async function loadDoctors() {
@@ -138,6 +144,11 @@ export default function BookAppointmentPage() {
     loadSlots();
   }, [doctorId, clinicId, appointmentDate]);
 
+  const selectedDoctor =
+    bookingOptions?.doctor ??
+    doctors.find((doctor) => String(doctor.id) === String(doctorId)) ??
+    null;
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
@@ -199,6 +210,18 @@ export default function BookAppointmentPage() {
           onSubmit={handleSubmit}
           className="mt-8 rounded-lg border border-brand-soft bg-[#f7fbf8] p-5 shadow-[0_18px_50px_rgba(52,92,50,0.10)]"
         >
+          {!isPatientLoggedIn ? (
+            <div className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <p className="font-semibold">Login required to confirm booking</p>
+              <p className="mt-1">
+                You can review doctor details, dates, and slots, but booking will only work after login.
+              </p>
+              <Link href="/login" className="mt-2 inline-flex font-semibold text-brand">
+                Go to login
+              </Link>
+            </div>
+          ) : null}
+
           {error ? (
             <div className="mb-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               <p>{error}</p>
@@ -259,71 +282,105 @@ export default function BookAppointmentPage() {
             </label>
           </div>
 
-          {bookingOptions?.doctor ? (
-            <div className="mt-5 rounded-md border border-blue-100 bg-white p-4 text-sm text-slate-700">
-              <p className="font-semibold text-slate-950">
-                {bookingOptions.doctor.name}
-              </p>
-              <p>
-                {bookingOptions.doctor.specialty} · {bookingOptions.doctor.location}
-              </p>
+          {selectedDoctor ? (
+            <div className="mt-5">
+              <DoctorCardDetails doctor={selectedDoctor} />
             </div>
           ) : null}
 
-          <div className="mt-6">
-            <p className="text-sm font-semibold text-slate-700">Available dates</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {dates.map((date) => (
-                <button
-                  key={date}
-                  type="button"
-                  onClick={() => setAppointmentDate(date)}
-                  className={`h-10 rounded border px-4 text-xs font-semibold ${
-                    appointmentDate === date
-                      ? "border-brand bg-brand text-brand-foreground"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-brand"
-                  }`}
-                >
-                  {date}
-                </button>
-              ))}
-              {clinicId && dates.length === 0 ? (
-                <span className="text-sm text-slate-500">No dates available.</span>
+          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-700">Available dates</p>
+              {appointmentDate ? (
+                <span className="text-xs font-medium text-brand">
+                  Selected: {appointmentDate}
+                </span>
               ) : null}
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              {!clinicId ? (
+                <p className="col-span-full text-sm text-slate-500">
+                  Select a clinic to see available dates.
+                </p>
+              ) : dates.length === 0 ? (
+                <p className="col-span-full text-sm text-slate-500">
+                  No dates available.
+                </p>
+              ) : (
+                dates.map((date) => (
+                  <button
+                    key={date}
+                    type="button"
+                    onClick={() => setAppointmentDate(date)}
+                    className={`h-10 rounded-full border px-3 text-xs font-semibold transition ${
+                      appointmentDate === date
+                        ? "border-brand bg-brand text-brand-foreground"
+                        : "border-slate-300 bg-slate-50 text-slate-700 hover:border-brand hover:bg-white"
+                    }`}
+                  >
+                    {date}
+                  </button>
+                ))
+              )}
             </div>
           </div>
 
-          <div className="mt-6">
-            <p className="text-sm font-semibold text-slate-700">Available time slots</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {slots.map((slot) => (
-                <button
-                  key={slot.time}
-                  type="button"
-                  disabled={slot.isBooked}
-                  onClick={() => setSlotTime(slot.time)}
-                  className={`h-10 rounded border px-4 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${
-                    slotTime === slot.time
-                      ? "border-brand bg-brand text-brand-foreground"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-brand"
-                  }`}
-                >
-                  {slot.time}
-                  {slot.isBooked ? " booked" : ""}
-                </button>
-              ))}
-              {appointmentDate && slots.length === 0 ? (
-                <span className="text-sm text-slate-500">No slots available.</span>
+          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-700">Available time slots</p>
+              {slotTime ? (
+                <span className="text-xs font-medium text-brand">
+                  Selected: {slotTime}
+                </span>
               ) : null}
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              {!appointmentDate ? (
+                <p className="col-span-full text-sm text-slate-500">
+                  Choose a date to see available time slots.
+                </p>
+              ) : slots.length === 0 ? (
+                <p className="col-span-full text-sm text-slate-500">
+                  No slots available.
+                </p>
+              ) : (
+                slots.map((slot) => (
+                  <button
+                    key={slot.time}
+                    type="button"
+                    disabled={slot.isBooked}
+                    onClick={() => setSlotTime(slot.time)}
+                    className={`h-10 rounded-full border px-3 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                      slotTime === slot.time
+                        ? "border-brand bg-brand text-brand-foreground"
+                        : "border-slate-300 bg-slate-50 text-slate-700 hover:border-brand hover:bg-white"
+                    }`}
+                  >
+                    {slot.time}
+                    {slot.isBooked ? " booked" : ""}
+                  </button>
+                ))
+              )}
             </div>
           </div>
 
           <button
             type="submit"
-            disabled={!doctorId || !clinicId || !appointmentDate || !slotTime || isSubmitting}
+            disabled={
+              !isPatientLoggedIn ||
+              !doctorId ||
+              !clinicId ||
+              !appointmentDate ||
+              !slotTime ||
+              isSubmitting
+            }
             className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-md bg-brand px-5 text-sm font-semibold text-brand-foreground transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Booking..." : "Confirm appointment"}
+            {!isPatientLoggedIn
+              ? "Log in to book"
+              : isSubmitting
+                ? "Booking..."
+                : "Confirm appointment"}
           </button>
         </form>
       </section>

@@ -15,7 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body id="top" className="min-h-full flex flex-col bg-background font-sans text-foreground scroll-smooth">
+      <body
+       
+        className="h-full bg-green-500 font-sans text-slate-900 antialiased"
+      >
         <Header />
         {children}
         <Footer />
