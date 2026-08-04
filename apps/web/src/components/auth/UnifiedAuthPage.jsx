@@ -185,7 +185,7 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
       }
 
       if (result.token && result.user) {
-        persistAuthSession(role, result.token, result.user);
+        persistAuthSession(role === "user" ? "patient" : role, result.token, result.user);
         router.push(config.dashboard);
         return;
       }

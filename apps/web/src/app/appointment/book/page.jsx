@@ -17,7 +17,7 @@ export default function BookAppointmentPage() {
   const [slots, setSlots] = useState([]);
   const [slotTime, setSlotTime] = useState("");
   const [error, setError] = useState("");
-  const [confirmation, setConfirmation] = useState(null);
+  const [bookingToast, setBookingToast] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(false);
@@ -155,6 +155,18 @@ export default function BookAppointmentPage() {
     loadSlots();
   }, [doctorId, clinicId, appointmentDate]);
 
+  useEffect(() => {
+    if (!bookingToast) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setBookingToast(null);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [bookingToast]);
+
   const selectedDoctor =
     bookingOptions?.doctor ??
     doctors.find((doctor) => String(doctor.id) === String(doctorId)) ??
@@ -173,7 +185,7 @@ export default function BookAppointmentPage() {
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
-    setConfirmation(null);
+    setBookingToast(null);
 
     const token = getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient");
     if (!token) {
@@ -203,7 +215,14 @@ export default function BookAppointmentPage() {
         return;
       }
 
-      setConfirmation(result.appointment);
+      setBookingToast({
+        doctorName: result.appointment?.doctor?.name ?? "Doctor",
+        clinicName: result.appointment?.clinic?.name ?? "Clinic",
+        appointmentDate: result.appointment?.appointmentDate ?? appointmentDate,
+        slotTime: result.appointment?.slotTime ?? slotTime,
+        id: result.appointment?.id ?? "",
+        status: result.appointment?.status ?? "pending",
+      });
       setSlotTime("");
       setSlots((currentSlots) =>
         currentSlots.map((slot) =>
@@ -219,6 +238,31 @@ export default function BookAppointmentPage() {
 
   return (
     <main className="bg-white">
+      {bookingToast ? (
+        <div className="fixed bottom-4 right-4 z-50 w-[min(92vw,420px)] rounded-2xl border border-green-200 bg-white px-4 py-4 shadow-[0_18px_50px_rgba(16,185,129,0.18)]">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-green-700">Booking confirmed</p>
+              <p className="mt-1 text-sm text-slate-700">
+                {bookingToast.doctorName} at {bookingToast.clinicName} on{" "}
+                {bookingToast.appointmentDate} at {bookingToast.slotTime}.
+              </p>
+              <p className="mt-1 text-xs text-slate-500">Appointment ID: {bookingToast.id}</p>
+              <p className="mt-1 text-xs font-medium uppercase tracking-[0.18em] text-green-600">
+                Status: {bookingToast.status}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBookingToast(null)}
+              className="rounded-full px-2 py-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              aria-label="Dismiss notification"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      ) : null}
       <section className="mx-auto min-h-[calc(100vh-220px)] w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand">
           Appointment Booking
@@ -251,18 +295,6 @@ export default function BookAppointmentPage() {
                   Go to login
                 </Link>
               ) : null}
-            </div>
-          ) : null}
-
-          {confirmation ? (
-            <div className="mb-5 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-              <p className="font-semibold">Booking confirmed</p>
-              <p className="mt-1">
-                {confirmation.doctor.name} at {confirmation.clinic.name} on{" "}
-                {confirmation.appointmentDate} at {confirmation.slotTime}.
-              </p>
-              <p className="mt-1">Appointment ID: {confirmation.id}</p>
-              <p>Status: {confirmation.status}</p>
             </div>
           ) : null}
 

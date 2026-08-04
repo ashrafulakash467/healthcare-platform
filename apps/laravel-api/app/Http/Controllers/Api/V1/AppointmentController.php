@@ -627,6 +627,34 @@ class AppointmentController extends Controller
         return $parsed->format('H:i:s');
     }
 
+    private function normalizeListField(mixed $value): array
+    {
+        if (blank($value)) {
+            return [];
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $value = $decoded;
+            } else {
+                $value = array_filter(array_map('trim', preg_split('/[\n,]+/', $value) ?: []));
+            }
+        }
+
+        if (! is_array($value)) {
+            return [];
+        }
+
+        return collect($value)
+            ->filter(fn ($item) => is_scalar($item) || $item === null)
+            ->map(fn ($item) => trim((string) $item))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
     private function displayTime(?string $time): string
     {
         if (! $time) {
