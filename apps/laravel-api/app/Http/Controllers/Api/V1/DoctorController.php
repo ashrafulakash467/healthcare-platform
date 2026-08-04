@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
 use App\Models\User;
+use App\Services\DoctorSlotSyncService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
@@ -215,6 +216,8 @@ class DoctorController extends Controller
                 ])->save();
             }
 
+            app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
+
             return $doctor->fresh(['user', 'primaryHospital', 'hospitals']);
         });
 
@@ -248,12 +251,17 @@ class DoctorController extends Controller
             'status' => ['sometimes', Rule::in(['active', 'offline', 'unavailable', 'inactive', 'suspended', 'deleted'])],
         ]);
 
-        $data['available_dates'] = array_key_exists('available_dates', $data)
-            ? $this->normalizeListField($data['available_dates'])
-            : null;
-        $data['available_time_slots'] = array_key_exists('available_time_slots', $data)
-            ? $this->normalizeListField($data['available_time_slots'])
-            : null;
+        if (array_key_exists('available_dates', $data)) {
+            $data['available_dates'] = $this->normalizeListField($data['available_dates']);
+        } else {
+            unset($data['available_dates']);
+        }
+
+        if (array_key_exists('available_time_slots', $data)) {
+            $data['available_time_slots'] = $this->normalizeListField($data['available_time_slots']);
+        } else {
+            unset($data['available_time_slots']);
+        }
 
         $doctor = Doctor::query()->with('user')->findOrFail($doctorId);
 
@@ -288,6 +296,8 @@ class DoctorController extends Controller
             'status',
         ])));
         $doctor->save();
+
+        app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
 
         return response()->json([
             'message' => 'Doctor updated successfully.',
@@ -336,6 +346,7 @@ class DoctorController extends Controller
             'isAvailable' => $this->isDoctorAvailable($doctor),
             'imagePath' => $doctor->image_path,
             'imageUrl' => $this->doctorImageUrl($doctor),
+            'chamberAddress' => $doctor->chamber_address,
             'availableDates' => $this->normalizeListField($doctor->available_dates),
             'availableTimeSlots' => $this->normalizeListField($doctor->available_time_slots),
             'clinics' => $clinics,

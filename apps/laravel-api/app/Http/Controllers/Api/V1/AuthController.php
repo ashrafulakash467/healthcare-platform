@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\DoctorSlotSyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,7 @@ class AuthController extends Controller
         $user->assignRole($role);
 
         if ($role === 'doctor') {
-            Doctor::updateOrCreate(
+            $doctor = Doctor::updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'specialty' => 'General Medicine',
@@ -112,6 +113,8 @@ class AuthController extends Controller
                     'status' => 'active',
                 ],
             );
+
+            app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
         } elseif ($role === 'patient') {
             Patient::updateOrCreate(
                 ['user_id' => $user->id],

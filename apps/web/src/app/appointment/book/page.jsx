@@ -23,7 +23,22 @@ export default function BookAppointmentPage() {
   const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(false);
 
   useEffect(() => {
-    setIsPatientLoggedIn(Boolean(getStoredToken("patient")));
+    const syncAuth = () => {
+      setIsPatientLoggedIn(
+        Boolean(
+          getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
+        ),
+      );
+    };
+
+    syncAuth();
+    window.addEventListener("auth-change", syncAuth);
+    window.addEventListener("storage", syncAuth);
+
+    return () => {
+      window.removeEventListener("auth-change", syncAuth);
+      window.removeEventListener("storage", syncAuth);
+    };
   }, []);
 
   useEffect(() => {
@@ -51,7 +66,6 @@ export default function BookAppointmentPage() {
       setIsLoading(true);
       setError("");
       setBookingOptions(null);
-      setClinicId("");
       setDates([]);
       setAppointmentDate("");
       setSlots([]);
@@ -69,9 +83,6 @@ export default function BookAppointmentPage() {
         }
 
         setBookingOptions(result);
-        if (result.clinics?.length === 1) {
-          setClinicId(String(result.clinics[0].id));
-        }
       } catch {
         setError("Could not load booking options. Make sure the backend is running on port 3001.");
       } finally {
@@ -148,13 +159,23 @@ export default function BookAppointmentPage() {
     bookingOptions?.doctor ??
     doctors.find((doctor) => String(doctor.id) === String(doctorId)) ??
     null;
+  const selectedDoctorClinicAddress =
+    selectedDoctor?.chamberAddress ?? selectedDoctor?.chamber_address ?? "";
+  useEffect(() => {
+    setClinicId(selectedDoctorClinicAddress);
+  }, [selectedDoctorClinicAddress]);
+  const selectedDoctorAvailableDates =
+    selectedDoctor?.availableDates ?? selectedDoctor?.available_dates ?? [];
+  const selectedDoctorAvailableTimeSlots =
+    selectedDoctor?.availableTimeSlots ?? selectedDoctor?.available_time_slots ?? [];
+  const normalizeSlotLabel = (value) => value.split("-")[0].trim().toLowerCase();
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
     setConfirmation(null);
 
-    const token = getStoredToken("patient");
+    const token = getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient");
     if (!token) {
       setError("Please log in before booking an appointment.");
       return;
@@ -168,7 +189,7 @@ export default function BookAppointmentPage() {
           method: "POST",
           body: JSON.stringify({
             doctorId: Number(doctorId),
-            clinicId: Number(clinicId),
+            clinicId,
             appointmentDate,
             slotTime,
           }),
@@ -269,15 +290,13 @@ export default function BookAppointmentPage() {
               <select
                 value={clinicId}
                 onChange={(event) => setClinicId(event.target.value)}
-                disabled={!bookingOptions || isLoading}
+                disabled={isLoading || !selectedDoctorClinicAddress}
                 className="mt-2 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand disabled:opacity-60"
               >
-                <option value="">Select clinic</option>
-                {bookingOptions?.clinics?.map((clinic) => (
-                  <option key={clinic.id} value={clinic.id}>
-                    {clinic.name} - {clinic.location}
-                  </option>
-                ))}
+                <option value="">{selectedDoctorClinicAddress || "Select clinic"}</option>
+                {selectedDoctorClinicAddress ? (
+                  <option value={selectedDoctorClinicAddress}>{selectedDoctorClinicAddress}</option>
+                ) : null}
               </select>
             </label>
           </div>
@@ -298,16 +317,12 @@ export default function BookAppointmentPage() {
               ) : null}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-              {!clinicId ? (
-                <p className="col-span-full text-sm text-slate-500">
-                  Select a clinic to see available dates.
-                </p>
-              ) : dates.length === 0 ? (
+              {selectedDoctorAvailableDates.length === 0 ? (
                 <p className="col-span-full text-sm text-slate-500">
                   No dates available.
                 </p>
               ) : (
-                dates.map((date) => (
+                selectedDoctorAvailableDates.map((date) => (
                   <button
                     key={date}
                     type="button"
@@ -335,29 +350,27 @@ export default function BookAppointmentPage() {
               ) : null}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-              {!appointmentDate ? (
-                <p className="col-span-full text-sm text-slate-500">
-                  Choose a date to see available time slots.
-                </p>
-              ) : slots.length === 0 ? (
+              {selectedDoctorAvailableTimeSlots.length === 0 ? (
                 <p className="col-span-full text-sm text-slate-500">
                   No slots available.
                 </p>
+              ) : !appointmentDate ? (
+                <p className="col-span-full text-sm text-slate-500">
+                  Choose a date to see available time slots.
+                </p>
               ) : (
-                slots.map((slot) => (
+                selectedDoctorAvailableTimeSlots.map((slot) => (
                   <button
-                    key={slot.time}
+                    key={slot}
                     type="button"
-                    disabled={slot.isBooked}
-                    onClick={() => setSlotTime(slot.time)}
+                    onClick={() => setSlotTime(normalizeSlotLabel(slot))}
                     className={`h-10 rounded-full border px-3 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                      slotTime === slot.time
+                      slotTime === normalizeSlotLabel(slot)
                         ? "border-brand bg-brand text-brand-foreground"
                         : "border-slate-300 bg-slate-50 text-slate-700 hover:border-brand hover:bg-white"
                     }`}
                   >
-                    {slot.time}
-                    {slot.isBooked ? " booked" : ""}
+                    {normalizeSlotLabel(slot)}
                   </button>
                 ))
               )}

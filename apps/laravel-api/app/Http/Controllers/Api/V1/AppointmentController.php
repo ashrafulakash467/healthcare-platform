@@ -96,15 +96,18 @@ class AppointmentController extends Controller
     {
         $data = $request->validate([
             'doctorId' => ['required', 'integer'],
-            'clinicId' => ['required', 'integer'],
+            'clinicId' => ['nullable'],
             'appointmentDate' => ['required', 'date'],
             'slotTime' => ['required', 'string'],
         ]);
 
         $doctor = Doctor::query()->with(['user', 'primaryHospital', 'hospitals', 'schedules'])->findOrFail($data['doctorId']);
-        $clinic = Hospital::query()->findOrFail($data['clinicId']);
+        $clinicId = trim((string) ($data['clinicId'] ?? ''));
+        $clinic = is_numeric($clinicId)
+            ? Hospital::query()->findOrFail((int) $clinicId)
+            : null;
         $patient = $this->resolvePatient($request->user());
-        $slot = $this->slotForBooking($doctor->id, $clinic->id, $data['appointmentDate'], $data['slotTime']);
+        $slot = $this->slotForBooking($doctor->id, $clinicId, $data['appointmentDate'], $data['slotTime']);
 
         if (! $slot) {
             throw ValidationException::withMessages([
@@ -122,7 +125,7 @@ class AppointmentController extends Controller
             'appointment_no' => $this->newAppointmentNumber(),
             'patient_id' => $patient->id,
             'doctor_id' => $doctor->id,
-            'hospital_id' => $clinic->id,
+            'hospital_id' => $clinic?->id,
             'appointment_slot_id' => $slot->id,
             'consultation_type' => $slot->schedule?->consultation_type ?? 'in_person',
             'appointment_date' => $data['appointmentDate'],
@@ -135,6 +138,7 @@ class AppointmentController extends Controller
             'symptoms' => null,
             'meta' => [
                 'source' => 'web',
+                'clinic_address' => $clinicId !== '' ? $clinicId : ($doctor->chamber_address ?? null),
             ],
         ]);
 
@@ -430,19 +434,24 @@ class AppointmentController extends Controller
         return $query->first();
     }
 
-    private function slotQuery(string $doctorId, string $clinicId)
+    private function slotQuery(string $doctorId, ?string $clinicId = null)
     {
-        return AppointmentSlot::query()
+        $query = AppointmentSlot::query()
             ->with(['schedule', 'doctor.user', 'hospital'])
-            ->where('doctor_id', $doctorId)
-            ->where('hospital_id', $clinicId);
+            ->where('doctor_id', $doctorId);
+
+        if ($clinicId !== null && $clinicId !== '' && ctype_digit($clinicId)) {
+            $query->where('hospital_id', (int) $clinicId);
+        }
+
+        return $query;
     }
 
-    private function slotForBooking(int $doctorId, int $clinicId, string $appointmentDate, string $slotTime): ?AppointmentSlot
+    private function slotForBooking(int $doctorId, ?string $clinicId, string $appointmentDate, string $slotTime): ?AppointmentSlot
     {
         $normalizedTime = $this->normalizeSlotTime($slotTime);
 
-        return $this->slotQuery((string) $doctorId, (string) $clinicId)
+        return $this->slotQuery((string) $doctorId, $clinicId)
             ->whereDate('slot_date', $appointmentDate)
             ->where('start_time', $normalizedTime)
             ->first();
@@ -454,6 +463,7 @@ class AppointmentController extends Controller
         $hospital = $appointment->hospital;
         $patient = $appointment->patient;
         $payment = $appointment->payment;
+        $clinicAddress = $appointment->meta['clinic_address'] ?? $doctor?->chamber_address ?? null;
 
         $appointmentDate = $overrides['appointmentDate'] ?? $appointment->appointment_date?->toDateString() ?? (string) $appointment->appointment_date;
         $slotTime = $overrides['slotTime'] ?? $this->displayTime($appointment->start_time);
@@ -472,7 +482,11 @@ class AppointmentController extends Controller
                 'id' => (string) $hospital->id,
                 'name' => $hospital->name,
                 'location' => $hospital->city ?? '',
-            ] : null,
+            ] : ($clinicAddress ? [
+                'id' => '',
+                'name' => $clinicAddress,
+                'location' => '',
+            ] : null),
             'appointmentDate' => $appointmentDate,
             'slotTime' => $slotTime,
             'status' => $appointment->status,
@@ -512,6 +526,9 @@ class AppointmentController extends Controller
             'gender' => $doctor->gender ?? 'Unspecified',
             'isAvailable' => $doctor->status === 'active' && $doctor->verification_status === 'approved',
             'imageUrl' => $this->doctorImageUrl($doctor->image_path),
+            'chamberAddress' => $doctor->chamber_address,
+            'availableDates' => $this->normalizeListField($doctor->available_dates),
+            'availableTimeSlots' => $this->normalizeListField($doctor->available_time_slots),
             'clinics' => $clinics,
         ];
     }
@@ -590,7 +607,12 @@ class AppointmentController extends Controller
 
     private function normalizeSlotTime(string $slotTime): string
     {
-        $formats = ['h:i A', 'H:i', 'H:i:s'];
+        $slotTime = trim($slotTime);
+        if (str_contains($slotTime, '-')) {
+            $slotTime = trim(explode('-', $slotTime, 2)[0]);
+        }
+
+        $formats = ['g:ia', 'g:i a', 'g:iA', 'g:i A', 'h:ia', 'h:i a', 'h:iA', 'h:i A', 'H:i', 'H:i:s'];
 
         foreach ($formats as $format) {
             try {

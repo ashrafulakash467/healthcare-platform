@@ -145,7 +145,7 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
           label="Available time slots"
           value={currentValue("availableTimeSlots", formatDoctorList(doctor.availableTimeSlots ?? doctor.available_time_slots))}
           onChange={(value) => updateField("availableTimeSlots", value)}
-          placeholder={"09:00 AM - 12:00 PM\n02:00 PM - 05:00 PM"}
+          placeholder={"09:00 AM\n02:00 PM"}
           hint="Add one slot per line or separate by commas."
         />
         <Field
