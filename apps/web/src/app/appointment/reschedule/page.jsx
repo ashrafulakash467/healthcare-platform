@@ -16,7 +16,7 @@ export default function RescheduleAppointmentPage() {
   const [slots, setSlots] = useState([]);
   const [slotTime, setSlotTime] = useState("");
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [rescheduleToast, setRescheduleToast] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -93,6 +93,18 @@ export default function RescheduleAppointmentPage() {
     loadSlots();
   }, [appointmentId, appointmentDate]);
 
+  useEffect(() => {
+    if (!rescheduleToast) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRescheduleToast(null);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [rescheduleToast]);
+
   async function handleSubmit(event) {
     event.preventDefault();
     const token = getStoredToken("patient");
@@ -102,7 +114,7 @@ export default function RescheduleAppointmentPage() {
     }
 
     setError("");
-    setMessage("");
+    setRescheduleToast(null);
     setIsSubmitting(true);
 
     try {
@@ -126,7 +138,13 @@ export default function RescheduleAppointmentPage() {
       }
 
       setAppointment(result.appointment);
-      setMessage(result.message ?? "Appointment rescheduled successfully.");
+      setRescheduleToast({
+        message: result.message ?? "Appointment rescheduled successfully.",
+        appointmentDate: result.appointment?.appointmentDate ?? appointmentDate,
+        slotTime: result.appointment?.slotTime ?? slotTime,
+        doctorName: result.appointment?.doctor?.name ?? "Doctor",
+        clinicName: result.appointment?.clinic?.name ?? "Clinic",
+      });
       setSlotTime("");
     } catch {
       setError("Could not reschedule appointment. Make sure the backend is running on port 3001.");
@@ -137,6 +155,29 @@ export default function RescheduleAppointmentPage() {
 
   return (
     <main className="bg-white">
+      {rescheduleToast ? (
+        <div className="fixed bottom-4 right-4 z-50 w-[min(92vw,420px)] rounded-2xl border border-green-200 bg-white px-4 py-4 shadow-[0_18px_50px_rgba(16,185,129,0.18)]">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-green-700">
+                {rescheduleToast.message}
+              </p>
+              <p className="mt-1 text-sm text-slate-700">
+                {rescheduleToast.doctorName} at {rescheduleToast.clinicName} on{" "}
+                {rescheduleToast.appointmentDate} at {rescheduleToast.slotTime}.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setRescheduleToast(null)}
+              className="rounded-full px-2 py-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              aria-label="Dismiss notification"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      ) : null}
       <section className="mx-auto min-h-[calc(100vh-220px)] w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand">
           Reschedule Appointment
@@ -152,12 +193,6 @@ export default function RescheduleAppointmentPage() {
           {error ? (
             <p className="mb-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
-            </p>
-          ) : null}
-
-          {message ? (
-            <p className="mb-5 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-              {message}
             </p>
           ) : null}
 

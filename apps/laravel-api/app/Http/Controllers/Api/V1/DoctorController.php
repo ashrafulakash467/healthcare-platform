@@ -460,7 +460,7 @@ class DoctorController extends Controller
 
         $legacyPath = 'doctors/'.$filename;
         if (Storage::disk('public')->exists($legacyPath)) {
-            return url('/api/doctor-images/'.$filename);
+            return url('/doctor-images/'.$filename);
         }
 
         return '/images/doctors/'.$filename;

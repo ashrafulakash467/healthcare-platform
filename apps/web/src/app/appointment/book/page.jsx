@@ -12,14 +12,16 @@ export default function BookAppointmentPage() {
   const [doctorId, setDoctorId] = useState(() => searchParams.get("doctorId") ?? "");
   const [bookingOptions, setBookingOptions] = useState(null);
   const [clinicId, setClinicId] = useState("");
-  const [dates, setDates] = useState([]);
   const [appointmentDate, setAppointmentDate] = useState("");
   const [slots, setSlots] = useState([]);
+  const [slotRefreshTick, setSlotRefreshTick] = useState(0);
+  const [isSlotsLoading, setIsSlotsLoading] = useState(false);
   const [slotTime, setSlotTime] = useState("");
   const [error, setError] = useState("");
   const [bookingToast, setBookingToast] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(() =>
     Boolean(
       getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
@@ -62,6 +64,31 @@ export default function BookAppointmentPage() {
   }, []);
 
   useEffect(() => {
+    const syncNow = () => {
+      setNow(Date.now());
+    };
+
+    syncNow();
+
+    const intervalId = window.setInterval(syncNow, 60_000);
+    window.addEventListener("focus", syncNow);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncNow();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", syncNow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!doctorId) {
       return;
     }
@@ -70,10 +97,10 @@ export default function BookAppointmentPage() {
       setIsLoading(true);
       setError("");
       setBookingOptions(null);
-      setDates([]);
       setAppointmentDate("");
       setSlots([]);
       setSlotTime("");
+      setClinicId("");
 
       try {
         const response = await apiFetch(
@@ -89,6 +116,11 @@ export default function BookAppointmentPage() {
         }
 
         setBookingOptions(result);
+        setClinicId(
+          result.doctor?.chamberAddress ??
+            result.doctor?.chamber_address ??
+            "",
+        );
       } catch {
         setError("Could not load booking options. Make sure the backend is running on port 3001.");
       } finally {
@@ -100,48 +132,13 @@ export default function BookAppointmentPage() {
   }, [doctorId]);
 
   useEffect(() => {
-    if (!doctorId || !clinicId) {
-      return;
-    }
-
-    async function loadDates() {
-      setError("");
-      setDates([]);
-      setAppointmentDate("");
-      setSlots([]);
-      setSlotTime("");
-
-      try {
-        const response = await apiFetch(
-          `/appointment/available-dates?doctorId=${doctorId}&clinicId=${clinicId}`,
-          {},
-          getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
-        );
-        const result = await response.json();
-
-        if (!response.ok) {
-          setError(result.message ?? "Could not load dates.");
-          return;
-        }
-
-        setDates(result.dates ?? []);
-      } catch {
-        setError("Could not load dates. Make sure the backend is running on port 3001.");
-      }
-    }
-
-    loadDates();
-  }, [doctorId, clinicId]);
-
-  useEffect(() => {
     if (!doctorId || !clinicId || !appointmentDate) {
       return;
     }
 
     async function loadSlots() {
       setError("");
-      setSlots([]);
-      setSlotTime("");
+      setIsSlotsLoading(true);
 
       try {
         const response = await apiFetch(
@@ -159,10 +156,41 @@ export default function BookAppointmentPage() {
         setSlots(result.slots ?? []);
       } catch {
         setError("Could not load slots. Make sure the backend is running on port 3001.");
+      } finally {
+        setIsSlotsLoading(false);
       }
     }
 
     loadSlots();
+  }, [doctorId, clinicId, appointmentDate, slotRefreshTick]);
+
+  useEffect(() => {
+    if (!doctorId || !clinicId || !appointmentDate) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setSlotRefreshTick((current) => current + 1);
+    }, 15000);
+
+    const handleFocus = () => {
+      setSlotRefreshTick((current) => current + 1);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setSlotRefreshTick((current) => current + 1);
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [doctorId, clinicId, appointmentDate]);
 
   useEffect(() => {
@@ -183,14 +211,25 @@ export default function BookAppointmentPage() {
     null;
   const selectedDoctorClinicAddress =
     selectedDoctor?.chamberAddress ?? selectedDoctor?.chamber_address ?? "";
-  useEffect(() => {
-    setClinicId(selectedDoctorClinicAddress);
-  }, [selectedDoctorClinicAddress]);
+  const effectiveClinicId = clinicId || selectedDoctorClinicAddress;
   const selectedDoctorAvailableDates =
     selectedDoctor?.availableDates ?? selectedDoctor?.available_dates ?? [];
-  const selectedDoctorAvailableTimeSlots =
-    selectedDoctor?.availableTimeSlots ?? selectedDoctor?.available_time_slots ?? [];
-  const normalizeSlotLabel = (value) => value.split("-")[0].trim().toLowerCase();
+  const todayDateKey = getLocalDateKey(new Date(now));
+  const visibleAvailableDates = selectedDoctorAvailableDates.filter((date) =>
+    isDateOnOrAfterToday(date, todayDateKey),
+  );
+  const activeAppointmentDate = visibleAvailableDates.includes(appointmentDate)
+    ? appointmentDate
+    : "";
+  const visibleSlots = slots.filter(
+    (slot) =>
+      activeAppointmentDate &&
+      !slot.isBooked &&
+      !isPastAppointmentSlot(activeAppointmentDate, slot.time, now),
+  );
+  const activeSlotTime = visibleSlots.some((slot) => slot.time === slotTime)
+    ? slotTime
+    : "";
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -211,9 +250,9 @@ export default function BookAppointmentPage() {
           method: "POST",
           body: JSON.stringify({
             doctorId: Number(doctorId),
-            clinicId,
-            appointmentDate,
-            slotTime,
+            clinicId: effectiveClinicId,
+            appointmentDate: activeAppointmentDate,
+            slotTime: activeSlotTime,
           }),
         },
         token,
@@ -228,17 +267,16 @@ export default function BookAppointmentPage() {
       setBookingToast({
         doctorName: result.appointment?.doctor?.name ?? "Doctor",
         clinicName: result.appointment?.clinic?.name ?? "Clinic",
-        appointmentDate: result.appointment?.appointmentDate ?? appointmentDate,
-        slotTime: result.appointment?.slotTime ?? slotTime,
+        appointmentDate: result.appointment?.appointmentDate ?? activeAppointmentDate,
+        slotTime: result.appointment?.slotTime ?? activeSlotTime,
         id: result.appointment?.id ?? "",
         status: result.appointment?.status ?? "pending",
       });
       setSlotTime("");
       setSlots((currentSlots) =>
-        currentSlots.map((slot) =>
-          slot.time === result.appointment.slotTime ? { ...slot, isBooked: true } : slot,
-        ),
+        currentSlots.filter((slot) => slot.time !== result.appointment.slotTime),
       );
+      setSlotRefreshTick((current) => current + 1);
     } catch {
       setError("Could not book appointment. Make sure the backend is running on port 3001.");
     } finally {
@@ -330,9 +368,9 @@ export default function BookAppointmentPage() {
                 Hospital / Clinic
               </span>
               <select
-                value={clinicId}
+                value={effectiveClinicId}
                 onChange={(event) => setClinicId(event.target.value)}
-                disabled={isLoading || !selectedDoctorClinicAddress}
+                disabled={isLoading || !effectiveClinicId}
                 className="mt-2 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand disabled:opacity-60"
               >
                 <option value="">{selectedDoctorClinicAddress || "Select clinic"}</option>
@@ -352,25 +390,29 @@ export default function BookAppointmentPage() {
           <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold text-slate-700">Available dates</p>
-              {appointmentDate ? (
+              {activeAppointmentDate ? (
                 <span className="text-xs font-medium text-brand">
-                  Selected: {appointmentDate}
+                  Selected: {activeAppointmentDate}
                 </span>
               ) : null}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-              {selectedDoctorAvailableDates.length === 0 ? (
+              {visibleAvailableDates.length === 0 ? (
                 <p className="col-span-full text-sm text-slate-500">
-                  No dates available.
+                  No future dates available.
                 </p>
               ) : (
-                selectedDoctorAvailableDates.map((date) => (
+                visibleAvailableDates.map((date) => (
                   <button
                     key={date}
                     type="button"
-                    onClick={() => setAppointmentDate(date)}
+                    onClick={() => {
+                      setAppointmentDate(date);
+                      setSlotTime("");
+                      setSlots([]);
+                    }}
                     className={`h-10 rounded-full border px-3 text-xs font-semibold transition ${
-                      appointmentDate === date
+                      activeAppointmentDate === date
                         ? "border-brand bg-brand text-brand-foreground"
                         : "border-slate-300 bg-slate-50 text-slate-700 hover:border-brand hover:bg-white"
                     }`}
@@ -385,34 +427,38 @@ export default function BookAppointmentPage() {
           <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold text-slate-700">Available time slots</p>
-              {slotTime ? (
+              {activeSlotTime ? (
                 <span className="text-xs font-medium text-brand">
-                  Selected: {slotTime}
+                  Selected: {activeSlotTime}
                 </span>
               ) : null}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-              {selectedDoctorAvailableTimeSlots.length === 0 ? (
+              {!activeAppointmentDate ? (
+                <p className="col-span-full text-sm text-slate-500">
+                  Choose a future date to see available time slots.
+                </p>
+              ) : isSlotsLoading ? (
+                <p className="col-span-full text-sm text-slate-500">
+                  Loading available time slots...
+                </p>
+              ) : visibleSlots.length === 0 ? (
                 <p className="col-span-full text-sm text-slate-500">
                   No slots available.
                 </p>
-              ) : !appointmentDate ? (
-                <p className="col-span-full text-sm text-slate-500">
-                  Choose a date to see available time slots.
-                </p>
               ) : (
-                selectedDoctorAvailableTimeSlots.map((slot) => (
+                visibleSlots.map((slot) => (
                   <button
-                    key={slot}
+                    key={slot.time}
                     type="button"
-                    onClick={() => setSlotTime(normalizeSlotLabel(slot))}
+                    onClick={() => setSlotTime(slot.time)}
                     className={`h-10 rounded-full border px-3 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                      slotTime === normalizeSlotLabel(slot)
+                      activeSlotTime === slot.time
                         ? "border-brand bg-brand text-brand-foreground"
                         : "border-slate-300 bg-slate-50 text-slate-700 hover:border-brand hover:bg-white"
                     }`}
                   >
-                    {normalizeSlotLabel(slot)}
+                    {slot.time}
                   </button>
                 ))
               )}
@@ -425,8 +471,8 @@ export default function BookAppointmentPage() {
               !isPatientLoggedIn ||
               !doctorId ||
               !clinicId ||
-              !appointmentDate ||
-              !slotTime ||
+              !activeAppointmentDate ||
+              !activeSlotTime ||
               isSubmitting
             }
             className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-md bg-brand px-5 text-sm font-semibold text-brand-foreground transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
@@ -441,4 +487,70 @@ export default function BookAppointmentPage() {
       </section>
     </main>
   );
+}
+
+function getLocalDateKey(input = new Date()) {
+  const date = input instanceof Date ? input : new Date(input);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function isDateOnOrAfterToday(dateString, todayDateKey) {
+  if (typeof dateString !== "string" || !todayDateKey) {
+    return false;
+  }
+
+  return dateString >= todayDateKey;
+}
+
+function isPastAppointmentSlot(appointmentDate, slotTime, now) {
+  const appointmentDateTime = parseAppointmentDateTimeLocal(appointmentDate, slotTime);
+
+  if (!appointmentDateTime) {
+    return false;
+  }
+
+  return appointmentDateTime.getTime() < now;
+}
+
+function parseAppointmentDateTimeLocal(appointmentDate, slotTime) {
+  if (typeof appointmentDate !== "string" || typeof slotTime !== "string") {
+    return null;
+  }
+
+  const dateMatch = appointmentDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!dateMatch) {
+    return null;
+  }
+
+  const timeText = slotTime.split("-")[0].trim();
+  const timeMatch = timeText.match(/^(\d{1,2})(?::(\d{2}))?\s*([AaPp][Mm])?$/);
+  if (!timeMatch) {
+    return null;
+  }
+
+  const year = Number(dateMatch[1]);
+  const month = Number(dateMatch[2]) - 1;
+  const day = Number(dateMatch[3]);
+  let hours = Number(timeMatch[1]);
+  const minutes = Number(timeMatch[2] ?? "0");
+  const meridiem = timeMatch[3]?.toLowerCase() ?? "";
+
+  if (meridiem === "am") {
+    if (hours === 12) {
+      hours = 0;
+    }
+  } else if (meridiem === "pm" && hours !== 12) {
+    hours += 12;
+  }
+
+  return new Date(year, month, day, hours, minutes, 0, 0);
 }

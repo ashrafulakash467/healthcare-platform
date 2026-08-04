@@ -555,7 +555,7 @@ class AppointmentController extends Controller
         $localPath = dirname(dirname(base_path())).DIRECTORY_SEPARATOR.'Stroage'.DIRECTORY_SEPARATOR.'doctors'.DIRECTORY_SEPARATOR.$filename;
 
         if (is_file($localPath)) {
-            return url('/api/doctor-images/'.$filename);
+            return url('/doctor-images/'.$filename);
         }
 
         return Storage::disk('public')->url($imagePath);

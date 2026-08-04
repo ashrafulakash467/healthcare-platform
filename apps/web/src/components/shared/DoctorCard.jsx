@@ -4,13 +4,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { apiUrl } from "@/lib/api";
 
+export const DOCTOR_IMAGE_FALLBACK =
+  "/images/doctor-learning-medical-data-at-office-concept-free-vector.jpg";
+
 export function resolveDoctorImageSrc(doctorOrUrl) {
   const candidates = [];
 
   if (typeof doctorOrUrl === "string") {
     candidates.push(doctorOrUrl);
   } else if (doctorOrUrl && typeof doctorOrUrl === "object") {
-    candidates.push(doctorOrUrl.imageUrl, doctorOrUrl.imagePath, doctorOrUrl.avatar);
+    candidates.push(
+      doctorOrUrl.imageUrl,
+      doctorOrUrl.imagePath,
+      doctorOrUrl.image_path,
+      doctorOrUrl.avatar,
+      doctorOrUrl.image,
+    );
   }
 
   for (const candidate of candidates) {
@@ -27,22 +36,45 @@ export function resolveDoctorImageSrc(doctorOrUrl) {
       return value;
     }
 
+    if (value.startsWith("blob:") || value.startsWith("data:")) {
+      return value;
+    }
+
+    if (value.startsWith("images/doctors/")) {
+      return `/${value}`;
+    }
+
+    if (value.startsWith("doctors/")) {
+      return apiUrl(`/doctor-images/${value.split("/").pop()}`);
+    }
+
+    if (value.startsWith("/images/doctors/")) {
+      return value;
+    }
+
+    if (
+      value.startsWith("/doctor-images/") ||
+      value.startsWith("doctor-images/") ||
+      value.startsWith("/api/doctor-images/") ||
+      value.startsWith("api/doctor-images/")
+    ) {
+      const normalizedPath = value
+        .replace(/^\/api/, "")
+        .replace(/^api/, "")
+        .replace(/^doctor-images\//, "/doctor-images/")
+        .replace(/^\/doctor-images\//, "/doctor-images/");
+
+      return apiUrl(normalizedPath);
+    }
+
     if (value.startsWith("/")) {
       return encodeURI(value);
     }
 
-    if (value.startsWith("images/doctors/")) {
-      return apiUrl(`/api/doctor-images/${value.split("/").pop()}`);
-    }
-
-    if (value.startsWith("doctors/")) {
-      return apiUrl(`/api/doctor-images/${value.split("/").pop()}`);
-    }
-
-    return apiUrl(`/api/doctor-images/${value}`);
+    return apiUrl(`/doctor-images/${value}`);
   }
 
-  return "/globe.svg";
+  return DOCTOR_IMAGE_FALLBACK;
 }
 
 export function formatConsultationFee(value) {

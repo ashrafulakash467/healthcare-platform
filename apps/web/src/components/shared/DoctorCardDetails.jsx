@@ -1,22 +1,26 @@
 "use client";
 
 import Image from "next/image";
-import { formatConsultationFee, resolveDoctorImageSrc } from "./DoctorCard";
+import {
+  formatConsultationFee,
+  resolveDoctorImageSrc,
+} from "./DoctorCard";
 
 export default function DoctorCardDetails({ doctor }) {
   const imageSrc = resolveDoctorImageSrc(doctor);
   const availableDates = formatDoctorList(doctor?.availableDates ?? doctor?.available_dates);
   const availableTimeSlots = formatDoctorList(doctor?.availableTimeSlots ?? doctor?.available_time_slots);
+  const verificationStatus = resolveVerificationStatus(doctor);
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)] md:flex-row">
-      <div className="relative aspect-[1.25] w-full shrink-0 bg-[linear-gradient(180deg,#f3f7ff_0%,#eaf1ff_100%)] md:aspect-auto md:w-72">
+      <div className="relative aspect-[1.25] w-full shrink-0 bg-[linear-gradient(180deg,#f3f7ff_0%,#eaf1ff_100%)] md:w-72">
         <Image
           src={imageSrc}
           alt={doctor?.name ?? "Doctor"}
           fill
-          sizes="(min-width: 768px) 288px, 100vw"
-          className="object-contain object-center px-5 py-4"
+          sizes="(min-width: 1024px) 320px, 100vw"
+          className="object-contain object-center px-4 py-3"
         />
         <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm backdrop-blur">
           Doctor Details
@@ -60,7 +64,11 @@ export default function DoctorCardDetails({ doctor }) {
           <InfoRow label="Available dates" value={availableDates || "Not available"} />
           <InfoRow label="Available time slots" value={availableTimeSlots || "Not available"} />
           <InfoRow label="Consultation fee" value={formatConsultationFee(doctor?.consultationFee ?? doctor?.consultation_fee)} />
-          <InfoRow label="Status" value={doctor?.verificationStatus ?? doctor?.status ?? "Pending"} />
+          <InfoRow
+            label="Verification Status"
+            value={verificationStatus.label}
+            tone={verificationStatus.tone}
+          />
         </div>
 
         {doctor?.bio ? (
@@ -73,13 +81,24 @@ export default function DoctorCardDetails({ doctor }) {
   );
 }
 
-function InfoRow({ label, value }) {
+function InfoRow({ label, value, tone = "slate" }) {
+  const toneClasses = {
+    emerald: "border-emerald-100 bg-emerald-50 text-emerald-700",
+    amber: "border-amber-100 bg-amber-50 text-amber-700",
+    rose: "border-rose-100 bg-rose-50 text-rose-700",
+    slate: "border-slate-200 bg-slate-50 text-slate-900",
+  };
+
   return (
     <div className="min-w-0">
       <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
         {label}
       </p>
-      <p className="mt-1 truncate text-sm font-medium text-slate-900">{value}</p>
+      <p
+        className={`mt-1 inline-flex max-w-full rounded-full border px-2.5 py-1 text-sm font-semibold ${toneClasses[tone] ?? toneClasses.slate}`}
+      >
+        <span className="truncate">{value}</span>
+      </p>
     </div>
   );
 }
@@ -94,4 +113,64 @@ function formatDoctorList(value) {
   }
 
   return "";
+}
+
+function resolveVerificationStatus(doctor) {
+  const rawValue =
+    doctor?.verificationStatus ??
+    doctor?.verification_status ??
+    doctor?.status ??
+    doctor?.verification ??
+    doctor?.isVerified ??
+    doctor?.is_verified;
+
+  if (typeof rawValue === "boolean") {
+    return rawValue
+      ? { label: "Approved", tone: "emerald" }
+      : { label: "Pending", tone: "amber" };
+  }
+
+  const normalized = String(rawValue ?? "").trim().toLowerCase();
+
+  if (!normalized) {
+    if (doctor?.isAvailable === true) {
+      return { label: "Approved", tone: "emerald" };
+    }
+
+    return { label: "Pending", tone: "amber" };
+  }
+
+  if (
+    normalized.includes("approved") ||
+    normalized.includes("verified") ||
+    normalized.includes("active")
+  ) {
+    return { label: capitalizeLabel(normalized), tone: "emerald" };
+  }
+
+  if (
+    normalized.includes("pending") ||
+    normalized.includes("review") ||
+    normalized.includes("waiting")
+  ) {
+    return { label: capitalizeLabel(normalized), tone: "amber" };
+  }
+
+  if (
+    normalized.includes("reject") ||
+    normalized.includes("suspend") ||
+    normalized.includes("inactive")
+  ) {
+    return { label: capitalizeLabel(normalized), tone: "rose" };
+  }
+
+  return { label: capitalizeLabel(normalized), tone: "slate" };
+}
+
+function capitalizeLabel(value) {
+  return String(value)
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
