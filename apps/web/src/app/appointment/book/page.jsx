@@ -20,7 +20,11 @@ export default function BookAppointmentPage() {
   const [bookingToast, setBookingToast] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(false);
+  const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(() =>
+    Boolean(
+      getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
+    ),
+  );
 
   useEffect(() => {
     const syncAuth = () => {
@@ -74,6 +78,8 @@ export default function BookAppointmentPage() {
       try {
         const response = await apiFetch(
           `/appointment/booking-options?doctorId=${doctorId}`,
+          {},
+          getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
         );
         const result = await response.json();
 
@@ -108,6 +114,8 @@ export default function BookAppointmentPage() {
       try {
         const response = await apiFetch(
           `/appointment/available-dates?doctorId=${doctorId}&clinicId=${clinicId}`,
+          {},
+          getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
         );
         const result = await response.json();
 
@@ -138,6 +146,8 @@ export default function BookAppointmentPage() {
       try {
         const response = await apiFetch(
           `/appointment/available-slots?doctorId=${doctorId}&clinicId=${clinicId}&date=${appointmentDate}`,
+          {},
+          getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
         );
         const result = await response.json();
 

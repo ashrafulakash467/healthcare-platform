@@ -32,7 +32,7 @@ export function resolveDoctorImageSrc(doctorOrUrl) {
     }
 
     if (value.startsWith("images/doctors/")) {
-      return encodeURI(`/${value}`);
+      return apiUrl(`/api/doctor-images/${value.split("/").pop()}`);
     }
 
     if (value.startsWith("doctors/")) {

@@ -247,7 +247,8 @@ class AppointmentController extends Controller
         }
 
         $appointment->loadMissing(['doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital', 'patient.user']);
-        $slots = $this->slotQuery((string) $appointment->doctor_id, (string) $appointment->hospital_id)
+        $clinicId = $appointment->hospital_id ? (string) $appointment->hospital_id : null;
+        $slots = $this->slotQuery((string) $appointment->doctor_id, $clinicId)
             ->whereDate('slot_date', '>=', now()->toDateString())
             ->orderBy('slot_date')
             ->get();
@@ -270,7 +271,8 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $slots = $this->slotQuery((string) $appointment->doctor_id, (string) $appointment->hospital_id)
+        $clinicId = $appointment->hospital_id ? (string) $appointment->hospital_id : null;
+        $slots = $this->slotQuery((string) $appointment->doctor_id, $clinicId)
             ->whereDate('slot_date', $date)
             ->orderBy('start_time')
             ->get()
@@ -304,7 +306,8 @@ class AppointmentController extends Controller
         }
 
         $appointment->loadMissing(['doctor.schedules', 'hospital']);
-        $slot = $this->slotForBooking((int) $appointment->doctor_id, (int) $appointment->hospital_id, $data['appointmentDate'], $data['slotTime']);
+        $clinicId = $appointment->hospital_id ? (string) $appointment->hospital_id : null;
+        $slot = $this->slotForBooking((int) $appointment->doctor_id, $clinicId, $data['appointmentDate'], $data['slotTime']);
 
         if (! $slot) {
             throw ValidationException::withMessages([
@@ -522,6 +525,7 @@ class AppointmentController extends Controller
             'email' => $doctor->user?->email ?? '',
             'phone' => $doctor->user?->phone ?? '',
             'specialty' => $doctor->specialty ?? 'General Medicine',
+            'consultationFee' => $doctor->consultation_fee,
             'location' => $doctor->city ?: $doctor->primaryHospital?->city ?: 'Unavailable',
             'gender' => $doctor->gender ?? 'Unspecified',
             'isAvailable' => $doctor->status === 'active' && $doctor->verification_status === 'approved',
