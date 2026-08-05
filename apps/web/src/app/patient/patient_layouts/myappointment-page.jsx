@@ -7,6 +7,11 @@ import {
   getStatusTone,
   parseAppointmentDateTime,
 } from "./dashboard-shared";
+import {
+  FaEye,
+  FaCalendarAlt,
+  FaTimesCircle,
+} from "react-icons/fa";
 
 export default function MyAppointmentPage({
   appointments,
@@ -70,7 +75,7 @@ export default function MyAppointmentPage({
         </p>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div className="">
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
@@ -103,16 +108,9 @@ export default function MyAppointmentPage({
                   : "Unavailable";
 
                 return (
-                  <button
+                  <div
                     key={appointment.id}
-                    type="button"
-                    onClick={() => onSelectAppointment(appointment.id)}
-                    className={`w-full rounded-xl border p-4 text-left transition ${
-                      isSelected
-                        ? "border-brand bg-brand-soft shadow-[0_16px_32px_rgba(52,92,50,0.10)]"
-                        : "border-slate-200 bg-slate-50/60 hover:border-slate-300 hover:bg-slate-50"
-                    }`}
-                  >
+                    className={`w-full rounded-xl border p-4 text-left`}>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
@@ -149,14 +147,58 @@ export default function MyAppointmentPage({
                         </p>
                       </div>
                     </div>
-                  </button>
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+
+                      {/* View */}
+                      <button
+                        type="button"
+                        onClick={() => onSelectAppointment(appointment.id)}
+                        className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                          isSelected
+                            ? "border-emerald-600 bg-emerald-600 text-white shadow-md"
+                            : "border-slate-300 bg-white text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700"
+                        }`}
+                      >
+                        <FaEye className="text-sm" />
+                      </button>
+
+                      {/* Reschedule */}
+                      {appointment.isReschedulable && (
+                        <Link
+                          href={`/appointment/reschedule?appointmentId=${appointment.id}`}
+                          className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-all duration-200 hover:border-blue-300 hover:bg-blue-100"
+                        >
+                          <FaCalendarAlt className="text-sm" />
+                        
+                        </Link>
+                      )}
+
+                      {/* Cancel */}
+                      {appointment.isCancellable && (
+                        <button
+                          type="button"
+                          onClick={() => handleCancelAppointment(appointment.id)}
+                          disabled={isCancellingId === appointment.id}
+                          className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition-all duration-200 hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <FaTimesCircle className="text-sm" />
+                          {isCancellingId === appointment.id
+                            ? "Cancelling..."
+                            : ""}
+                        </button>
+                      )}
+
+                    </div>
+                 </div>
                 );
               })}
             </div>
           )}
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+
+      </div>
+              <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           {selectedAppointment ? (
             <>
               <div className="flex flex-col gap-3 border-b border-slate-100 pb-4">
@@ -345,7 +387,6 @@ export default function MyAppointmentPage({
             </div>
           )}
         </section>
-      </div>
     </div>
   );
 }

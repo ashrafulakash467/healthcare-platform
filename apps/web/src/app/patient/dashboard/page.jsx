@@ -33,60 +33,12 @@ export default function PatientDashboardPage() {
   const [recordCategory, setRecordCategory] = useState("prescriptions"); // 'prescriptions' | 'diagnostics' | 'notes' | 'uploads' | 'invoices'
   const categories = [
     { key: "prescriptions", label: "Prescriptions" },
-    { key: "diagnostics", label: "Diagnostic Reports" },
     { key: "notes", label: "Appointment Notes" },
     { key: "uploads", label: "Uploaded Documents" },
     { key: "invoices", label: "Invoices" },
   ];
 
   // Mock Medical Records State
-  const [records, setRecords] = useState({
-    prescriptions: [
-      {
-        id: "rx-1",
-        title: "Amoxicillin 500mg",
-        doctor: "Dr. Sarah Jenkins",
-        date: "2026-06-12",
-        fileUrl: "#",
-      },
-    ],
-    diagnostics: [
-      {
-        id: "diag-1",
-        title: "Complete Blood Count (CBC)",
-        facility: "Central Diagnostics",
-        date: "2026-05-20",
-        fileUrl: "#",
-      },
-    ],
-    notes: [
-      {
-        id: "note-1",
-        title: "Annual Physical Assessment",
-        doctor: "Dr. Alan Grant",
-        date: "2026-04-10",
-        fileUrl: "#",
-      },
-    ],
-    uploads: [
-      {
-        id: "up-1",
-        title: "Previous Vaccination History.pdf",
-        date: "2026-01-15",
-        fileUrl: "#",
-      },
-    ],
-    invoices: [
-      {
-        id: "inv-1",
-        title: "Invoice #INV-2026-089",
-        amount: "$150.00",
-        status: "Paid",
-        date: "2026-06-12",
-        fileUrl: "#",
-      },
-    ],
-  });
 
   useEffect(() => {
     async function loadPatient() {
