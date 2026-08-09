@@ -21,6 +21,13 @@ const statusOptions = [
   { value: "unavailable", label: "Unavailable" },
 ];
 
+const genderOptions = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other", label: "Other" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
 const DOCTOR_IMAGE_FALLBACK = "/images/doctors/doc1.png";
 
 export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCancel }) {
@@ -122,6 +129,12 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
           onChange={(value) => updateField("email", value)}
           placeholder="doctor@example.com"
           type="email"
+        />
+        <SelectField
+          label="Gender"
+          value={currentValue("gender", doctor.gender ?? "")}
+          onChange={(value) => updateField("gender", value)}
+          options={genderOptions}
         />
         <Field
           label={doctor?.id ? "New Password" : "Password"}
