@@ -375,18 +375,18 @@ export default function AdminDashboard() {
     const passwordConfirmationValue = String(formData?.passwordConfirmation ?? "").trim();
 
     if (isCreateMode && !passwordValue) {
-      setStatusMessage("Please set a password for the doctor account.");
+      showToast("Please set a password for the doctor account.", "error");
       return;
     }
 
     if (passwordValue || passwordConfirmationValue) {
       if (!passwordValue || !passwordConfirmationValue) {
-        setStatusMessage("Please fill in both password fields.");
+        showToast("Please fill in both password fields.", "error");
         return;
       }
 
       if (passwordValue !== passwordConfirmationValue) {
-        setStatusMessage("Doctor passwords do not match.");
+        showToast("Doctor passwords do not match.", "error");
         return;
       }
     }
@@ -456,10 +456,10 @@ export default function AdminDashboard() {
           setEditForm({});
           showToast(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
         } else {
-          setStatusMessage(result.message ?? (isCreateMode ? "Failed to create doctor." : "Failed to update doctor."));
+          showToast(result.message ?? (isCreateMode ? "Failed to create doctor." : "Failed to update doctor."), "error");
         }
       } catch {
-        setStatusMessage(isCreateMode ? "Failed to create doctor." : "Failed to update doctor.");
+        showToast(isCreateMode ? "Failed to create doctor." : "Failed to update doctor.", "error");
       }
 
       return;
@@ -512,12 +512,12 @@ export default function AdminDashboard() {
         );
         setEditingDoctor(null);
         setEditForm({});
-        setStatusMessage(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
+        showToast(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
       } else {
-        setStatusMessage(result.message ?? (isCreateMode ? "Failed to create doctor." : "Failed to update doctor."));
+        showToast(result.message ?? (isCreateMode ? "Failed to create doctor." : "Failed to update doctor."), "error");
       }
     } catch {
-      setStatusMessage(isCreateMode ? "Failed to create doctor." : "Failed to update doctor.");
+      showToast(isCreateMode ? "Failed to create doctor." : "Failed to update doctor.", "error");
     }
   }
 
@@ -536,10 +536,10 @@ export default function AdminDashboard() {
         setDeleteConfirmId(null);
         showToast("Doctor deleted successfully.");
       } else {
-        setStatusMessage(result.message ?? "Failed to delete doctor.");
+        showToast(result.message ?? "Failed to delete doctor.", "error");
       }
     } catch {
-      setStatusMessage("Failed to delete doctor.");
+      showToast("Failed to delete doctor.", "error");
     }
   }
 
@@ -788,7 +788,9 @@ export default function AdminDashboard() {
           className={`fixed bottom-6 right-6 z-50 w-[min(92vw,22rem)] rounded-2xl border px-4 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.18)] ${
             toast.tone === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-slate-200 bg-white text-slate-800"
+              : toast.tone === "error"
+                ? "border-rose-200 bg-rose-50 text-rose-800"
+                : "border-slate-200 bg-white text-slate-800"
           }`}
           role="status"
           aria-live="polite"

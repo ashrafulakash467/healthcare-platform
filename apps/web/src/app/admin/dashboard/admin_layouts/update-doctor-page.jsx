@@ -100,7 +100,7 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 pb-28 shadow-sm">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
@@ -289,21 +289,23 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={onSave}
-          className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-        >
-          {doctor?.id ? "Save Changes" : "Create Doctor"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-        >
-          Cancel
-        </button>
+      <div className="fixed bottom-4 left-1/2 z-40 w-[min(92vw,24rem)] -translate-x-1/2 px-4 py-3">
+        <div className="flex flex-wrap justify-center gap-2">
+          <button
+            type="button"
+            onClick={onSave}
+            className="inline-flex min-w-32 items-center justify-center rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            {doctor?.id ? "Save Changes" : "Create Doctor"}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex min-w-24 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );
