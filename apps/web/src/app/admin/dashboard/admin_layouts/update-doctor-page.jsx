@@ -124,6 +124,20 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
           type="email"
         />
         <Field
+          label={doctor?.id ? "New Password" : "Password"}
+          value={currentValue("password", "")}
+          onChange={(value) => updateField("password", value)}
+          placeholder={doctor?.id ? "Leave blank to keep current password" : "Set a login password"}
+          type="password"
+        />
+        <Field
+          label={doctor?.id ? "Confirm New Password" : "Confirm Password"}
+          value={currentValue("passwordConfirmation", "")}
+          onChange={(value) => updateField("passwordConfirmation", value)}
+          placeholder="Re-enter password"
+          type="password"
+        />
+        <Field
           label="Specialty"
           value={currentValue("specialty", doctor.specialty ?? doctor.speciality)}
           onChange={(value) => updateField("specialty", value)}
@@ -192,6 +206,11 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
           onChange={(value) => updateField("status", value)}
           options={statusOptions}
         />
+        <div className="md:col-span-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
+          {doctor?.id
+            ? "Leave the password fields blank to keep the current doctor login. Fill both fields to update it."
+            : "Set the doctor login password here. The doctor can sign in with this email and password right away."}
+        </div>
         <div className="md:col-span-2">
           <div className="flex items-center justify-between gap-3">
             <div>

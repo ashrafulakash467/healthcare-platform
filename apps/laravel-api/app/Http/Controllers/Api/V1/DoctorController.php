@@ -155,6 +155,7 @@ class DoctorController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'specialty' => ['required', 'string', 'max:255'],
             'sub_specialty' => ['nullable', 'string', 'max:255'],
             'qualification' => ['nullable', 'string', 'max:255'],
@@ -176,14 +177,12 @@ class DoctorController extends Controller
         $availableTimeSlots = $this->normalizeListField($data['available_time_slots'] ?? null);
 
         $doctor = DB::transaction(function () use ($data, $request): Doctor {
-            $password = Str::random(16);
-
             $user = User::create([
                 'name' => $data['name'],
                 'username' => Str::slug($data['name']).'-'.Str::lower(Str::random(6)),
                 'email' => $data['email'],
                 'phone' => $data['phone'] ?? null,
-                'password' => Hash::make($password),
+                'password' => Hash::make($data['password']),
                 'status' => 'active',
             ]);
 
@@ -233,6 +232,7 @@ class DoctorController extends Controller
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'max:255'],
             'phone' => ['sometimes', 'string', 'max:20'],
+            'password' => ['sometimes', 'nullable', 'string', 'min:8', 'confirmed'],
             'specialty' => ['sometimes', 'string', 'max:255'],
             'sub_specialty' => ['sometimes', 'nullable', 'string', 'max:255'],
             'qualification' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -276,6 +276,22 @@ class DoctorController extends Controller
                 'email' => $data['email'] ?? null,
                 'phone' => $data['phone'] ?? null,
             ], static fn ($value) => $value !== null));
+        }
+
+        if (array_key_exists('password', $data) && filled($data['password'])) {
+            $doctor->user?->forceFill([
+                'password' => Hash::make($data['password']),
+            ])->save();
+        }
+
+        if (
+            isset($data['status']) &&
+            $doctor->user &&
+            in_array($data['status'], ['active', 'approved'], true)
+        ) {
+            $doctor->user->forceFill([
+                'status' => 'active',
+            ])->save();
         }
 
         $doctor->fill(array_intersect_key($data, array_flip([

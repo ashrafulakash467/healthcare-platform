@@ -9,6 +9,10 @@ import {
   getStatusTone,
   parseAppointmentDateTime,
 } from "./dashboard-shared";
+import {
+  saveConsultationMemo,
+  savePrescriptionRecord,
+} from "@/lib/medical-records";
 
 const workflowSteps = [
   "Open Appointment",
@@ -27,6 +31,7 @@ export default function MyAppointmentPage({
   onSelectAppointment,
   mode,
   now,
+  onMedicalRecordsChanged,
 }) {
   const [decisionById, setDecisionById] = useState({});
   const [notesById, setNotesById] = useState({});
@@ -100,7 +105,7 @@ export default function MyAppointmentPage({
     setWorkflowError("");
   }
 
-  function saveNotes() {
+  async function saveNotes() {
     if (!selectedAppointment) {
       return;
     }
@@ -110,11 +115,24 @@ export default function MyAppointmentPage({
       return;
     }
 
-    setWorkflowMessage(`Saved notes for ${appointmentName}.`);
-    setWorkflowError("");
+    try {
+      await saveConsultationMemo({
+        appointmentId: selectedAppointment.id,
+        notes: notesValue.trim(),
+        chiefComplaint: appointmentName,
+        treatmentPlan: prescriptionValue.trim() || null,
+      });
+      setWorkflowMessage(`Saved notes for ${appointmentName}.`);
+      setWorkflowError("");
+      await onMedicalRecordsChanged?.();
+    } catch (error) {
+      setWorkflowError(
+        error instanceof Error ? error.message : "Could not save notes.",
+      );
+    }
   }
 
-  function issuePrescription() {
+  async function issuePrescription() {
     if (!selectedAppointment) {
       return;
     }
@@ -124,8 +142,20 @@ export default function MyAppointmentPage({
       return;
     }
 
-    setWorkflowMessage(`Prescription issued for ${appointmentName}.`);
-    setWorkflowError("");
+    try {
+      await savePrescriptionRecord({
+        appointmentId: selectedAppointment.id,
+        prescription: prescriptionValue.trim(),
+        notes: notesValue.trim() || undefined,
+      });
+      setWorkflowMessage(`Prescription issued for ${appointmentName}.`);
+      setWorkflowError("");
+      await onMedicalRecordsChanged?.();
+    } catch (error) {
+      setWorkflowError(
+        error instanceof Error ? error.message : "Could not save prescription.",
+      );
+    }
   }
 
   function completeAppointment() {
@@ -312,7 +342,23 @@ export default function MyAppointmentPage({
                 </p>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <InfoCard
+                  title="Patient Name"
+                  value={
+                    selectedAppointment.patient?.name ||
+                    selectedAppointment.patientName ||
+                    "Patient"
+                  }
+                />
+                <InfoCard
+                  title="Patient Email"
+                  value={selectedAppointment.patient?.email || "Unavailable"}
+                />
+                <InfoCard
+                  title="Patient Phone"
+                  value={selectedAppointment.patient?.phone || "Unavailable"}
+                />
                 <InfoCard
                   title="Appointment Date"
                   value={selectedAppointment.appointmentDate}
@@ -426,7 +472,7 @@ export default function MyAppointmentPage({
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
                   <label className="block text-sm font-semibold text-slate-700">
-                    Issue Prescription
+                    Upload Prescription
                     <textarea
                       value={prescriptionValue}
                       onChange={(event) =>
@@ -445,7 +491,7 @@ export default function MyAppointmentPage({
                     onClick={issuePrescription}
                     className="mt-3 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
-                    Issue Prescription
+                    Save Prescription
                   </button>
                 </div>
 

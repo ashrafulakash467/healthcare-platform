@@ -274,8 +274,26 @@ function normalizeDoctorDateList(value) {
     .filter(Boolean);
 }
 
+function getStoredAdminUser() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const storedAdmin = localStorage.getItem("adminUser");
+
+  if (storedAdmin) {
+    try {
+      return JSON.parse(storedAdmin);
+    } catch {
+      return { name: "Admin", email: "admin@healthcare.com", role: "Admin" };
+    }
+  }
+
+  return { name: "Admin", email: "admin@healthcare.com", role: "Admin" };
+}
+
 export default function AdminDashboard() {
-  const [admin, setAdmin] = useState(null);
+  const [admin] = useState(() => getStoredAdminUser());
   const [isReady, setIsReady] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
@@ -283,6 +301,7 @@ export default function AdminDashboard() {
   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
   const [statusMessage, setStatusMessage] = useState("");
+  const [toast, setToast] = useState(null);
   const [doctors, setDoctors] = useState([]);
   const [doctorsLoading, setDoctorsLoading] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState(null);
@@ -297,19 +316,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    const storedAdmin = localStorage.getItem("adminUser");
-
-    if (storedAdmin) {
-      try {
-        setAdmin(JSON.parse(storedAdmin));
-      } catch {
-        setAdmin({ name: "Admin", email: "admin@healthcare.com", role: "Admin" });
-      }
-    } else {
-      setAdmin({ name: "Admin", email: "admin@healthcare.com", role: "Admin" });
-    }
-
-    setIsReady(true);
+    queueMicrotask(() => setIsReady(true));
   }, []);
 
   async function loadDoctors() {
@@ -342,12 +349,47 @@ export default function AdminDashboard() {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    if (!toast) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setToast(null);
+    }, 3200);
+
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  function showToast(message, tone = "success") {
+    setToast({ message, tone });
+  }
+
   async function handleUpdateDoctor(doctorId, formData) {
     const token = getStoredToken("admin");
     if (!token) return;
 
     const hasImageFile = formData?.imageFile instanceof File;
     const isCreateMode = !doctorId;
+    const passwordValue = String(formData?.password ?? "").trim();
+    const passwordConfirmationValue = String(formData?.passwordConfirmation ?? "").trim();
+
+    if (isCreateMode && !passwordValue) {
+      setStatusMessage("Please set a password for the doctor account.");
+      return;
+    }
+
+    if (passwordValue || passwordConfirmationValue) {
+      if (!passwordValue || !passwordConfirmationValue) {
+        setStatusMessage("Please fill in both password fields.");
+        return;
+      }
+
+      if (passwordValue !== passwordConfirmationValue) {
+        setStatusMessage("Doctor passwords do not match.");
+        return;
+      }
+    }
 
     if (hasImageFile) {
       const payload = new FormData();
@@ -385,6 +427,8 @@ export default function AdminDashboard() {
       appendValue("license_no", formData.licenseNo ?? "");
       appendValue("verification_status", formData.verificationStatus ?? "");
       appendValue("status", formData.status ?? "");
+      appendValue("password", passwordValue);
+      appendValue("password_confirmation", passwordConfirmationValue);
       payload.append("image", formData.imageFile);
 
       if (!isCreateMode) {
@@ -410,7 +454,7 @@ export default function AdminDashboard() {
           );
           setEditingDoctor(null);
           setEditForm({});
-          setStatusMessage(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
+          showToast(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
         } else {
           setStatusMessage(result.message ?? (isCreateMode ? "Failed to create doctor." : "Failed to update doctor."));
         }
@@ -445,6 +489,8 @@ export default function AdminDashboard() {
       license_no: formData.licenseNo ?? null,
       verification_status: formData.verificationStatus ?? undefined,
       status: formData.status ?? undefined,
+      password: passwordValue || undefined,
+      password_confirmation: passwordValue ? passwordConfirmationValue : undefined,
     };
 
     if (formData.imagePath) {
@@ -488,7 +534,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         setDoctors((current) => current.filter((doctor) => doctor.id !== doctorId));
         setDeleteConfirmId(null);
-        setStatusMessage("Doctor deleted successfully.");
+        showToast("Doctor deleted successfully.");
       } else {
         setStatusMessage(result.message ?? "Failed to delete doctor.");
       }
@@ -519,6 +565,8 @@ export default function AdminDashboard() {
       imagePath: doctor.imagePath ?? doctor.imageUrl ?? "",
       imageFile: null,
       imagePreviewUrl: doctor.imageUrl ?? doctor.imagePath ?? "",
+      password: "",
+      passwordConfirmation: "",
     });
   }
 
@@ -543,6 +591,8 @@ export default function AdminDashboard() {
       status: "active",
       imagePath: "",
       imageUrl: "",
+      password: "",
+      passwordConfirmation: "",
     });
     setEditForm({
       name: "",
@@ -564,6 +614,8 @@ export default function AdminDashboard() {
       imagePath: "",
       imageFile: null,
       imagePreviewUrl: "",
+      password: "",
+      passwordConfirmation: "",
     });
     setActiveTab("doctors");
   }
@@ -730,6 +782,20 @@ export default function AdminDashboard() {
           {activeTab === "audit" && <AuditPage logs={auditSeed} />}
         </main>
       </div>
+
+      {toast ? (
+        <div
+          className={`fixed bottom-6 right-6 z-50 w-[min(92vw,22rem)] rounded-2xl border px-4 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.18)] ${
+            toast.tone === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+              : "border-slate-200 bg-white text-slate-800"
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          <p className="text-sm font-semibold">{toast.message}</p>
+        </div>
+      ) : null}
     </main>
   );
 }

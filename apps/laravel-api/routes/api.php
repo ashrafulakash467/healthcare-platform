@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DoctorController;
+use App\Http\Controllers\Api\V1\MedicalRecordController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('doctor/me', [AuthController::class, 'me'])->middleware('role:doctor|admin|super-admin');
     Route::get('admin/me', [AuthController::class, 'me'])->middleware('role:admin|super-admin');
     Route::get('appointment/my', [AppointmentController::class, 'my']);
+    Route::get('medical-records', [MedicalRecordController::class, 'index'])->middleware('role:patient|doctor|admin|super-admin');
 
     Route::middleware('role:admin|super-admin')->group(function (): void {
         Route::get('admin/dashboard', [DashboardController::class, 'admin']);
@@ -49,6 +51,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::middleware('role:doctor|admin|super-admin')->group(function (): void {
         Route::get('doctor/dashboard', [DashboardController::class, 'doctor']);
+        Route::post('consultations/{appointmentId}/notes', [MedicalRecordController::class, 'storeNote']);
+        Route::post('consultations/{appointmentId}/prescriptions', [MedicalRecordController::class, 'storePrescription']);
     });
 
     Route::middleware('role:patient|admin|super-admin')->group(function (): void {

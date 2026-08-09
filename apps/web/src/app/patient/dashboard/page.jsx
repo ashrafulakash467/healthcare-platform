@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDays, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
 import { Icon } from "../patient_layouts/dashboard-shared";
 import DashboardOverviewPage from "../patient_layouts/dashboardoverview-page";
 import MyAppointmentPage from "../patient_layouts/myappointment-page";
-import MedicalRecordsPage from "../patient_layouts/medicalrecords-page";
+import MedicalRecordsPage from "./Medical-Records";
 import { apiFetch, getStoredToken } from "@/lib/api";
 
 export default function PatientDashboardPage() {
@@ -26,65 +26,7 @@ export default function PatientDashboardPage() {
   const [doctorContact, setDoctorContact] = useState(null);
   const [doctorContactError, setDoctorContactError] = useState("");
   const [now, setNow] = useState(Date.now());
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Layout & Category Navigation States
-  const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'appointments' | 'records'
-  const [recordCategory, setRecordCategory] = useState("prescriptions"); // 'prescriptions' | 'diagnostics' | 'notes' | 'uploads' | 'invoices'
-  const categories = [
-    { key: "prescriptions", label: "Prescriptions" },
-    { key: "notes", label: "Appointment Notes" },
-    { key: "uploads", label: "Uploaded Documents" },
-    { key: "invoices", label: "Invoices" },
-  ];
-
-  const [records] = useState({
-    prescriptions: [
-      {
-        id: "rx-1",
-        title: "Amoxicillin 500mg",
-        doctor: "Dr. Sarah Jenkins",
-        date: "2026-06-12",
-        fileUrl: "#",
-      },
-    ],
-    diagnostics: [
-      {
-        id: "diag-1",
-        title: "Complete Blood Count (CBC)",
-        facility: "Central Diagnostics",
-        date: "2026-05-20",
-        fileUrl: "#",
-      },
-    ],
-    notes: [
-      {
-        id: "note-1",
-        title: "Annual Physical Assessment",
-        doctor: "Dr. Alan Grant",
-        date: "2026-04-10",
-        fileUrl: "#",
-      },
-    ],
-    uploads: [
-      {
-        id: "up-1",
-        title: "Previous Vaccination History.pdf",
-        date: "2026-01-15",
-        fileUrl: "#",
-      },
-    ],
-    invoices: [
-      {
-        id: "inv-1",
-        title: "Invoice #INV-2026-089",
-        amount: "BDT 18,000",
-        status: "Paid",
-        date: "2026-06-12",
-        fileUrl: "#",
-      },
-    ],
-  });
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
     async function loadPatient() {
@@ -179,8 +121,8 @@ export default function PatientDashboardPage() {
       if (response.ok) {
         setAppointments(result.appointments ?? []);
       }
-    } catch (e) {
-      console.error("Failed to fetch appointments:", e);
+    } catch (error) {
+      console.error("Failed to fetch appointments:", error);
     }
   }
 
@@ -224,7 +166,7 @@ export default function PatientDashboardPage() {
         return nextReasons;
       });
       await loadAppointments(authToken);
-    } catch (error) {
+    } catch {
       setActionError(
         "Could not cancel appointment. Make sure the backend is running on port 3001.",
       );
@@ -268,35 +210,27 @@ export default function PatientDashboardPage() {
     }
   }
 
-  function handleLogout() {
-    localStorage.removeItem("patientToken");
-    localStorage.removeItem("patientUser");
-    router.push("/login");
-  }
-
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-500 font-medium">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 font-medium text-slate-500">
         Loading dashboard...
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* LEFT SIDEBAR NAVIGATION */}
-      <aside className="sticky top-0 h-165 w-64 flex flex-col justify-between flex-shrink-0 border-r border-slate-200 bg-white ">
+    <div className="mx-auto flex min-h-screen w-full max-w-7xl bg-slate-50 font-sans text-slate-900">
+      <aside className="sticky top-0 flex h-165 w-64 flex-shrink-0 flex-col justify-between border-r border-slate-200 bg-white">
         <div>
-          {/* Dashboard Header/Logo */}
-          <div className="flex h-16 items-center px-6 border-b border-slate-100">
+          <div className="flex h-16 items-center border-b border-slate-100 px-6">
             <span className="text-lg font-bold text-slate-900">
               HealthPortal
             </span>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="p-4 space-y-1">
+          <nav className="space-y-1 p-4">
             <button
+              type="button"
               onClick={() => setActiveTab("dashboard")}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
                 activeTab === "dashboard"
@@ -309,6 +243,7 @@ export default function PatientDashboardPage() {
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab("appointments")}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
                 activeTab === "appointments"
@@ -319,79 +254,20 @@ export default function PatientDashboardPage() {
               <FontAwesomeIcon icon={faCalendarDays} />
               My Appointment
             </button>
-            <div>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("records");
-                  setIsMenuOpen((current) => !current);
-                }}
-                aria-expanded={isMenuOpen}
-                aria-controls="medical-records-accordion"
-                className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-sm font-semibold transition ${
-                  activeTab === "records" || isMenuOpen
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-600 hover:bg-slate-300 hover:text-slate-900"
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <span
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-md border ${
-                      activeTab === "records" || isMenuOpen
-                        ? "border-white/20 bg-white/10 text-white"
-                        : "border-slate-200 bg-green-100 text-slate-500"
-                    }`}
-                  >
-                    <Icon name="records" className="h-4 w-4" />
-                  </span>
-                  Medical Records
-                </span>
-                <span
-                  className={`text-sm leading-none transition-transform ${
-                    isMenuOpen ? "rotate-180 text-white/80" : "text-slate-400"
-                  }`}
-                >
-                  ▾
-                </span>
-              </button>
 
-              <div
-                id="medical-records-accordion"
-                className={`grid transition-all duration-200 ease-out ${
-                  isMenuOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="border-t border-slate-200 bg-slate-50 p-2">
-                    <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">                    
-                    </p>
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.key}
-                        type="button"
-                        onClick={() => {
-                          setActiveTab("records");
-                          setRecordCategory(cat.key);
-                          setIsMenuOpen(true);
-                        }}
-                        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition ${
-                          recordCategory === cat.key
-                            ? "bg-slate-900 text-white"
-                            : "text-slate-700 hover:bg-white hover:text-slate-950"
-                        }`}
-                      >
-                        <span>{cat.label}</span>
-                        {recordCategory === cat.key ? (
-                          <span className="text-xs font-semibold">
-                            <FontAwesomeIcon icon={faCircleCheck} />
-                          </span>
-                        ) : null}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("records")}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+                activeTab === "records"
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-300 hover:text-slate-900"
+              }`}
+            >
+              <Icon name="records" />
+              Medical Records
+            </button>
+
             <Link
               href="/find-doctor"
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-300 hover:text-slate-900"
@@ -402,8 +278,7 @@ export default function PatientDashboardPage() {
           </nav>
         </div>
 
-        {/* User Info & Logout Button */}
-        <div className="p-4 border-t border-slate-100">
+        <div className="border-t border-slate-100 p-4">
           <div className="flex items-center gap-3 px-2 py-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 font-bold text-slate-700">
               {patient?.name?.charAt(0) || "P"}
@@ -420,7 +295,6 @@ export default function PatientDashboardPage() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
       <main className="flex-1 overflow-y-auto p-8">
         {activeTab === "dashboard" && (
           <DashboardOverviewPage
@@ -456,13 +330,7 @@ export default function PatientDashboardPage() {
           />
         )}
 
-        {activeTab === "records" && (
-          <MedicalRecordsPage
-            records={records}
-            recordCategory={recordCategory}
-            setRecordCategory={setRecordCategory}
-          />
-        )}
+        {activeTab === "records" && <MedicalRecordsPage patient={patient} />}
       </main>
     </div>
   );

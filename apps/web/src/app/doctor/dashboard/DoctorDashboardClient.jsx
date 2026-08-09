@@ -9,6 +9,11 @@ import MyAppointmentPage from "./doctor_layouts/myappointment-page";
 import MedicalRecordsPage from "./doctor_layouts/medicalrecords-page";
 import ScheduleManagementPage from "./doctor_layouts/schedule-management-page";
 import { apiFetch, getStoredToken } from "@/lib/api";
+import {
+  createMedicalRecordsChannel,
+  emptyMedicalRecords,
+  fetchMedicalRecords,
+} from "@/lib/medical-records";
 
 const tabItems = [
   { key: "dashboard", label: "Dashboard", icon: "dashboard" },
@@ -48,54 +53,7 @@ export default function DoctorDashboardClient() {
   const [recordCategory, setRecordCategory] = useState("diagnostics");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState("");
   const [now, setNow] = useState(() => Date.now());
-
-  const [records] = useState({
-    prescriptions: [
-      {
-        id: "rx-1",
-        title: "Amoxicillin 500mg",
-        doctor: "Dr. Sarah Jenkins",
-        date: "2026-06-12",
-        fileUrl: "#",
-      },
-    ],
-    diagnostics: [
-      {
-        id: "diag-1",
-        title: "Complete Blood Count (CBC)",
-        facility: "Central Diagnostics",
-        date: "2026-05-20",
-        fileUrl: "#",
-      },
-    ],
-    notes: [
-      {
-        id: "note-1",
-        title: "Annual Physical Assessment",
-        doctor: "Dr. Alan Grant",
-        date: "2026-04-10",
-        fileUrl: "#",
-      },
-    ],
-    uploads: [
-      {
-        id: "up-1",
-        title: "Previous Vaccination History.pdf",
-        date: "2026-01-15",
-        fileUrl: "#",
-      },
-    ],
-    invoices: [
-      {
-        id: "inv-1",
-        title: "Invoice #INV-2026-089",
-        amount: "$150.00",
-        status: "Paid",
-        date: "2026-06-12",
-        fileUrl: "#",
-      },
-    ],
-  });
+  const [records, setRecords] = useState(emptyMedicalRecords());
 
   function loadAppointments(token) {
     return apiFetch("/appointment/my", {}, token)
@@ -108,6 +66,16 @@ export default function DoctorDashboardClient() {
       .catch((error) => {
         console.error("Failed to fetch appointments:", error);
       });
+  }
+
+  async function loadMedicalRecords() {
+    try {
+      const nextRecords = await fetchMedicalRecords("doctor");
+      setRecords(nextRecords);
+    } catch (error) {
+      console.error("Failed to fetch medical records:", error);
+      setRecords(emptyMedicalRecords());
+    }
   }
 
   useEffect(() => {
@@ -132,10 +100,12 @@ export default function DoctorDashboardClient() {
 
         setDoctor(result.user ?? null);
         await loadAppointments(token);
+        await loadMedicalRecords();
       } catch {
         const cachedDoctor = localStorage.getItem("doctorUser");
         if (cachedDoctor) {
           setDoctor(JSON.parse(cachedDoctor));
+          await loadMedicalRecords();
         }
       } finally {
         setIsLoading(false);
@@ -144,6 +114,19 @@ export default function DoctorDashboardClient() {
 
     loadDoctor();
   }, []);
+
+  useEffect(() => {
+    const channel = createMedicalRecordsChannel();
+    if (channel) {
+      channel.onmessage = () => {
+        loadMedicalRecords();
+      };
+    }
+
+    return () => {
+      channel?.close();
+    };
+  }, [doctor?.id]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -338,6 +321,7 @@ export default function DoctorDashboardClient() {
             onSelectAppointment={setSelectedAppointmentId}
             mode="today"
             now={now}
+            onMedicalRecordsChanged={loadMedicalRecords}
           />
         )}
 
@@ -348,6 +332,7 @@ export default function DoctorDashboardClient() {
             onSelectAppointment={setSelectedAppointmentId}
             mode="upcoming"
             now={now}
+            onMedicalRecordsChanged={loadMedicalRecords}
           />
         )}
 
@@ -358,6 +343,7 @@ export default function DoctorDashboardClient() {
             onSelectAppointment={setSelectedAppointmentId}
             mode="pending"
             now={now}
+            onMedicalRecordsChanged={loadMedicalRecords}
           />
         )}
 
