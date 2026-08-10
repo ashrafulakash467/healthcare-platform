@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "./dashboard-shared";
+import { Icon } from "../Dashboard_Overview/dashboard-shared";
 
 export default function MedicalRecordsPage({
   title = "Medical Records",

@@ -1,24 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Icon, formatCurrency } from "./admin_layouts/dashboard-shared";
-import UsersPage from "./admin_layouts/users-page";
-import DoctorsPage from "./admin_layouts/doctors-page";
-import ReportsPage from "./admin_layouts/reports-page";
-import HospitalsPage from "./admin_layouts/hospitals-page";
-import AppointmentsPage from "./admin_layouts/appointments-page";
-import PaymentsPage from "./admin_layouts/payments-page";
-import ContentPage from "./admin_layouts/content-page";
-import NotificationsPage from "./admin_layouts/notifications-page";
-import SupportPage from "./admin_layouts/support-page";
-import RolesPage from "./admin_layouts/roles-page";
-import SettingsPage from "./admin_layouts/settings-page";
-import AuditPage from "./admin_layouts/audit-page";
+import { Icon, formatCurrency } from "./dashboard-shared";
+import UsersPage from "../Users/users-page";
+import DoctorsPage from "../Doctors/doctors-page";
+import ReportsPage from "../Doctors/reports-page";
+import HospitalsPage from "../Hospitals/hospitals-page";
+import AppointmentsPage from "../Appointments/appointments-page";
+import PaymentsPage from "../Payments/payments-page";
+import ContentPage from "../Content/content-page";
+import NotificationsPage from "../Notifications/notifications-page";
+import SupportPage from "../Support/support-page";
+import RolesPage from "../Roles_&_permisions/roles-page";
+import SettingsPage from "../All_Settings/settings-page";
+import AuditPage from "../Audit_logs/audit-page";
 import { apiFetch, getStoredToken } from "@/lib/api";
 
 const tabItems = [
   { key: "dashboard", label: "Dashboard Overview", icon: "dashboard" },
-  { key: "users", label: "Users", icon: "users" },
+  { key: "users", label: "All Users", icon: "users" },
   { key: "doctors", label: "Doctors", icon: "doctors" },
   { key: "hospitals", label: "Hospitals", icon: "hospitals" },
   { key: "appointments", label: "Appointments", icon: "appointments" },
@@ -28,8 +28,8 @@ const tabItems = [
   { key: "notifications", label: "Notifications", icon: "notifications" },
   { key: "support", label: "Support", icon: "support" },
   { key: "roles", label: "Roles & Permissions", icon: "roles" },
-  { key: "settings", label: "System Settings", icon: "settings" },
   { key: "audit", label: "Audit Logs", icon: "audit" },
+  { key: "settings", label: "All Settings", icon: "settings" },
 ];
 
 const loginWorkflow = [
@@ -131,13 +131,6 @@ const kpiCards = [
     detail: "Core services are operating normally.",
     tone: "emerald",
   },
-];
-
-const usersSeed = [
-  { id: "user-1", name: "Nadia Rahman", email: "nadia@example.com", role: "Patient", status: "Active", channel: "Mobile" },
-  { id: "user-2", name: "Dr. Sarah Khan", email: "sarah.khan@example.com", role: "Doctor", status: "Pending MFA", channel: "Web" },
-  { id: "user-3", name: "Mizanur Rahman", email: "mizanur@example.com", role: "Hospital Admin", status: "Active", channel: "Web" },
-  { id: "user-4", name: "Ayesha Sultana", email: "ayesha@example.com", role: "Support Agent", status: "Suspended", channel: "Desktop" },
 ];
 
 const doctorsSeed = [
@@ -726,7 +719,7 @@ export default function AdminDashboard() {
           {activeTab === "dashboard" && (
             <DashboardOverviewPanel admin={admin} totals={totals} onNavigate={openModule} />
           )}
-          {activeTab === "users" && <UsersPage users={usersSeed} />}
+          {activeTab === "users" && <UsersPage />}
           {activeTab === "doctors" && (
             <DoctorsPage
               doctors={doctors}

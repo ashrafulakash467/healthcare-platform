@@ -49,7 +49,7 @@ function MetricCard({ label, value, detail, onClick, tone = "slate" }) {
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneClasses}`}
+      className={`rounded-2xl border p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneClasses}`}
     >
       <p className="text-xs font-semibold uppercase tracking-wide text-current/70">
         {label}
@@ -181,7 +181,7 @@ export default function DashboardOverviewPage({
           tone="amber"
           onClick={() => onNavigateTab("notifications")}
         />
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             Profile Snapshot
           </p>
@@ -203,7 +203,7 @@ export default function DashboardOverviewPage({
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_0.95fr]">
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
@@ -219,7 +219,7 @@ export default function DashboardOverviewPage({
             {workflowSteps.map((step, index) => (
               <div
                 key={step.title}
-                className="flex gap-4 rounded-lg border border-slate-100 bg-slate-50/60 p-4"
+                className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 shadow-sm"
               >
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">
                   {index + 1}
@@ -235,7 +235,7 @@ export default function DashboardOverviewPage({
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
@@ -256,14 +256,14 @@ export default function DashboardOverviewPage({
 
           <div className="mt-4 space-y-3">
             {notifications.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+              <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
                 No notifications right now.
               </p>
             ) : (
               notifications.map((item) => (
                 <article
                   key={item.id}
-                  className="rounded-lg border border-slate-100 bg-slate-50 p-4"
+                  className="rounded-2xl border border-slate-100 bg-slate-50 p-4 shadow-sm"
                 >
                   <h3 className="text-sm font-bold text-slate-900">
                     {item.title}

@@ -1,4 +1,4 @@
-import { formatCurrency } from "./dashboard-shared";
+import { formatCurrency } from "../Dashboard_Overview/dashboard-shared";
 
 const workflowSteps = [
   {

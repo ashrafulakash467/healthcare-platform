@@ -1,6 +1,6 @@
 "use client";
 
-import { formatCurrency } from "./dashboard-shared";
+import { formatCurrency } from "../Dashboard_Overview/dashboard-shared";
 
 export default function PaymentsPage({ payments }) {
   const totalRevenue = payments

@@ -218,7 +218,7 @@ export default function MyAppointmentPage({
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
@@ -262,49 +262,53 @@ export default function MyAppointmentPage({
                       );
                       setWorkflowError("");
                     }}
-                    className={`w-full rounded-xl border p-4 text-left transition ${
+                    className={`w-full rounded-2xl border p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
                       isSelected
-                        ? "border-brand bg-brand-soft shadow-[0_16px_32px_rgba(52,92,50,0.10)]"
-                        : "border-slate-200 bg-slate-50/60 hover:border-slate-300 hover:bg-slate-50"
+                        ? "border-slate-950 bg-slate-950 text-white"
+                        : "border-slate-200 bg-white text-slate-900"
                     }`}
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-bold text-slate-900">
+                          <p className={`text-sm font-bold ${isSelected ? "text-white" : "text-slate-900"}`}>
                             {appointment.patient?.name ||
                               appointment.patientName ||
                               appointment.doctor?.name ||
                               "Patient"}
                           </p>
                           <span
-                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${getStatusTone(
-                              appointment.status,
-                            )}`}
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+                              isSelected
+                                ? "bg-white/10 text-white"
+                                : getStatusTone(appointment.status)
+                            }`}
                           >
                             {appointment.status || "pending"}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500">
+                        <p className={`text-xs ${isSelected ? "text-slate-200" : "text-slate-500"}`}>
                           {appointment.doctor?.specialty || "Clinical review"} -{" "}
                           {appointment.clinic?.name || "Assigned clinic"}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className={`text-xs ${isSelected ? "text-slate-200" : "text-slate-500"}`}>
                           {appointment.appointmentDate} at {appointment.slotTime}
                         </p>
                       </div>
 
-                      <div className="space-y-1 text-right">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      <div className={`space-y-1 text-right ${isSelected ? "text-slate-100" : ""}`}>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-current/70">
                           Time left
                         </p>
-                        <p className="text-sm font-bold text-slate-900">
+                        <p className="text-sm font-bold text-current">
                           {countdown}
                         </p>
                         <p
-                          className={`text-[11px] font-semibold uppercase tracking-wide ${getPaymentTone(
-                            appointment.paymentStatus,
-                          )}`}
+                          className={`text-[11px] font-semibold uppercase tracking-wide ${
+                            isSelected
+                              ? "text-white"
+                              : getPaymentTone(appointment.paymentStatus)
+                          }`}
                         >
                           {appointment.paymentStatus || "unpaid"}
                         </p>
@@ -317,7 +321,7 @@ export default function MyAppointmentPage({
           )}
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           {selectedAppointment ? (
             <>
               <div className="flex flex-col gap-3 border-b border-slate-100 pb-4">

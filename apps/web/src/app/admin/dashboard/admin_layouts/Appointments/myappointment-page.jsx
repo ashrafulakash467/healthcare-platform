@@ -8,7 +8,7 @@ import {
   getPaymentTone,
   getStatusTone,
   parseAppointmentDateTime,
-} from "./dashboard-shared";
+} from "../Dashboard_Overview/dashboard-shared";
 
 const workflowSteps = [
   "Open Appointment",

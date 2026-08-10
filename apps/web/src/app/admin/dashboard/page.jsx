@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import AdminDashboard from "./AdminDashboard";
+import AdminDashboard from "./admin_layouts/Dashboard_Overview/AdminDashboard";
 
 export default function AdminDashboardPage() {
   return (

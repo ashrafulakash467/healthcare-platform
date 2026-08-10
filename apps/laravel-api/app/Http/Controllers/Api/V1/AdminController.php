@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -31,6 +32,30 @@ class AdminController extends Controller
                 'approved' => $approved,
                 'rejected' => $rejected,
             ],
+        ]);
+    }
+
+    public function users(): JsonResponse
+    {
+        $users = User::query()
+            ->with([
+                'roles',
+                'doctor.primaryHospital',
+                'patient.hospital',
+                'createdHospitals',
+            ])
+            ->where(function ($query): void {
+                $query->whereNull('status')
+                    ->orWhere('status', '!=', 'deleted');
+            })
+            ->latest()
+            ->get()
+            ->map(fn (User $user) => $this->formatUserCard($user))
+            ->values();
+
+        return response()->json([
+            'users' => $users,
+            'total' => $users->count(),
         ]);
     }
 
@@ -98,6 +123,92 @@ class AdminController extends Controller
             'imageUrl' => $this->doctorImageUrl($doctor->image_path),
             'createdAt' => $doctor->created_at?->toISOString(),
         ];
+    }
+
+    private function formatUserCard(User $user): array
+    {
+        $roles = $user->getRoleNames()->values()->all();
+        $doctor = $user->doctor;
+        $patient = $user->patient;
+        $createdHospitals = $user->createdHospitals->map(fn ($hospital): array => [
+            'id' => (string) $hospital->id,
+            'name' => $hospital->name,
+            'city' => $hospital->city,
+            'status' => $hospital->status,
+        ])->values()->all();
+
+        $primaryRole = $roles[0] ?? $this->inferUserRole($user);
+
+        return [
+            'id' => (string) $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'status' => $user->status ?? 'active',
+            'roles' => $roles,
+            'role' => $primaryRole,
+            'roleLabel' => $this->userRoleLabel($primaryRole),
+            'lastLoginAt' => $user->last_login_at?->toISOString(),
+            'createdAt' => $user->created_at?->toISOString(),
+            'twoFactorEnabled' => (bool) $user->two_factor_enabled,
+            'doctor' => $doctor ? [
+                'id' => (string) $doctor->id,
+                'specialty' => $doctor->specialty,
+                'licenseNo' => $doctor->license_no,
+                'gender' => $doctor->gender,
+                'verificationStatus' => $doctor->verification_status,
+                'status' => $doctor->status,
+                'hospital' => $doctor->primaryHospital ? [
+                    'id' => (string) $doctor->primaryHospital->id,
+                    'name' => $doctor->primaryHospital->name,
+                    'city' => $doctor->primaryHospital->city,
+                ] : null,
+            ] : null,
+            'patient' => $patient ? [
+                'id' => (string) $patient->id,
+                'mrn' => $patient->mrn,
+                'gender' => $patient->gender,
+                'bloodGroup' => $patient->blood_group,
+                'dateOfBirth' => $patient->date_of_birth?->toDateString(),
+                'city' => $patient->city,
+                'status' => $patient->status,
+                'hospital' => $patient->hospital ? [
+                    'id' => (string) $patient->hospital->id,
+                    'name' => $patient->hospital->name,
+                    'city' => $patient->hospital->city,
+                ] : null,
+            ] : null,
+            'createdHospitals' => $createdHospitals,
+        ];
+    }
+
+    private function inferUserRole(User $user): string
+    {
+        if ($user->doctor) {
+            return 'doctor';
+        }
+
+        if ($user->patient) {
+            return 'patient';
+        }
+
+        if ($user->createdHospitals->isNotEmpty()) {
+            return 'hospital';
+        }
+
+        return 'user';
+    }
+
+    private function userRoleLabel(string $role): string
+    {
+        return match ($role) {
+            'super-admin' => 'Super Admin',
+            'admin' => 'Admin',
+            'doctor' => 'Doctor',
+            'patient' => 'Patient',
+            'hospital' => 'Hospital Admin',
+            default => 'User',
+        };
     }
 
     private function doctorImageUrl(?string $imagePath): string
