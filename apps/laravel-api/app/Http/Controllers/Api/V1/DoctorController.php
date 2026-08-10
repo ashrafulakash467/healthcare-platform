@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
+use App\Models\Hospital;
 use App\Models\User;
 use App\Services\DoctorSlotSyncService;
 use Illuminate\Support\Facades\DB;
@@ -164,6 +165,7 @@ class DoctorController extends Controller
             'consultation_fee' => ['nullable', 'numeric', 'min:0'],
             'follow_up_fee' => ['nullable', 'numeric', 'min:0'],
             'chamber_address' => ['nullable', 'string', 'max:500'],
+            'hospital_ids' => ['nullable'],
             'available_dates' => ['nullable'],
             'available_time_slots' => ['nullable'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -175,6 +177,7 @@ class DoctorController extends Controller
 
         $availableDates = $this->normalizeListField($data['available_dates'] ?? null);
         $availableTimeSlots = $this->normalizeListField($data['available_time_slots'] ?? null);
+        $hospitalIds = $this->normalizeHospitalIds($data['hospital_ids'] ?? null);
 
         $doctor = DB::transaction(function () use ($data, $request): Doctor {
             $user = User::create([
@@ -215,6 +218,7 @@ class DoctorController extends Controller
                 ])->save();
             }
 
+            $this->syncDoctorHospitals($doctor, $hospitalIds);
             app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
 
             return $doctor->fresh(['user', 'primaryHospital', 'hospitals']);
@@ -241,6 +245,7 @@ class DoctorController extends Controller
             'consultation_fee' => ['sometimes', 'numeric', 'min:0'],
             'follow_up_fee' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'chamber_address' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'hospital_ids' => ['sometimes', 'nullable'],
             'available_dates' => ['sometimes', 'nullable'],
             'available_time_slots' => ['sometimes', 'nullable'],
             'city' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -262,6 +267,10 @@ class DoctorController extends Controller
         } else {
             unset($data['available_time_slots']);
         }
+
+        $hospitalIds = array_key_exists('hospital_ids', $data)
+            ? $this->normalizeHospitalIds($data['hospital_ids'])
+            : null;
 
         $doctor = Doctor::query()->with('user')->findOrFail($doctorId);
 
@@ -312,6 +321,10 @@ class DoctorController extends Controller
             'status',
         ])));
         $doctor->save();
+
+        if ($hospitalIds !== null) {
+            $this->syncDoctorHospitals($doctor, $hospitalIds);
+        }
 
         app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
 
@@ -365,6 +378,7 @@ class DoctorController extends Controller
             'chamberAddress' => $doctor->chamber_address,
             'availableDates' => $this->normalizeListField($doctor->available_dates),
             'availableTimeSlots' => $this->normalizeListField($doctor->available_time_slots),
+            'hospitalIds' => $doctor->hospitals->pluck('id')->map(fn ($id): string => (string) $id)->values()->all(),
             'clinics' => $clinics,
         ];
     }
@@ -399,6 +413,7 @@ class DoctorController extends Controller
             'verificationStatus' => $doctor->verification_status,
             'verifiedAt' => $doctor->verified_at?->toISOString(),
             'status' => $doctor->status,
+            'hospitalIds' => $doctor->hospitals->pluck('id')->map(fn ($id): string => (string) $id)->values()->all(),
             'hospital' => $hospital ? [
                 'id' => (string) $hospital->id,
                 'name' => $hospital->name,
@@ -429,6 +444,50 @@ class DoctorController extends Controller
         }
 
         return $clinics;
+    }
+
+    private function normalizeHospitalIds(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $value = $decoded;
+            } else {
+                $value = [$value];
+            }
+        }
+
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $ids = collect($value)
+            ->map(fn ($item): int => (int) trim((string) $item))
+            ->filter(fn ($item): bool => $item > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (! $ids) {
+            return [];
+        }
+
+        return Hospital::query()
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->map(fn ($id): string => (string) $id)
+            ->values()
+            ->all();
+    }
+
+    private function syncDoctorHospitals(Doctor $doctor, array $hospitalIds): void
+    {
+        $doctor->hospitals()->sync($hospitalIds);
+
+        $doctor->forceFill([
+            'primary_hospital_id' => $hospitalIds[0] ?? null,
+        ])->save();
     }
 
     private function doctorLocation(Doctor $doctor): string

@@ -413,7 +413,7 @@ export default function AdminDashboard() {
           ? ""
           : formData.followUpFee,
       );
-      appendValue("chamber_address", formData.chamberAddress ?? "");
+      appendValue("hospital_ids", JSON.stringify(Array.isArray(formData.hospitalIds) ? formData.hospitalIds : []));
       appendValue("available_dates", formData.availableDates ?? "");
       appendValue("available_time_slots", formData.availableTimeSlots ?? "");
       appendValue("city", formData.city ?? "");
@@ -475,7 +475,7 @@ export default function AdminDashboard() {
         formData.followUpFee === "" || formData.followUpFee === null || formData.followUpFee === undefined
           ? null
           : formData.followUpFee,
-      chamber_address: formData.chamberAddress ?? null,
+      hospital_ids: Array.isArray(formData.hospitalIds) ? formData.hospitalIds : [],
       available_dates: formData.availableDates ?? null,
       available_time_slots: formData.availableTimeSlots ?? null,
       city: formData.city ?? null,
@@ -548,7 +548,7 @@ export default function AdminDashboard() {
       gender: doctor.gender ?? "",
       consultationFee: doctor.consultationFee ?? "",
       followUpFee: doctor.followUpFee ?? "",
-      chamberAddress: doctor.chamberAddress ?? doctor.chamber_address ?? "",
+      hospitalIds: doctor.hospitalIds ?? doctor.hospital_ids ?? [],
       availableDates: normalizeDoctorDateList(doctor.availableDates ?? doctor.available_dates),
       availableTimeSlots: formatDoctorListValue(doctor.availableTimeSlots ?? doctor.available_time_slots),
       city: doctor.city ?? "",
@@ -575,7 +575,7 @@ export default function AdminDashboard() {
       gender: "",
       consultationFee: "",
       followUpFee: "",
-      chamberAddress: "",
+      hospitalIds: [],
       availableDates: [],
       availableTimeSlots: "",
       city: "",
@@ -597,7 +597,7 @@ export default function AdminDashboard() {
       gender: "",
       consultationFee: "",
       followUpFee: "",
-      chamberAddress: "",
+      hospitalIds: [],
       availableDates: [],
       availableTimeSlots: "",
       city: "",

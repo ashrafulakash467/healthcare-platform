@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -6,6 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
+import { apiFetch, getStoredToken } from "@/lib/api";
 import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
 
 const verificationStatusOptions = [
@@ -36,6 +37,8 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
   const imagePreviewRef = useRef(initialImagePreviewSrc);
   const [showImageControls, setShowImageControls] = useState(true);
   const [imagePreviewSrc, setImagePreviewSrc] = useState(initialImagePreviewSrc);
+  const [hospitalOptions, setHospitalOptions] = useState([]);
+  const [hospitalsLoading, setHospitalsLoading] = useState(false);
 
   const currentValue = (key, fallback = "") => {
     const value = form?.[key];
@@ -52,11 +55,48 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
     }));
   };
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadHospitals() {
+      const token = getStoredToken("admin");
+      if (!token) {
+        return;
+      }
+
+      setHospitalsLoading(true);
+
+      try {
+        const response = await apiFetch("/admin/hospitals", {}, token);
+        const result = await response.json();
+
+        if (response.ok && !cancelled) {
+          setHospitalOptions(Array.isArray(result.hospitals) ? result.hospitals : []);
+        }
+      } catch {
+        if (!cancelled) {
+          setHospitalOptions([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setHospitalsLoading(false);
+        }
+      }
+    }
+
+    void loadHospitals();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const imagePath = currentValue("imagePath", doctor.imagePath ?? "");
   const formPreviewUrl = currentValue("imagePreviewUrl", "");
   const imagePreviewUrl = imagePreviewSrc || formPreviewUrl || resolveDoctorImageSrc(doctor);
   const selectedImageLabel =
     form?.imageFile?.name || (imagePath ? imagePath.split("/").filter(Boolean).pop() : "No image selected");
+  const selectedHospitalIds = normalizeHospitalIdList(currentValue("hospitalIds", doctor.hospitalIds ?? []));
 
   useEffect(() => {
     return () => {
@@ -156,12 +196,83 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
           onChange={(value) => updateField("specialty", value)}
           placeholder="Cardiology"
         />
-        <Field
-          label="Hospital / Clinic"
-          value={currentValue("chamberAddress", doctor.chamberAddress ?? doctor.chamber_address)}
-          onChange={(value) => updateField("chamberAddress", value)}
-          placeholder="Central Hospital / Clinic"
-        />
+        <div className="md:col-span-2 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Clinics &amp; Hospitals
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                Select the clinics and hospitals this doctor belongs to. The selection is saved in MySQL.
+              </p>
+            </div>
+            <p className="text-xs font-medium text-slate-600">
+              Selected: {selectedHospitalIds.length}
+            </p>
+          </div>
+
+          {hospitalsLoading ? (
+            <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">
+              Loading clinics and hospitals from MySQL...
+            </div>
+          ) : hospitalOptions.length ? (
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {hospitalOptions.map((hospital) => {
+                const isSelected = selectedHospitalIds.includes(String(hospital.id));
+
+                return (
+                  <button
+                    key={hospital.id}
+                    type="button"
+                    onClick={() => updateField("hospitalIds", toggleHospitalIdField(selectedHospitalIds, hospital.id))}
+                    className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
+                      isSelected
+                        ? "border-emerald-300 bg-emerald-50"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold ${
+                        isSelected
+                          ? "border-emerald-500 bg-emerald-500 text-white"
+                          : "border-slate-300 bg-white text-slate-400"
+                      }`}
+                    >
+                      {isSelected ? "✓" : ""}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-slate-900">
+                        {hospital.name}
+                      </span>
+                      <span className="block truncate text-xs text-slate-500">
+                        {[hospital.city, hospital.status].filter(Boolean).join(" - ") || "Hospital"}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">
+              No hospitals found in MySQL.
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {selectedHospitalIds.length ? (
+              selectedHospitalIds.map((hospitalId) => {
+                const hospital = hospitalOptions.find((item) => String(item.id) === String(hospitalId));
+                return (
+                  <Tag key={hospitalId}>
+                    {hospital?.name ?? `Hospital #${hospitalId}`}
+                  </Tag>
+                );
+              })
+            ) : (
+              <Tag>None selected</Tag>
+            )}
+          </div>
+        </div>
         <CalendarField
           label="Available dates"
           value={currentValue("availableDates", parseDoctorDateList(doctor.availableDates ?? doctor.available_dates))}
@@ -343,6 +454,14 @@ function TextareaField({ label, value, onChange, placeholder, hint }) {
       />
       {hint ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
     </label>
+  );
+}
+
+function Tag({ children }) {
+  return (
+    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+      {children}
+    </span>
   );
 }
 
@@ -675,6 +794,34 @@ function parseDoctorDateList(value) {
     .filter(Boolean);
 }
 
+function normalizeHospitalIdList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item)).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/[\n,]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function toggleHospitalIdField(value, hospitalId) {
+  const next = new Set(normalizeHospitalIdList(value));
+  const id = String(hospitalId);
+
+  if (next.has(id)) {
+    next.delete(id);
+  } else {
+    next.add(id);
+  }
+
+  return Array.from(next);
+}
+
 function getLocalDateKey(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -695,3 +842,4 @@ function formatDoctorDateLabel(dateString) {
     day: "numeric",
   }).format(date);
 }
+

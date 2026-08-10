@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
+use App\Models\Hospital;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,6 +59,30 @@ class AdminController extends Controller
         return response()->json([
             'users' => $users,
             'total' => $users->count(),
+        ]);
+    }
+
+    public function hospitals(): JsonResponse
+    {
+        $hospitals = Hospital::query()
+            ->select(['id', 'name', 'city', 'status'])
+            ->where(function ($query): void {
+                $query->whereNull('status')
+                    ->orWhere('status', 'active');
+            })
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Hospital $hospital): array => [
+                'id' => (string) $hospital->id,
+                'name' => $hospital->name,
+                'city' => $hospital->city,
+                'status' => $hospital->status,
+            ])
+            ->values();
+
+        return response()->json([
+            'hospitals' => $hospitals,
+            'total' => $hospitals->count(),
         ]);
     }
 

@@ -59,7 +59,7 @@ export default function DoctorCardDetails({ doctor }) {
         </div>
 
         <div className="grid gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-2">
-          <InfoRow label="Hospital / Clinic" value={doctor?.chamberAddress ?? doctor?.chamber_address ?? doctor?.hospitalClinic ?? "Not available"} />
+          <InfoRow label="Clinics & Hospitals" value={formatDoctorClinics(doctor?.clinics) || doctor?.hospitalClinic || "Not available"} />
           <InfoRow label="Location" value={doctor?.location ?? "Location not available"} />
           <InfoRow label="Available dates" value={availableDates || "Not available"} />
           <InfoRow label="Available time slots" value={availableTimeSlots || "Not available"} />
@@ -113,6 +113,17 @@ function formatDoctorList(value) {
   }
 
   return "";
+}
+
+function formatDoctorClinics(clinics) {
+  if (!Array.isArray(clinics) || clinics.length === 0) {
+    return "";
+  }
+
+  return clinics
+    .map((clinic) => clinic?.name ?? clinic?.location ?? "")
+    .filter(Boolean)
+    .join(", ");
 }
 
 function resolveVerificationStatus(doctor) {

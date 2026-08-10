@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { apiUrl } from "@/lib/api";
 import { useMemo, useState } from "react";
+import DoctorDetailsView from "./doctor_details_view";
 import UpdateDoctorPage from "./update-doctor-page";
 
 const DOCTOR_IMAGE_FALLBACK = "/images/doctors/doc1.png";
@@ -45,8 +46,10 @@ export default function DoctorsPage({
         doctor.email,
         doctor.specialty,
         doctor.speciality,
-        doctor.chamberAddress,
-        doctor.chamber_address,
+        doctor.clinics
+          ?.map((clinic) => [clinic?.name, clinic?.location].filter(Boolean).join(" "))
+          .filter(Boolean)
+          .join(" "),
         doctor.phone,
         doctor.city,
         doctor.licenseNo,
@@ -256,23 +259,21 @@ export default function DoctorsPage({
           onSave={() => onUpdate(editingDoctor.id, editForm)}
           onCancel={onCancelEdit}
         />
+      ) : previewDoctor ? (
+        <DoctorPreviewCard
+          doctor={previewDoctor}
+          onClose={() => setPreviewDoctorId(null)}
+          onEdit={() => {
+            onEdit(previewDoctor);
+            setPreviewDoctorId(null);
+          }}
+          onDelete={() => {
+            setDeleteConfirmId(previewDoctor.id);
+            setPreviewDoctorId(null);
+          }}
+        />
       ) : (
         <div className="space-y-4">
-          {previewDoctor ? (
-            <DoctorPreviewCard
-              doctor={previewDoctor}
-              onClose={() => setPreviewDoctorId(null)}
-              onEdit={() => {
-                onEdit(previewDoctor);
-                setPreviewDoctorId(null);
-              }}
-              onDelete={() => {
-                setDeleteConfirmId(previewDoctor.id);
-                setPreviewDoctorId(null);
-              }}
-            />
-          ) : null}
-
           {filteredDoctors.length > 0 ? (
             filteredDoctors.map((doctor) => (
               <DoctorCard
@@ -467,100 +468,7 @@ function DoctorCard({
 }
 
 function DoctorPreviewCard({ doctor, onClose, onEdit, onDelete }) {
-  const avatarSrc = resolveDoctorImageSrc(doctor);
-  const avatarInitial = getDoctorInitial(doctor.name);
-  const consultationFee = formatCurrencyValue(doctor.consultationFee ?? doctor.fees ?? doctor.followUpFee);
-  const followUpFee = formatCurrencyValue(doctor.followUpFee);
-  const statusLabel = doctor.verificationStatus ?? doctor.status ?? "Pending";
-  const statusTone = badgeTone(statusLabel);
-  const showAvatarFallback = avatarSrc === DOCTOR_IMAGE_FALLBACK;
-
-  return (
-    <div className="w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex min-w-0 flex-1 items-start gap-3">
-          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-blue-50">
-            <Image
-              key={avatarSrc}
-              src={avatarSrc}
-              alt={doctor.name ?? "Doctor"}
-              fill
-              className="object-cover"
-              sizes="56px"
-              unoptimized
-            />
-            {showAvatarFallback ? (
-              <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-base font-bold text-blue-600">
-                {avatarInitial}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="truncate text-base font-bold text-slate-900">
-                {doctor.name ?? "Unnamed Doctor"}
-              </h3>
-              <Badge tone={statusTone.color}>{statusLabel}</Badge>
-            </div>
-
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
-              <MailIcon className="h-4 w-4 shrink-0" />
-              <span className="truncate">{doctor.email ?? "N/A"}</span>
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-500">
-              <span className="inline-flex items-center gap-1.5">
-                <PhoneIcon className="h-3.5 w-3.5" />
-                {doctor.phone ?? "N/A"}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <MapPinIcon className="h-3.5 w-3.5" />
-                {doctor.city ?? "N/A"}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <AwardIcon className="h-3.5 w-3.5" />
-                {doctor.licenseNo ?? "N/A"}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2 border-t border-slate-100 pt-3 lg:border-t-0 lg:pl-4 lg:pt-0">
-          <button
-            type="button"
-            onClick={onEdit}
-            className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 transition hover:bg-blue-100"
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="rounded-lg border border-rose-100 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-100"
-          >
-            Delete
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <InfoPair
-          label="Specialty"
-          value={doctor.specialty ?? doctor.speciality ?? "General Medicine"}
-        />
-        <InfoPair label="Consultation" value={consultationFee} />
-        <InfoPair label="Follow-up" value={followUpFee} />
-      </div>
-    </div>
-  );
+  return <DoctorDetailsView doctor={doctor} onBack={onClose} onEdit={onEdit} onDelete={onDelete} />;
 }
 
 function DoctorEditForm(props) {
@@ -605,17 +513,6 @@ function PanelCard({ eyebrow, title, description, children }) {
       </div>
       {children}
     </section>
-  );
-}
-
-function InfoPair({ label, value }) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-semibold text-slate-800">{value}</p>
-    </div>
   );
 }
 
