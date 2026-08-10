@@ -7,6 +7,8 @@ use App\Models\Doctor;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
@@ -56,6 +58,35 @@ class AdminController extends Controller
         return response()->json([
             'users' => $users,
             'total' => $users->count(),
+        ]);
+    }
+
+    public function destroy(string $userId): JsonResponse
+    {
+        $user = User::query()
+            ->with(['doctor', 'patient', 'createdHospitals'])
+            ->findOrFail($userId);
+
+        Gate::authorize('delete', $user);
+
+        DB::transaction(function () use ($user): void {
+            $user->syncRoles([]);
+            $user->syncPermissions([]);
+
+            DB::table('personal_access_tokens')
+                ->where('tokenable_type', User::class)
+                ->where('tokenable_id', $user->id)
+                ->delete();
+
+            DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->delete();
+
+            $user->delete();
+        });
+
+        return response()->json([
+            'message' => 'User deleted successfully.',
         ]);
     }
 
