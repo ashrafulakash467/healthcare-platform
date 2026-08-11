@@ -12,7 +12,7 @@ class ProfileController extends Controller
     public function show(Request $request): JsonResponse
     {
         return response()->json([
-            'user' => new UserResource($request->user()->loadMissing(['roles', 'permissions'])),
+            'user' => new UserResource($request->user()->loadMissing(['roles', 'permissions', 'patient', 'patient.hospital'])),
         ]);
     }
 }

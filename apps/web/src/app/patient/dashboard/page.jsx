@@ -1,18 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
-import { Icon } from "../patient_layouts/dashboard-shared";
 import DashboardOverviewPage from "../patient_layouts/dashboardoverview-page";
-import MyAppointmentPage from "../patient_layouts/myappointment-page";
+import PatientDashboardShell from "../patient_layouts/patient-dashboard-shell";
+import MyAppointmentPage from "./my_appointment";
 import MedicalRecordsPage from "./Medical-Records";
 import { apiFetch, getStoredToken } from "@/lib/api";
 
 export default function PatientDashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +25,13 @@ export default function PatientDashboardPage() {
   const [doctorContact, setDoctorContact] = useState(null);
   const [doctorContactError, setDoctorContactError] = useState("");
   const [now, setNow] = useState(Date.now());
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState(() =>
+    normalizeDashboardTab(tabParam),
+  );
+
+  useEffect(() => {
+    setActiveTab(normalizeDashboardTab(tabParam));
+  }, [tabParam]);
 
   useEffect(() => {
     async function loadPatient() {
@@ -78,10 +83,7 @@ export default function PatientDashboardPage() {
       return;
     }
 
-    if (appointments.length === 0) {
-      if (selectedAppointmentId) {
-        queueMicrotask(() => setSelectedAppointmentId(""));
-      }
+    if (!selectedAppointmentId) {
       return;
     }
 
@@ -90,7 +92,9 @@ export default function PatientDashboardPage() {
     );
 
     if (!selectedStillExists) {
-      queueMicrotask(() => setSelectedAppointmentId(appointments[0].id));
+      queueMicrotask(() => {
+        setSelectedAppointmentId(appointments[0]?.id ?? "");
+      });
     }
   }, [activeTab, appointments, selectedAppointmentId]);
 
@@ -219,83 +223,12 @@ export default function PatientDashboardPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-7xl bg-slate-50 font-sans text-slate-900">
-      <aside className="sticky top-0 flex h-165 w-64 flex-shrink-0 flex-col justify-between border-r border-slate-200 bg-white">
-        <div>
-          <div className="flex h-16 items-center border-b border-slate-100 px-6">
-            <span className="text-lg font-bold text-slate-900">
-              HealthPortal
-            </span>
-          </div>
-
-          <nav className="space-y-1 p-4">
-            <button
-              type="button"
-              onClick={() => setActiveTab("dashboard")}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
-                activeTab === "dashboard"
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:bg-slate-300 hover:text-slate-900"
-              }`}
-            >
-              <Icon name="dashboard" />
-              Dashboard Overview
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("appointments")}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
-                activeTab === "appointments"
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:bg-slate-300 hover:text-slate-900"
-              }`}
-            >
-              <FontAwesomeIcon icon={faCalendarDays} />
-              My Appointment
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("records")}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
-                activeTab === "records"
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:bg-slate-300 hover:text-slate-900"
-              }`}
-            >
-              <Icon name="records" />
-              Medical Records
-            </button>
-
-            <Link
-              href="/find-doctor"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-300 hover:text-slate-900"
-            >
-              <Icon name="doctors" />
-              Find Doctors
-            </Link>
-          </nav>
-        </div>
-
-        <div className="border-t border-slate-100 p-4">
-          <div className="flex items-center gap-3 px-2 py-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 font-bold text-slate-700">
-              {patient?.name?.charAt(0) || "P"}
-            </div>
-            <div className="overflow-hidden">
-              <p className="truncate text-sm font-bold text-slate-900">
-                {patient?.name}
-              </p>
-              <p className="truncate text-xs text-slate-500">
-                {patient?.email}
-              </p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <main className="flex-1 overflow-y-auto p-8">
+    <PatientDashboardShell
+      patient={patient}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      navigationMode="tabs"
+    >
         {activeTab === "dashboard" && (
           <DashboardOverviewPage
             patient={patient}
@@ -324,6 +257,8 @@ export default function PatientDashboardPage() {
             isPayingId={isPayingId}
             actionMessage={actionMessage}
             actionError={actionError}
+            setActionError={setActionError}
+            setActionMessage={setActionMessage}
             doctorContact={doctorContact}
             doctorContactError={doctorContactError}
             now={now}
@@ -331,7 +266,16 @@ export default function PatientDashboardPage() {
         )}
 
         {activeTab === "records" && <MedicalRecordsPage patient={patient} />}
-      </main>
-    </div>
+      </PatientDashboardShell>
   );
+}
+
+function normalizeDashboardTab(value) {
+  const tab = String(value ?? "").toLowerCase();
+
+  if (tab === "appointments" || tab === "records" || tab === "dashboard") {
+    return tab;
+  }
+
+  return "dashboard";
 }

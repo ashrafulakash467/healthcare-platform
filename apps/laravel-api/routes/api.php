@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::middleware('role:patient|admin|super-admin')->group(function (): void {
         Route::get('patient/dashboard', [DashboardController::class, 'patient']);
+        Route::match(['put', 'patch'], 'patient/me', [AuthController::class, 'updateMe'])->middleware('role:patient');
         Route::get('appointment/booking-options', [AppointmentController::class, 'bookingOptions']);
         Route::get('appointment/available-dates', [AppointmentController::class, 'availableDates']);
         Route::get('appointment/available-slots', [AppointmentController::class, 'availableSlots']);

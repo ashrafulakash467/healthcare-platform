@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -67,7 +68,7 @@ class AuthController extends Controller
             'message' => 'Login successful.',
             'token' => $token,
             'token_type' => 'Bearer',
-            'user' => new UserResource($user->fresh(['roles', 'permissions'])),
+            'user' => new UserResource($user->fresh(['roles', 'permissions', 'patient', 'patient.hospital'])),
         ]);
     }
 
@@ -119,6 +120,10 @@ class AuthController extends Controller
             Patient::updateOrCreate(
                 ['user_id' => $user->id],
                 [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'country' => 'Bangladesh',
                     'status' => 'active',
                 ],
             );
@@ -135,7 +140,7 @@ class AuthController extends Controller
             );
         }
 
-        $user->refresh()->load(['roles', 'permissions']);
+        $user->refresh()->load(['roles', 'permissions', 'patient', 'patient.hospital']);
 
         $token = $user->createToken('healthcare-api', [$role])->plainTextToken;
 
@@ -161,7 +166,90 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'user' => new UserResource($user->loadMissing(['roles', 'permissions'])),
+            'user' => new UserResource($user->loadMissing(['roles', 'permissions', 'patient', 'patient.hospital'])),
+        ]);
+    }
+
+    public function updateMe(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $patient = $user->patient;
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:191',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('users', 'phone')->ignore($user->id),
+            ],
+            'mrn' => [
+                'nullable',
+                'string',
+                'max:100',
+                Rule::unique('patients', 'mrn')->ignore($patient?->id),
+            ],
+            'gender' => ['nullable', 'string', 'max:20'],
+            'bloodGroup' => ['nullable', 'string', 'max:20'],
+            'dateOfBirth' => ['nullable', 'date'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'max:255'],
+            'currentPassword' => ['nullable', 'string', 'required_with:newPassword,confirmPassword', 'max:255'],
+            'newPassword' => ['nullable', 'string', 'required_with:currentPassword,confirmPassword', 'min:8', 'max:255'],
+            'confirmPassword' => ['nullable', 'string', 'required_with:newPassword', 'same:newPassword', 'max:255'],
+        ]);
+
+        if (filled($validated['newPassword'] ?? null) && ! Hash::check((string) ($validated['currentPassword'] ?? ''), $user->password)) {
+            throw ValidationException::withMessages([
+                'currentPassword' => ['Current password is incorrect.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($user, $patient, $validated): void {
+            $user->forceFill([
+                'name' => trim((string) $validated['name']),
+                'email' => trim((string) $validated['email']),
+                'phone' => filled($validated['phone'] ?? null) ? trim((string) $validated['phone']) : null,
+            ])->save();
+
+            if (filled($validated['newPassword'] ?? null)) {
+                $user->forceFill([
+                    'password' => $validated['newPassword'],
+                ])->save();
+            }
+
+            $patientRecord = $patient ?? new Patient([
+                'user_id' => $user->id,
+                'status' => 'active',
+            ]);
+
+            $patientRecord->fill([
+                'name' => trim((string) $validated['name']),
+                'email' => trim((string) $validated['email']),
+                'phone' => filled($validated['phone'] ?? null) ? trim((string) $validated['phone']) : null,
+                'mrn' => filled($validated['mrn'] ?? null) ? trim((string) $validated['mrn']) : null,
+                'gender' => filled($validated['gender'] ?? null) ? trim((string) $validated['gender']) : null,
+                'blood_group' => filled($validated['bloodGroup'] ?? null) ? trim((string) $validated['bloodGroup']) : null,
+                'date_of_birth' => filled($validated['dateOfBirth'] ?? null) ? $validated['dateOfBirth'] : null,
+                'city' => filled($validated['city'] ?? null) ? trim((string) $validated['city']) : null,
+                'state' => filled($validated['state'] ?? null) ? trim((string) $validated['state']) : null,
+                'country' => 'Bangladesh',
+            ]);
+
+            $patientRecord->save();
+        });
+
+        $freshUser = $user->fresh(['roles', 'permissions', 'patient', 'patient.hospital']);
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'user' => new UserResource($freshUser),
         ]);
     }
 

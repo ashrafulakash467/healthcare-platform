@@ -32,6 +32,14 @@ export function Icon({ name, className = "w-5 h-5" }) {
         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
       />
     ),
+    settings: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7Zm7.4-2.5a1.8 1.8 0 0 0 .36 1.98l.05.05a2.2 2.2 0 0 1-1.56 3.76 2.2 2.2 0 0 1-1.56-.65l-.04-.04a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65V20a2.2 2.2 0 0 1-4.4 0v-.06a1.8 1.8 0 0 0-1.09-1.65 1.8 1.8 0 0 0-1.98.36l-.04.04a2.2 2.2 0 0 1-3.12-3.12l.05-.05a1.8 1.8 0 0 0 .36-1.98 1.8 1.8 0 0 0-1.65-1.09H4a2.2 2.2 0 0 1 0-4.4h.06c.74 0 1.4-.44 1.65-1.09a1.8 1.8 0 0 0-.36-1.98l-.05-.05A2.2 2.2 0 0 1 8.44 3.2a2.2 2.2 0 0 1 1.56.65l.04.04c.51.51 1.26.67 1.98.36A1.8 1.8 0 0 0 13.11 2.6V2a2.2 2.2 0 0 1 4.4 0v.06c0 .74.44 1.4 1.09 1.65.72.31 1.47.15 1.98-.36l.04-.04a2.2 2.2 0 0 1 3.12 3.12l-.05.05c-.51.51-.67 1.26-.36 1.98.25.65.91 1.09 1.65 1.09H22a2.2 2.2 0 0 1 0 4.4h-.06c-.74 0-1.4.44-1.65 1.09Z"
+      />
+    ),
     logout: (
       <path
         strokeLinecap="round"
@@ -88,11 +96,11 @@ export function Icon({ name, className = "w-5 h-5" }) {
 
 export function InfoCard({ title, value }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-        {title}
+    <div className="rounded-xl flex justify-between border border-slate-100 bg-white p-4 shadow-sm">
+      <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
+        {title}:
       </p>
-      <p className="mt-1 text-base font-bold text-slate-900">{value}</p>
+      <p className="text-sm font-bold text-slate-900">{value}</p>
     </div>
   );
 }
