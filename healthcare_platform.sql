@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Aug 11, 2026 at 06:08 AM
+-- Generation Time: Aug 11, 2026 at 11:31 AM
 -- Server version: 11.4.9-MariaDB
 -- PHP Version: 8.3.28
 
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `appointments` (
   KEY `appointments_payment_status_index` (`payment_status`),
   KEY `appointments_channel_index` (`channel`),
   KEY `appointments_follow_up_date_index` (`follow_up_date`)
-) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `appointments`
@@ -87,7 +87,9 @@ INSERT INTO `appointments` (`id`, `appointment_no`, `patient_id`, `doctor_id`, `
 (10, 'APT-20260804110948-4LUG', 4, 1, NULL, 16, 'in_person', '2026-08-06', '09:00:00', '09:30:00', 'pending', 'pending', 'web', 'General consultation', NULL, NULL, NULL, NULL, NULL, '2026-08-04 05:13:53', NULL, NULL, NULL, '{\"source\":\"web\",\"clinic_address\":\"House 12, Road 5, Dhanmondi, Dhaka\"}', '2026-08-04 05:09:48', '2026-08-04 05:13:53', NULL),
 (11, 'APT-20260804120251-7SR3', 4, 3, NULL, 69, 'in_person', '2026-08-06', '10:00:00', '11:00:00', 'pending', 'pending', 'web', 'General consultation', NULL, NULL, NULL, NULL, NULL, '2026-08-04 06:06:31', NULL, NULL, NULL, '{\"source\":\"web\",\"clinic_address\":\"Mental Hospital\"}', '2026-08-04 06:02:51', '2026-08-04 06:06:31', NULL),
 (12, 'APT-20260805060618-FXIE', 3, 4, NULL, 37, 'in_person', '2026-08-08', '09:00:00', '09:15:00', 'pending', 'pending', 'web', 'General consultation', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"source\":\"web\",\"clinic_address\":\"Cardio Care Cardiology.\"}', '2026-08-05 00:06:18', '2026-08-05 00:06:18', NULL),
-(13, 'APT-20260809091829-BI20', 5, 4, NULL, 38, 'in_person', '2026-08-10', '09:00:00', '09:15:00', 'pending', 'pending', 'web', 'General consultation', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"source\":\"web\",\"clinic_address\":\"Cardio Care Cardiology.\"}', '2026-08-09 03:18:29', '2026-08-09 03:18:29', NULL);
+(13, 'APT-20260809091829-BI20', 5, 4, NULL, 38, 'in_person', '2026-08-10', '09:00:00', '09:15:00', 'pending', 'pending', 'web', 'General consultation', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"source\":\"web\",\"clinic_address\":\"Cardio Care Cardiology.\"}', '2026-08-09 03:18:29', '2026-08-09 03:18:29', NULL),
+(14, 'APT-20260811062024-I08L', 6, 4, NULL, 39, 'in_person', '2026-08-12', '09:00:00', '09:15:00', 'pending', 'pending', 'web', 'General consultation', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"source\":\"web\",\"clinic_address\":\"Cardio Care Cardiology.\"}', '2026-08-11 00:20:24', '2026-08-11 00:20:24', NULL),
+(15, 'APT-20260811070103-BOCO', 7, 3, NULL, 75, 'in_person', '2026-08-12', '10:00:00', '11:00:00', 'pending', 'paid', 'web', 'General consultation', NULL, NULL, NULL, NULL, NULL, '2026-08-11 01:35:12', NULL, NULL, NULL, '{\"source\":\"web\",\"clinic_address\":\"Mental Hospital\"}', '2026-08-11 01:01:03', '2026-08-11 01:35:24', NULL);
 
 -- --------------------------------------------------------
 
@@ -149,7 +151,7 @@ INSERT INTO `appointment_slots` (`id`, `doctor_schedule_id`, `doctor_id`, `hospi
 (36, 2, 4, NULL, '2026-08-05', '09:00:00', '09:15:00', 1, 1, 0, 'booked', '2026-08-09 05:21:11', '2026-08-04 04:39:33', '2026-08-09 05:21:11'),
 (37, 2, 4, NULL, '2026-08-08', '09:00:00', '09:15:00', 1, 1, 0, 'booked', '2026-08-09 05:21:11', '2026-08-04 04:39:33', '2026-08-09 05:21:11'),
 (38, 2, 4, NULL, '2026-08-10', '09:00:00', '09:15:00', 1, 1, 0, 'booked', '2026-08-09 05:21:11', '2026-08-04 04:39:33', '2026-08-09 05:21:11'),
-(39, 2, 4, NULL, '2026-08-12', '09:00:00', '09:15:00', 1, 0, 1, 'available', '2026-08-09 05:21:11', '2026-08-04 04:39:33', '2026-08-09 05:21:11'),
+(39, 2, 4, NULL, '2026-08-12', '09:00:00', '09:15:00', 1, 1, 1, 'booked', '2026-08-09 05:21:11', '2026-08-04 04:39:33', '2026-08-11 00:20:24'),
 (40, 2, 4, NULL, '2026-08-15', '09:00:00', '09:15:00', 1, 0, 1, 'available', '2026-08-09 05:21:11', '2026-08-04 04:39:33', '2026-08-09 05:21:11'),
 (41, 2, 4, NULL, '2026-08-18', '09:00:00', '09:15:00', 1, 0, 1, 'available', '2026-08-09 05:21:11', '2026-08-04 04:39:33', '2026-08-09 05:21:11'),
 (42, 2, 4, NULL, '2026-08-20', '09:00:00', '09:15:00', 1, 0, 1, 'available', '2026-08-09 05:21:11', '2026-08-04 04:39:33', '2026-08-09 05:21:11'),
@@ -184,8 +186,8 @@ INSERT INTO `appointment_slots` (`id`, `doctor_schedule_id`, `doctor_id`, `hospi
 (71, 4, 3, NULL, '2026-08-08', '10:00:00', '11:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-09 05:07:55'),
 (72, 4, 3, NULL, '2026-08-10', '09:00:00', '10:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-09 05:07:55'),
 (73, 4, 3, NULL, '2026-08-10', '10:00:00', '11:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-09 05:07:55'),
-(74, 4, 3, NULL, '2026-08-12', '09:00:00', '10:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-09 05:07:55'),
-(75, 4, 3, NULL, '2026-08-12', '10:00:00', '11:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-09 05:07:55'),
+(74, 4, 3, NULL, '2026-08-12', '09:00:00', '10:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-11 01:35:12'),
+(75, 4, 3, NULL, '2026-08-12', '10:00:00', '11:00:00', 1, 1, 1, 'booked', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-11 01:35:12'),
 (76, 4, 3, NULL, '2026-08-15', '09:00:00', '10:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-09 05:07:55'),
 (77, 4, 3, NULL, '2026-08-15', '10:00:00', '11:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-09 05:07:55'),
 (78, 4, 3, NULL, '2026-08-19', '09:00:00', '10:00:00', 1, 0, 1, 'available', '2026-08-09 05:07:55', '2026-08-04 04:39:43', '2026-08-09 05:07:55'),
@@ -650,7 +652,7 @@ CREATE TABLE IF NOT EXISTS `migrations` (
   `migration` varchar(100) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `migrations`
@@ -663,7 +665,10 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (4, '2026_07_29_125253_create_personal_access_tokens_table', 1),
 (5, '2026_07_29_125403_create_permission_tables', 1),
 (6, '2026_07_29_200000_create_healthcare_domain_tables', 1),
-(7, '2026_08_03_000001_add_available_dates_and_time_slots_to_doctors_table', 2);
+(7, '2026_08_03_000001_add_available_dates_and_time_slots_to_doctors_table', 2),
+(8, '2026_08_11_063923_add_deleted_at_to_medical_records_table', 3),
+(9, '2026_08_11_070001_add_profile_fields_to_patients_table', 4),
+(10, '2026_08_11_070002_backfill_patient_profile_fields', 5);
 
 -- --------------------------------------------------------
 
@@ -707,6 +712,7 @@ INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES
 (3, 'App\\Models\\User', 7),
 (4, 'App\\Models\\User', 8),
 (4, 'App\\Models\\User', 10),
+(4, 'App\\Models\\User', 11),
 (5, 'App\\Models\\User', 4);
 
 -- --------------------------------------------------------
@@ -755,19 +761,16 @@ CREATE TABLE IF NOT EXISTS `patients` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) UNSIGNED NOT NULL,
   `hospital_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(100) DEFAULT NULL,
   `mrn` varchar(100) DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
   `gender` varchar(100) DEFAULT NULL,
   `blood_group` varchar(100) DEFAULT NULL,
-  `marital_status` varchar(100) DEFAULT NULL,
-  `address_line1` varchar(100) DEFAULT NULL,
-  `address_line2` varchar(100) DEFAULT NULL,
   `city` varchar(100) DEFAULT NULL,
   `state` varchar(100) DEFAULT NULL,
-  `postal_code` varchar(100) DEFAULT NULL,
   `country` varchar(100) DEFAULT NULL,
-  `emergency_contact_name` varchar(100) DEFAULT NULL,
-  `emergency_contact_phone` varchar(100) DEFAULT NULL,
   `status` varchar(100) NOT NULL DEFAULT 'active',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -779,23 +782,20 @@ CREATE TABLE IF NOT EXISTS `patients` (
   KEY `patients_date_of_birth_index` (`date_of_birth`),
   KEY `patients_gender_index` (`gender`),
   KEY `patients_blood_group_index` (`blood_group`),
-  KEY `patients_marital_status_index` (`marital_status`),
   KEY `patients_city_index` (`city`),
   KEY `patients_state_index` (`state`),
   KEY `patients_country_index` (`country`),
-  KEY `patients_status_index` (`status`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `patients_status_index` (`status`),
+  KEY `patients_email_index` (`email`),
+  KEY `patients_phone_index` (`phone`)
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `patients`
 --
 
-INSERT INTO `patients` (`id`, `user_id`, `hospital_id`, `mrn`, `date_of_birth`, `gender`, `blood_group`, `marital_status`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`, `country`, `emergency_contact_name`, `emergency_contact_phone`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 3, 1, 'MRN-100001', NULL, 'Female', 'O+', NULL, NULL, NULL, 'Dhaka', NULL, NULL, 'Bangladesh', NULL, NULL, 'active', '2026-08-02 01:12:41', '2026-08-02 01:12:41', NULL),
-(2, 8, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-08-04 01:23:39', '2026-08-04 01:23:39', NULL),
-(3, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-08-04 04:04:15', '2026-08-04 04:04:15', NULL),
-(4, 9, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-08-04 04:49:19', '2026-08-04 04:49:19', NULL),
-(5, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-08-09 01:54:04', '2026-08-09 01:54:04', NULL);
+INSERT INTO `patients` (`id`, `user_id`, `hospital_id`, `name`, `email`, `phone`, `mrn`, `date_of_birth`, `gender`, `blood_group`, `city`, `state`, `country`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(7, 11, NULL, 'test2', 'test2@gmail.com', '01500000017', NULL, '2000-12-20', 'Male', 'A+', 'Dhaka', 'uttora-10', 'Bangladesh', 'active', '2026-08-11 01:01:03', '2026-08-11 03:30:35', NULL);
 
 -- --------------------------------------------------------
 
@@ -837,14 +837,15 @@ CREATE TABLE IF NOT EXISTS `payments` (
   KEY `payments_method_index` (`method`),
   KEY `payments_status_index` (`status`),
   KEY `payments_paid_at_index` (`paid_at`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `payments`
 --
 
 INSERT INTO `payments` (`id`, `transaction_no`, `appointment_id`, `patient_id`, `doctor_id`, `hospital_id`, `payer_user_id`, `provider`, `method`, `currency`, `amount`, `discount_amount`, `tax_amount`, `total_amount`, `paid_amount`, `due_amount`, `status`, `paid_at`, `meta`, `created_at`, `updated_at`) VALUES
-(1, 'TRX-APT-1002', 2, 1, 1, 1, 3, 'manual', 'cash', 'BDT', 1250.00, 0.00, 0.00, 1250.00, 1250.00, 0.00, 'paid', '2026-08-01 01:12:41', NULL, '2026-08-02 01:12:41', '2026-08-02 01:12:41');
+(1, 'TRX-APT-1002', 2, 1, 1, 1, 3, 'manual', 'cash', 'BDT', 1250.00, 0.00, 0.00, 1250.00, 1250.00, 0.00, 'paid', '2026-08-01 01:12:41', NULL, '2026-08-02 01:12:41', '2026-08-02 01:12:41'),
+(2, 'TRX-APT-20260811070103-BOCO-EFGS', 15, 7, 3, NULL, 11, 'manual', 'cash', 'BDT', 1200.00, 0.00, 0.00, 1200.00, 1200.00, 0.00, 'paid', '2026-08-11 01:35:24', NULL, '2026-08-11 01:35:24', '2026-08-11 01:35:24');
 
 -- --------------------------------------------------------
 
@@ -909,7 +910,7 @@ CREATE TABLE IF NOT EXISTS `personal_access_tokens` (
   UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
   KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`),
   KEY `personal_access_tokens_expires_at_index` (`expires_at`)
-) ENGINE=MyISAM AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `personal_access_tokens`
@@ -931,9 +932,14 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 (13, 'App\\Models\\User', 8, 'healthcare-api', '18aab2a27119a34490730bb0ef3f26bae82f06c813f8c8770c89eccd120e405b', '[\"patient\"]', NULL, NULL, '2026-08-04 01:24:01', '2026-08-04 01:24:01'),
 (14, 'App\\Models\\User', 2, 'healthcare-api', 'c094e52025e3091506eb173fc841eaa7be839adce942420d0b4f43b33eb25a26', '[\"doctor\"]', '2026-08-04 01:24:32', NULL, '2026-08-04 01:24:28', '2026-08-04 01:24:32'),
 (15, 'App\\Models\\User', 1, 'healthcare-api', 'b0f7ad03123e55e0fb77dbeac1f8a6b900457fbbcad58eb0008b5a51eed962d1', '[\"admin\"]', '2026-08-04 04:48:19', NULL, '2026-08-04 01:25:02', '2026-08-04 04:48:19'),
+(44, 'App\\Models\\User', 11, 'healthcare-api', '436eadf5511c111047381abb1cd82bbe9d9899f780019416920fc9da660af9ac', '[\"patient\"]', '2026-08-11 03:37:54', NULL, '2026-08-11 03:37:33', '2026-08-11 03:37:54'),
+(43, 'App\\Models\\User', 6, 'healthcare-api', '2b9337b6bd19da5f900d37ec6c30cc2bcc5b6f7e00e4799ba478fb2e75e9c715', '[\"doctor\"]', '2026-08-11 04:58:22', NULL, '2026-08-11 01:01:34', '2026-08-11 04:58:22'),
 (18, 'App\\Models\\User', 1, 'healthcare-api', '49925dd1d7bd824699b1e149ad7cd2d3bf8aa8c39519b2f52ec2ac644fdf3514', '[\"admin\"]', '2026-08-04 05:00:25', NULL, '2026-08-04 05:00:05', '2026-08-04 05:00:25'),
+(42, 'App\\Models\\User', 11, 'healthcare-api', '8bf3782f1b35c96951dca60bb7eb57c0fd69fb9271c0294cf8f9b5d0087e0f74', '[\"patient\"]', '2026-08-11 03:37:23', NULL, '2026-08-11 01:00:22', '2026-08-11 03:37:23'),
 (20, 'App\\Models\\User', 1, 'healthcare-api', 'f99c05a5d4167de8129dce913c76e183c3a0fe0fbd6a7accbd1eeb2424373fe8', '[\"admin\"]', '2026-08-05 00:06:18', NULL, '2026-08-04 05:07:07', '2026-08-05 00:06:18'),
+(41, 'App\\Models\\User', 6, 'healthcare-api', '04055912b46c7a1b719a5d396a2dc3b2178f998dbcf9a318fe403f1cf01e3263', '[\"doctor\"]', '2026-08-11 00:59:36', NULL, '2026-08-11 00:41:26', '2026-08-11 00:59:36'),
 (22, 'App\\Models\\User', 1, 'healthcare-api', '2592686c148f5478d64a43470f4dae8f74f5e33cc2433da872d82ab2fe34f35c', '[\"admin\"]', '2026-08-05 00:07:15', NULL, '2026-08-05 00:07:13', '2026-08-05 00:07:15'),
+(40, 'App\\Models\\User', 11, 'healthcare-api', '1c2d6f58cb3b849771360aff01d77d5f3635016aadb1694bef631fa375e01277', '[\"patient\"]', '2026-08-11 00:40:49', NULL, '2026-08-11 00:19:50', '2026-08-11 00:40:49'),
 (24, 'App\\Models\\User', 1, 'healthcare-api', 'dfde0e5c6f7a976187b5cd05280e9e132e0eca7d1a2c107b8dd7da0ce9eac543', '[\"admin\"]', '2026-08-05 02:35:27', NULL, '2026-08-05 00:11:49', '2026-08-05 02:35:27'),
 (25, 'App\\Models\\User', 2, 'healthcare-api', 'fa5d0c60cc67e16fe328d483fdd0106e8684b41a26a9e33413de5fcf5e9be533', '[\"doctor\"]', '2026-08-09 02:32:12', NULL, '2026-08-09 01:50:44', '2026-08-09 02:32:12'),
 (26, 'App\\Models\\User', 10, 'healthcare-api', '654712880bd0a73c9826a65f704516681b55ad449289c8156af2b48f0961c672', '[\"patient\"]', '2026-08-09 03:30:33', NULL, '2026-08-09 01:54:05', '2026-08-09 03:30:33'),
@@ -949,7 +955,12 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 (36, 'App\\Models\\User', 7, 'healthcare-api', '7e25afde6f1795ef1b70d94206e48f7be1ea225968f92be4a15415c5c68b68aa', '[\"doctor\"]', '2026-08-10 00:35:35', NULL, '2026-08-09 04:51:47', '2026-08-10 00:35:35'),
 (37, 'App\\Models\\User', 1, 'healthcare-api', '59ef876fb4b8135e0f1748c86fae99ebc46437274db5c3c01a425672cf220542', '[\"admin\"]', '2026-08-10 04:00:32', NULL, '2026-08-10 00:34:40', '2026-08-10 04:00:32'),
 (38, 'App\\Models\\User', 10, 'healthcare-api', '5816ef319d043194b09246a0c68f347aa87f761fef4cbeecd58a5f4fcafc3b21', '[\"patient\"]', '2026-08-10 00:57:53', NULL, '2026-08-10 00:57:52', '2026-08-10 00:57:53'),
-(39, 'App\\Models\\User', 1, 'healthcare-api', 'd61c1d8088c821a74d29d98e2828d2f83a17c6d29b3362bcedd0566c74af856e', '[\"admin\"]', NULL, NULL, '2026-08-10 03:40:40', '2026-08-10 03:40:40');
+(39, 'App\\Models\\User', 1, 'healthcare-api', 'd61c1d8088c821a74d29d98e2828d2f83a17c6d29b3362bcedd0566c74af856e', '[\"admin\"]', NULL, NULL, '2026-08-10 03:40:40', '2026-08-10 03:40:40'),
+(45, 'App\\Models\\User', 11, 'healthcare-api', '1b57bf13a9058025164c2b031d3a8e8e4174b8e3936b28982fd9101c41c79268', '[\"patient\"]', '2026-08-11 03:37:58', NULL, '2026-08-11 03:37:58', '2026-08-11 03:37:58'),
+(46, 'App\\Models\\User', 11, 'healthcare-api', '799af55be2fc3dc9a206be3511f4dd6318ba8efdcbf999a9b40e140357a99ff8', '[\"patient\"]', '2026-08-11 04:15:33', NULL, '2026-08-11 04:15:29', '2026-08-11 04:15:33'),
+(47, 'App\\Models\\User', 6, 'healthcare-api', 'bff99c0593cf37e1155737791127fa4192db417d0d6bfdf0abd7e4f076690e2d', '[\"doctor\"]', '2026-08-11 04:15:50', NULL, '2026-08-11 04:15:49', '2026-08-11 04:15:50'),
+(48, 'App\\Models\\User', 6, 'healthcare-api', '3bfe466f225226457027525773143eaa6438da5b0ff3852ab0cb39d69069e349', '[\"doctor\"]', '2026-08-11 05:10:48', NULL, '2026-08-11 04:16:47', '2026-08-11 05:10:48'),
+(49, 'App\\Models\\User', 11, 'healthcare-api', '50721e64214de7248ab90c1a2e40748262de372c7e2c52477a2d4c7643e60251', '[\"patient\"]', '2026-08-11 05:30:19', NULL, '2026-08-11 05:14:46', '2026-08-11 05:30:19');
 
 -- --------------------------------------------------------
 
@@ -1151,7 +1162,8 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
 ('WWT1JehzzgY9ibKeQaNJTyKzqUO3LiLr00qGSRu4', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'eyJfdG9rZW4iOiJBYmhLaE5mWGJSRDdBeHNmQXZXYWxGQkVkdWNWeTVmaHhFaTFOVjZaIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cL2xvY2FsaG9zdDozMDAxIiwicm91dGUiOm51bGx9LCJfZmxhc2giOnsib2xkIjpbXSwibmV3IjpbXX19', 1785654877),
-('pXeWOvRGZyey5HekKTADT4cRg5yShFdudJZMk8k4', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0', 'eyJfdG9rZW4iOiJXRXlWRHlhQW40ZVoycG5HenZZVURMdHhVazl6SkQydXZxUjlZT2RnIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cLzEyNy4wLjAuMTozMDAxIiwicm91dGUiOm51bGx9LCJfZmxhc2giOnsib2xkIjpbXSwibmV3IjpbXX19', 1786343509);
+('pXeWOvRGZyey5HekKTADT4cRg5yShFdudJZMk8k4', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0', 'eyJfdG9rZW4iOiJXRXlWRHlhQW40ZVoycG5HenZZVURMdHhVazl6SkQydXZxUjlZT2RnIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cLzEyNy4wLjAuMTozMDAxIiwicm91dGUiOm51bGx9LCJfZmxhc2giOnsib2xkIjpbXSwibmV3IjpbXX19', 1786343509),
+('fUyjiAWwb68QGgwyhXzkVH0ne0cW1GigzufBZCfT', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0', 'eyJfdG9rZW4iOiJ1ckZaQkF0b0RJMUxWYm5veTAyaGpuRGU4UG1sRkdWM05MdDVjWHlSIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cLzEyNy4wLjAuMTozMDAxIiwicm91dGUiOm51bGx9LCJfZmxhc2giOnsib2xkIjpbXSwibmV3IjpbXX19', 1786429049);
 
 -- --------------------------------------------------------
 
@@ -1242,7 +1254,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `users_username_unique` (`username`),
   UNIQUE KEY `users_phone_unique` (`phone`),
   KEY `users_status_index` (`status`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
@@ -1253,9 +1265,10 @@ INSERT INTO `users` (`id`, `name`, `username`, `email`, `phone`, `email_verified
 (2, 'Muhammad Isalam', 'doctor', 'muhammad @gmail.com', '01700000002', '2026-08-02 01:12:39', '$2y$12$vY0SQizmWeuao9yVeoPJ4O9Iq7XPy.O10/CQeqJR.KWTh9Hjg0Uc2', 'active', 0, NULL, NULL, '2026-08-09 04:50:46', NULL, '2026-08-02 01:12:39', '2026-08-09 04:50:46'),
 (4, 'Hospital Admin', 'hospital', 'hospital@healthcare.com', '01700000004', '2026-08-02 01:12:40', '$2y$12$.oyJEUZq5UP4X8MfxxgWPumv4RYzSrQdi41gfF6IXbCRI7jexfif.', 'active', 0, NULL, NULL, NULL, NULL, '2026-08-02 01:12:40', '2026-08-02 01:12:40'),
 (5, 'Fuad Islam', 'pending-doctor', 'fuad@gmail.com', '01700000005', '2026-08-02 01:12:40', '$2y$12$Z3bQ8tqNi/6edvGe450WmeF.EQcAJy.kU5888GjG7H1xCdM9rmO1K', 'active', 0, NULL, NULL, '2026-08-09 04:43:48', NULL, '2026-08-02 01:12:40', '2026-08-09 04:43:48'),
-(6, 'Arafat Alif', 'arafat-alif-23i2cd', 'arafat@gmail.com', '01710000011', NULL, '$2y$12$5N3zIoYxHEmOI3YMnAeeTeFJg1pZtM1bS5jQk9WwSnjw9rNiW1FAi', 'active', 0, NULL, NULL, '2026-08-09 04:45:15', NULL, '2026-08-02 06:29:00', '2026-08-09 04:45:15'),
+(6, 'Arafat Alif', 'arafat-alif-23i2cd', 'arafat@gmail.com', '01710000011', NULL, '$2y$12$5N3zIoYxHEmOI3YMnAeeTeFJg1pZtM1bS5jQk9WwSnjw9rNiW1FAi', 'active', 0, NULL, NULL, '2026-08-11 04:16:47', NULL, '2026-08-02 06:29:00', '2026-08-11 04:16:47'),
 (7, 'Ahad', 'ahad-rbrlmv', 'ahad@gmail.com', '0171000022', NULL, '$2y$12$YKZOiCucMN4/2PHlKYZRFuQVOC5i4cyfTMR3O/GpjC8vgvivav69m', 'active', 0, NULL, NULL, '2026-08-09 04:51:47', NULL, '2026-08-02 06:38:23', '2026-08-09 04:51:47'),
 (8, 'akash', NULL, 'a@gmail.com', '+8801710000000', NULL, '$2y$12$1EgGDGF9kMpA3UYAw73fFO7OvTw6jQ6CidCPHDwK9AsdN.m6J/T5y', 'active', 0, NULL, NULL, '2026-08-04 01:24:01', NULL, '2026-08-04 01:23:39', '2026-08-04 01:24:01'),
+(11, 'test2', NULL, 'test2@gmail.com', '01500000017', NULL, '$2y$12$ZPLCrOXLuBPsSC3eRlSuyOhnaqQzlSWOPcNhUZxuYYFEEJmB7AuEa', 'active', 0, NULL, NULL, '2026-08-11 05:14:46', NULL, '2026-08-11 00:19:49', '2026-08-11 05:14:46'),
 (10, 'test', NULL, 'test@gmail.com', '01709098787', NULL, '$2y$12$Q9ADUj9V4nXepWuVLRkcD.FoQzmTYGRXPIBBWnT15iihG.3nlzAoS', 'active', 0, NULL, NULL, '2026-08-10 00:57:52', NULL, '2026-08-09 01:54:04', '2026-08-10 00:57:52');
 COMMIT;
 

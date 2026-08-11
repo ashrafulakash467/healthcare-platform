@@ -88,22 +88,21 @@ export default function DashboardOverviewPage({
             Doctor Dashboard
           </h1>
           <p className="mt-0.5 text-sm text-slate-500">
-            Welcome back, Dr. {doctor?.name}. Follow the consultation flow from
-            review to follow-up.
+            Welcome back, Dr. {doctor?.name}. 
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => onNavigateTab("records")}
-            className="inline-flex items-center rounded-lg border border-red-500 bg-white px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-background-500 hover:text-white hover:border hover:border-black"
           >
             All Doc
           </button>
           <button
             type="button"
             onClick={() => onNavigateTab("earnings")}
-            className="inline-flex items-center rounded-lg border border-red-500 bg-white px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-red-50"
           >
             Reports
           </button>
@@ -209,9 +208,6 @@ export default function DashboardOverviewPage({
               <h2 className="text-lg font-bold text-slate-900">
                 Consultation Flow
               </h2>
-              <p className="text-sm text-slate-500">
-                This is the exact working sequence for the doctor dashboard.
-              </p>
             </div>
           </div>
 
@@ -241,9 +237,6 @@ export default function DashboardOverviewPage({
               <h2 className="text-lg font-bold text-slate-900">
                 Notifications
               </h2>
-              <p className="text-sm text-slate-500">
-                Track follow-ups, queue changes, and remaining tasks.
-              </p>
             </div>
             <button
               type="button"
