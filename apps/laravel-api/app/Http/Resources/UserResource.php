@@ -44,6 +44,50 @@ class UserResource extends JsonResource
                     ] : null,
                 ];
             }),
+            'doctor' => $this->whenLoaded('doctor', function (): array {
+                $doctor = $this->doctor;
+
+                return [
+                    'id' => (string) $doctor->id,
+                    'userId' => (string) $doctor->user_id,
+                    'primaryHospitalId' => $doctor->primary_hospital_id ? (string) $doctor->primary_hospital_id : null,
+                    'specialty' => $doctor->specialty,
+                    'subSpecialty' => $doctor->sub_specialty,
+                    'qualification' => $doctor->qualification,
+                    'bio' => $doctor->bio,
+                    'gender' => $doctor->gender,
+                    'consultationFee' => $doctor->consultation_fee,
+                    'followUpFee' => $doctor->follow_up_fee,
+                    'licenseNo' => $doctor->license_no,
+                    'chamberAddress' => $doctor->chamber_address,
+                    'availableDates' => collect($doctor->available_dates ?? [])->filter()->values()->all(),
+                    'availableTimeSlots' => collect($doctor->available_time_slots ?? [])->filter()->values()->all(),
+                    'city' => $doctor->city,
+                    'state' => $doctor->state,
+                    'country' => $doctor->country,
+                    'verificationStatus' => $doctor->verification_status,
+                    'verifiedAt' => $doctor->verified_at?->toISOString(),
+                    'status' => $doctor->status,
+                    'imagePath' => $doctor->image_path,
+                    'hospitalIds' => $doctor->relationLoaded('hospitals')
+                        ? $doctor->hospitals->pluck('id')->map(fn ($id): string => (string) $id)->values()->all()
+                        : [],
+                    'clinics' => $doctor->relationLoaded('hospitals')
+                        ? $doctor->hospitals->map(function ($hospital): array {
+                            return [
+                                'id' => (string) $hospital->id,
+                                'name' => $hospital->name,
+                                'location' => $hospital->city ?? $hospital->state ?? $hospital->country ?? '',
+                            ];
+                        })->values()->all()
+                        : [],
+                    'primaryHospital' => $doctor->relationLoaded('primaryHospital') && $doctor->primaryHospital ? [
+                        'id' => (string) $doctor->primaryHospital->id,
+                        'name' => $doctor->primaryHospital->name,
+                        'city' => $doctor->primaryHospital->city,
+                    ] : null,
+                ];
+            }),
             'roles' => $this->getRoleNames()->values(),
             'permissions' => $this->getAllPermissions()->pluck('name')->values(),
             'token_abilities' => $request->user()?->currentAccessToken()?->abilities ?? [],

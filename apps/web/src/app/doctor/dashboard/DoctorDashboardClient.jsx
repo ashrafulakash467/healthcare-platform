@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
-import { Icon } from "./doctor_layouts/dashboard-shared";
+import { useRouter } from "next/navigation";
 import DashboardOverviewPage from "./doctor_layouts/dashboardoverview-page";
+import DoctorDashboardSidebar from "./doctor_layouts/doctor-dashboard-sidebar";
 import MyAppointmentPage from "./doctor_layouts/myappointment-page";
 import MedicalRecordsPage from "./doctor_layouts/medicalrecords-page";
 import ScheduleManagementPage from "./doctor_layouts/schedule-management-page";
@@ -14,18 +13,7 @@ import {
   emptyMedicalRecords,
   fetchMedicalRecords,
 } from "@/lib/medical-records";
-
-const tabItems = [
-  { key: "dashboard", label: "Dashboard", icon: "dashboard" },
-  { key: "today", label: "Today's Appointments", icon: "calendar" },
-  { key: "upcoming", label: "Upcoming Appointments", icon: "calendar" },
-  { key: "pending", label: "Pending Requests", icon: "clipboard" },
-  { key: "records", label: "Patient Records", icon: "records" },
-  { key: "prescriptions", label: "Prescriptions", icon: "records" },
-  { key: "schedule", label: "Schedule Management", icon: "stethoscope" },
-  { key: "earnings", label: "Earnings", icon: "wallet" },
-  { key: "notifications", label: "Notifications", icon: "bell" },
-];
+import SettingsPage from "./Settings/page";
 
 const notificationsSeed = [
   {
@@ -45,7 +33,9 @@ const notificationsSeed = [
   },
 ];
 
+
 export default function DoctorDashboardClient() {
+  const router = useRouter();
   const [doctor, setDoctor] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -215,6 +205,11 @@ export default function DoctorDashboardClient() {
       return;
     }
 
+    if (nextTab === "settings") {
+      router.push("/doctor/dashboard/Settings");
+      return;
+    }
+
     if (nextTab === "records") {
       setRecordCategory("diagnostics");
       setActiveTab("records");
@@ -222,22 +217,6 @@ export default function DoctorDashboardClient() {
     }
 
     setActiveTab(nextTab);
-  }
-
-  function getTabActiveState(tabKey) {
-    if (tabKey === "records") {
-      return activeTab === "records" && recordCategory !== "prescriptions";
-    }
-
-    if (tabKey === "prescriptions") {
-      return activeTab === "records" && recordCategory === "prescriptions";
-    }
-
-    if (tabKey === "schedule") {
-      return activeTab === "schedule";
-    }
-
-    return activeTab === tabKey;
   }
 
   if (isLoading) {
@@ -250,53 +229,12 @@ export default function DoctorDashboardClient() {
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-7xl bg-slate-50 font-sans text-slate-900">
-      <aside className="sticky top-0 flex h-165 w-64 flex-shrink-0 flex-col justify-between border-r border-slate-200 bg-white">
-        <div>
-          <div className="flex h-16 items-center border-b border-slate-100 px-6">
-            <span className="text-lg font-bold text-slate-900">
-              HealthPortal
-            </span>
-          </div>
-
-          <nav className="space-y-1 p-4">
-            {tabItems.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => handleTabChange(item.key)}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
-                  getTabActiveState(item.key)
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                {item.key === "today" ? (
-                  <FontAwesomeIcon icon={faCalendarDays} />
-                ) : (
-                  <Icon name={item.icon} />
-                )}
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        <div className="border-t border-slate-100 p-4">
-          <div className="flex items-center gap-3 px-2 py-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 font-bold text-slate-700">
-              {doctor?.name?.charAt(0) || "D"}
-            </div>
-            <div className="overflow-hidden">
-              <p className="truncate text-sm font-bold text-slate-900">
-                {doctor?.name}
-              </p>
-              <p className="truncate text-xs text-slate-500">
-                {doctor?.email}
-              </p>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <DoctorDashboardSidebar
+        doctor={doctor}
+        activeTab={activeTab}
+        recordCategory={recordCategory}
+        onNavigateTab={handleTabChange}
+      />
 
       <main className="flex-1 overflow-y-auto p-8">
         {activeTab === "dashboard" && (
@@ -311,7 +249,13 @@ export default function DoctorDashboardClient() {
             workflowSteps={workflowSteps}
             onNavigateSection={handleTabChange}
             onNavigateTab={handleTabChange}
+
           />
+        )}
+        
+        {activeTab === "settings" && (
+          <SettingsPage />
+
         )}
 
         {activeTab === "today" && (

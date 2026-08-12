@@ -1,5 +1,5 @@
 import { formatCurrency } from "./dashboard-shared";
-
+import { useRouter } from "next/navigation";
 const workflowSteps = [
   {
     title: "Open Appointment",
@@ -32,6 +32,12 @@ const workflowSteps = [
   {
     title: "Schedule Follow-up",
     detail: "Set the next visit when the patient needs another review.",
+  },
+];
+const settings = [
+  {
+    id: "profile-settings",
+    name: "Profile Settings",
   },
 ];
 
@@ -69,7 +75,9 @@ export default function DashboardOverviewPage({
   notifications = [],
   records = {},
   onNavigateTab,
+  ...props
 }) {
+    const router = useRouter();
   const patientRecordCount =
     (records.diagnostics?.length ?? 0) +
     (records.notes?.length ?? 0) +
@@ -179,6 +187,13 @@ export default function DashboardOverviewPage({
           detail="Alerts, reminders, and pending updates."
           tone="amber"
           onClick={() => onNavigateTab("notifications")}
+        />
+        <MetricCard
+          label="Settings"
+          value={"Update Profile"}
+          detail="Update and Edit your profile settings."
+          tone="amber"
+          onClick={() => router.push("/doctor/dashboard/Settings")}
         />
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
