@@ -24,7 +24,6 @@ export default function ResetPasswordPage() {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   function updateField(event) {
     const { name, value } = event.target;
     setForm((currentForm) => ({ ...currentForm, [name]: value }));
@@ -97,14 +96,13 @@ export default function ResetPasswordPage() {
           ) : null}
 
           <div className="grid gap-4">
-            <Field
-              label="Reset token"
-              name="token"
-              value={form.token}
-              error={errors.token}
-              onChange={updateField}
-              autoComplete="off"
+            
+            <input 
+            type="hidden" 
+            name="token" 
+            value={form.token} 
             />
+
             <Field
               label="Email"
               name="email"

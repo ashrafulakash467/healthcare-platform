@@ -15,7 +15,6 @@ export default function ForgotPasswordPage() {
     event.preventDefault();
     setError("");
     setMessage("");
-    setResetUrl("");
     setIsSubmitting(true);
 
     try {
@@ -31,9 +30,7 @@ export default function ForgotPasswordPage() {
       }
 
       setMessage(result.message);
-      if (result.resetUrl) {
-        setResetUrl(result.resetUrl);
-      }
+     
     } catch {
       setError("Could not reach the API. Make sure the backend is running on port 3001.");
     } finally {
@@ -69,14 +66,6 @@ export default function ForgotPasswordPage() {
           {message ? (
             <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
               <p>{message}</p>
-              {resetUrl ? (
-                <Link
-                  href={resetUrl}
-                  className="mt-2 inline-flex font-semibold text-brand hover:text-brand-hover"
-                >
-                  Open development reset link
-                </Link>
-              ) : null}
             </div>
           ) : null}
 
