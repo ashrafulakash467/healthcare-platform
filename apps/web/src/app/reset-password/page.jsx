@@ -97,14 +97,7 @@ export default function ResetPasswordPage() {
           ) : null}
 
           <div className="grid gap-4">
-            <Field
-              label="Reset token"
-              name="token"
-              value={form.token}
-              error={errors.token}
-              onChange={updateField}
-              autoComplete="off"
-            />
+            <input type="hidden" name="token" value={form.token} />
             <Field
               label="Email"
               name="email"

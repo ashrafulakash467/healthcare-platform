@@ -150,58 +150,27 @@ export default function ScheduleManagementPage({ doctor, onNavigateSection }) {
         </p>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                Workflow Steps
-              </h2>
-              <p className="text-sm text-slate-500">
-                Follow the same sequence every time you update availability.
-              </p>
-            </div>
-          </div>
+      <div className="grid gap-6">
+      
 
-          <div className="mt-4 space-y-3">
-            {workflowSteps.map((step, index) => (
-              <div
-                key={step}
-                className="flex gap-4 rounded-lg border border-slate-100 bg-slate-50/60 p-4"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">
-                  {index + 1}
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">{step}</h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {workflowDescription(step)}
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Doctor
                   </p>
-                </div>
-              </div>
-            ))}
-          </div>
+                  <p className="mt-1 text-sm font-bold text-slate-900">
+                    Dr. {doctor?.name || "Unavailable"}
+                  </p>
+                  <p className="text-sm text-slate-500">{doctor?.specialty || "Doctor"}</p>
+            </div>
 
-          <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Doctor
-            </p>
-            <p className="mt-1 text-sm font-bold text-slate-900">
-              Dr. {doctor?.name || "Unavailable"}
-            </p>
-            <p className="text-sm text-slate-500">{doctor?.specialty || "Doctor"}</p>
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className=" mt-6 flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
                 Schedule Builder
               </h2>
-              <p className="text-sm text-slate-500">
-                Configure the chamber, working days, timings, breaks, and capacity.
-              </p>
+
             </div>
           </div>
 
@@ -297,9 +266,9 @@ export default function ScheduleManagementPage({ doctor, onNavigateSection }) {
                 className="mt-2 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
               >
                 <option value="10">10 minutes</option>
-                <option value="15">15 minutes</option>
-                <option value="20">20 minutes</option>
-                <option value="30">30 minutes</option>
+                <option value="15">20 minutes</option>
+                <option value="20">30 minutes</option>
+                <option value="30">60 minutes</option>
               </select>
             </label>
 

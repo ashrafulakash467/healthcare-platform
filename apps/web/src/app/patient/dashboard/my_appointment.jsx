@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { FaCalendarAlt, FaEye, FaTimesCircle } from "react-icons/fa";
-import { useState } from "react";
 import {
   InfoCard,
   formatCurrency,
@@ -34,15 +33,6 @@ export default function MyAppointmentPage({
   function getCancellationReason(appointmentId) {
     return String(cancellationReasons[appointmentId] ?? "").trim();
   }
-const [toast, setToast] = useState(null);
-
-const showToast = (message, type = "error") => {
-  setToast({ message, type });
-
-  setTimeout(() => {
-    setToast(null);
-  }, 3000);
-};
 
   function handleToggleDetails(appointmentId) {
     onSelectAppointment(selectedAppointmentId === appointmentId ? "" : appointmentId);
@@ -60,7 +50,6 @@ const showToast = (message, type = "error") => {
     if (!reason) {
       onSelectAppointment(appointment.id);
       if (typeof setActionError === "function") {
-         showToast("Please add a cancellation reason first, then press Cancel again.");
       }
       if (typeof setActionMessage === "function") {
         setActionMessage("");
