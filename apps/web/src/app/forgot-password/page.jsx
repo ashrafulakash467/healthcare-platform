@@ -38,15 +38,10 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-<<<<<<< HEAD
-      setMessage(result.message);
-     
-=======
       setMessage(result.message ?? "If that email exists, we sent a reset link.");
       if (result.resetUrl) {
         setResetUrl(result.resetUrl);
       }
->>>>>>> b2eff257 (add mailtrap auth)
     } catch {
       setError("Could not reach the API. Make sure the backend is running on port 3001.");
     } finally {
@@ -83,8 +78,6 @@ export default function ForgotPasswordPage() {
           {message ? (
             <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
               <p>{message}</p>
-<<<<<<< HEAD
-=======
               {resetUrl ? (
                 <a
                   href={resetUrl}
@@ -95,7 +88,6 @@ export default function ForgotPasswordPage() {
                   Open reset link
                 </a>
               ) : null}
->>>>>>> b2eff257 (add mailtrap auth)
             </div>
           ) : null}
 
