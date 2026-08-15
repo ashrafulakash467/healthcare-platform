@@ -1,0 +1,61 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Forgot Password and Account Recovery Workflow" id="nE8v_9OQeKrCYsqPqRF3">
+    <mxGraphModel dx="1033" dy="554" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-138" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontStyle=1;" value="Start" vertex="1">
+          <mxGeometry height="40" width="100" x="345" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-139" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;" value="Event occurs in the platform" vertex="1">
+          <mxGeometry height="50" width="290" x="250" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-140" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;" value="Select template and message content" vertex="1">
+          <mxGeometry height="50" width="290" x="250" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-141" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;" value="Determine recipients and channels" vertex="1">
+          <mxGeometry height="50" width="290" x="250" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-142" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;" value="Send email, SMS, or push notification" vertex="1">
+          <mxGeometry height="50" width="330" x="230" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-143" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontStyle=1;" value="Delivery successful?" vertex="1">
+          <mxGeometry height="90" width="150" x="320" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-144" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;" value="Queue retry or raise alert" vertex="1">
+          <mxGeometry height="50" width="250" x="40" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-145" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;" value="Mark as delivered and store notification history" vertex="1">
+          <mxGeometry height="50" width="250" x="460" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-146" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontStyle=1;" value="End" vertex="1">
+          <mxGeometry height="40" width="100" x="345" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-147" edge="1" parent="1" source="zsrWAC7Oeq_QB4B8tIEo-138" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#455A64;" target="zsrWAC7Oeq_QB4B8tIEo-139">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-148" edge="1" parent="1" source="zsrWAC7Oeq_QB4B8tIEo-139" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#455A64;" target="zsrWAC7Oeq_QB4B8tIEo-140">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-149" edge="1" parent="1" source="zsrWAC7Oeq_QB4B8tIEo-140" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#455A64;" target="zsrWAC7Oeq_QB4B8tIEo-141">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-150" edge="1" parent="1" source="zsrWAC7Oeq_QB4B8tIEo-141" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#455A64;" target="zsrWAC7Oeq_QB4B8tIEo-142">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-151" edge="1" parent="1" source="zsrWAC7Oeq_QB4B8tIEo-142" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#455A64;" target="zsrWAC7Oeq_QB4B8tIEo-143">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-152" edge="1" parent="1" source="zsrWAC7Oeq_QB4B8tIEo-143" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#455A64;" target="zsrWAC7Oeq_QB4B8tIEo-144" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-153" edge="1" parent="1" source="zsrWAC7Oeq_QB4B8tIEo-143" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#455A64;" target="zsrWAC7Oeq_QB4B8tIEo-145" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zsrWAC7Oeq_QB4B8tIEo-154" edge="1" parent="1" source="zsrWAC7Oeq_QB4B8tIEo-145" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#455A64;" target="zsrWAC7Oeq_QB4B8tIEo-146">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
