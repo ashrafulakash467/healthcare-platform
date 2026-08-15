@@ -68,7 +68,11 @@ class AuthController extends Controller
             'message' => 'Login successful.',
             'token' => $token,
             'token_type' => 'Bearer',
+<<<<<<< HEAD
             'user' => new UserResource($user->fresh(['roles', 'permissions', 'patient', 'patient.hospital'])),
+=======
+            'user' => new UserResource($user->fresh(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals'])),
+>>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
         ]);
     }
 
@@ -140,7 +144,11 @@ class AuthController extends Controller
             );
         }
 
+<<<<<<< HEAD
         $user->refresh()->load(['roles', 'permissions', 'patient', 'patient.hospital']);
+=======
+        $user->refresh()->load(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals']);
+>>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
 
         $token = $user->createToken('healthcare-api', [$role])->plainTextToken;
 
@@ -148,7 +156,7 @@ class AuthController extends Controller
             'message' => 'Account created successfully.',
             'token' => $token,
             'token_type' => 'Bearer',
-            'user' => new UserResource($user),
+            'user' => new UserResource($user->loadMissing(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals'])),
         ], 201);
     }
 
@@ -166,7 +174,110 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
+<<<<<<< HEAD
             'user' => new UserResource($user->loadMissing(['roles', 'permissions', 'patient', 'patient.hospital'])),
+=======
+            'user' => new UserResource($user->loadMissing(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals'])),
+        ]);
+    }
+
+    public function updateDoctorMe(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $doctor = $user->doctor;
+
+        if (! $doctor) {
+            return response()->json([
+                'message' => 'Doctor profile not found.',
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:191',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('users', 'phone')->ignore($user->id),
+            ],
+            'specialty' => ['nullable', 'string', 'max:255'],
+            'subSpecialty' => ['nullable', 'string', 'max:255'],
+            'qualification' => ['nullable', 'string', 'max:255'],
+            'bio' => ['nullable', 'string'],
+            'gender' => ['nullable', 'string', 'max:20'],
+            'consultationFee' => ['nullable', 'numeric', 'min:0'],
+            'followUpFee' => ['nullable', 'numeric', 'min:0'],
+            'licenseNo' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('doctors', 'license_no')->ignore($doctor->id),
+            ],
+            'chamberAddress' => ['nullable', 'string', 'max:500'],
+            'availableDates' => ['nullable'],
+            'availableTimeSlots' => ['nullable'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:255'],
+            'currentPassword' => ['nullable', 'string', 'required_with:newPassword,confirmPassword', 'max:255'],
+            'newPassword' => ['nullable', 'string', 'required_with:currentPassword,confirmPassword', 'min:8', 'max:255'],
+            'confirmPassword' => ['nullable', 'string', 'required_with:newPassword', 'same:newPassword', 'max:255'],
+        ]);
+
+        if (filled($validated['newPassword'] ?? null) && ! Hash::check((string) ($validated['currentPassword'] ?? ''), $user->password)) {
+            throw ValidationException::withMessages([
+                'currentPassword' => ['Current password is incorrect.'],
+            ]);
+        }
+
+        $availableDates = $this->normalizeListField($validated['availableDates'] ?? null);
+        $availableTimeSlots = $this->normalizeListField($validated['availableTimeSlots'] ?? null);
+
+        DB::transaction(function () use ($user, $doctor, $validated, $availableDates, $availableTimeSlots): void {
+            $user->forceFill([
+                'name' => trim((string) $validated['name']),
+                'email' => trim((string) $validated['email']),
+                'phone' => filled($validated['phone'] ?? null) ? trim((string) $validated['phone']) : null,
+            ])->save();
+
+            if (filled($validated['newPassword'] ?? null)) {
+                $user->forceFill([
+                    'password' => $validated['newPassword'],
+                ])->save();
+            }
+
+            $doctor->forceFill([
+                'specialty' => filled($validated['specialty'] ?? null) ? trim((string) $validated['specialty']) : null,
+                'sub_specialty' => filled($validated['subSpecialty'] ?? null) ? trim((string) $validated['subSpecialty']) : null,
+                'qualification' => filled($validated['qualification'] ?? null) ? trim((string) $validated['qualification']) : null,
+                'bio' => filled($validated['bio'] ?? null) ? trim((string) $validated['bio']) : null,
+                'gender' => filled($validated['gender'] ?? null) ? trim((string) $validated['gender']) : null,
+                'consultation_fee' => $validated['consultationFee'] ?? null,
+                'follow_up_fee' => $validated['followUpFee'] ?? null,
+                'license_no' => filled($validated['licenseNo'] ?? null) ? trim((string) $validated['licenseNo']) : null,
+                'chamber_address' => filled($validated['chamberAddress'] ?? null) ? trim((string) $validated['chamberAddress']) : null,
+                'available_dates' => $availableDates,
+                'available_time_slots' => $availableTimeSlots,
+                'city' => filled($validated['city'] ?? null) ? trim((string) $validated['city']) : null,
+                'state' => filled($validated['state'] ?? null) ? trim((string) $validated['state']) : null,
+                'country' => filled($validated['country'] ?? null) ? trim((string) $validated['country']) : null,
+            ])->save();
+        });
+
+        app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
+
+        $freshUser = $user->fresh(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals']);
+
+        return response()->json([
+            'message' => 'Doctor profile updated successfully.',
+            'user' => new UserResource($freshUser),
+>>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
         ]);
     }
 
@@ -322,5 +433,39 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Password has been reset successfully.',
         ]);
+    }
+
+    private function normalizeListField(mixed $value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map(
+                static fn ($item) => trim((string) $item),
+                $value,
+            )));
+        }
+
+        if (! is_string($value)) {
+            return [];
+        }
+
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return [];
+        }
+
+        $decoded = json_decode($trimmed, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return array_values(array_filter(array_map(
+                static fn ($item) => trim((string) $item),
+                $decoded,
+            )));
+        }
+
+        $parts = preg_split('/[\r\n,]+/', $trimmed) ?: [];
+
+        return array_values(array_filter(array_map(
+            static fn ($item) => trim((string) $item),
+            $parts,
+        )));
     }
 }

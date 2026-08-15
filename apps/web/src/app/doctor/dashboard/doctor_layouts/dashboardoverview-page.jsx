@@ -1,5 +1,5 @@
 import { formatCurrency } from "./dashboard-shared";
-
+import { useRouter } from "next/navigation";
 const workflowSteps = [
   {
     title: "Open Appointment",
@@ -32,6 +32,12 @@ const workflowSteps = [
   {
     title: "Schedule Follow-up",
     detail: "Set the next visit when the patient needs another review.",
+  },
+];
+const settings = [
+  {
+    id: "profile-settings",
+    name: "Profile Settings",
   },
 ];
 
@@ -69,7 +75,9 @@ export default function DashboardOverviewPage({
   notifications = [],
   records = {},
   onNavigateTab,
+  ...props
 }) {
+    const router = useRouter();
   const patientRecordCount =
     (records.diagnostics?.length ?? 0) +
     (records.notes?.length ?? 0) +
@@ -88,22 +96,21 @@ export default function DashboardOverviewPage({
             Doctor Dashboard
           </h1>
           <p className="mt-0.5 text-sm text-slate-500">
-            Welcome back, Dr. {doctor?.name}. Follow the consultation flow from
-            review to follow-up.
+            Welcome back, Dr. {doctor?.name}. 
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => onNavigateTab("records")}
-            className="inline-flex items-center rounded-lg border border-red-500 bg-white px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-background-500 hover:text-white hover:border hover:border-black"
           >
             All Doc
           </button>
           <button
             type="button"
             onClick={() => onNavigateTab("earnings")}
-            className="inline-flex items-center rounded-lg border border-red-500 bg-white px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-red-50"
           >
             Reports
           </button>
@@ -181,6 +188,13 @@ export default function DashboardOverviewPage({
           tone="amber"
           onClick={() => onNavigateTab("notifications")}
         />
+        <MetricCard
+          label="Settings"
+          value={"Update Profile"}
+          detail="Update and Edit your profile settings."
+          tone="amber"
+          onClick={() => router.push("/doctor/dashboard/Settings")}
+        />
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             Profile Snapshot
@@ -209,9 +223,6 @@ export default function DashboardOverviewPage({
               <h2 className="text-lg font-bold text-slate-900">
                 Consultation Flow
               </h2>
-              <p className="text-sm text-slate-500">
-                This is the exact working sequence for the doctor dashboard.
-              </p>
             </div>
           </div>
 
@@ -241,9 +252,6 @@ export default function DashboardOverviewPage({
               <h2 className="text-lg font-bold text-slate-900">
                 Notifications
               </h2>
-              <p className="text-sm text-slate-500">
-                Track follow-ups, queue changes, and remaining tasks.
-              </p>
             </div>
             <button
               type="button"

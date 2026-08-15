@@ -17,7 +17,6 @@ const emergencyCards = [
     title: "AC Ambulance",
     items: [
       "Get ambulance within 30 minutes*",
-      "24/7 affordable quality service",
       "We are just a call away: 01405600700",
     ],
     accent: "#ff5f6d",
@@ -26,7 +25,6 @@ const emergencyCards = [
     title: "ICU Ambulance",
     items: [
       "Get ambulance within 30 minutes*",
-      "24/7 affordable quality service",
       "We are just a call away: 01405600700",
     ],
     accent: "#305fbd",
@@ -35,7 +33,6 @@ const emergencyCards = [
     title: "AIR Ambulance",
     items: [
       "Get ambulance within 60 minutes*",
-      "24/7 affordable quality service",
       "We are just a call away: 01405600700",
     ],
     accent: "#ff8a34",

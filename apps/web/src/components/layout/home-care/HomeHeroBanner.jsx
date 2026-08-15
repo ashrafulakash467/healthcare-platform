@@ -31,7 +31,7 @@ export default function HomeHeroBanner() {
   useEffect(() => {
     const timer = window.setInterval(() => {
       setActiveSlide((current) => (current + 1) % slides.length);
-    }, 4000);
+    }, 6000);
 
     return () => window.clearInterval(timer);
   }, []);

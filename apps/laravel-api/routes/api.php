@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('patient/me', [AuthController::class, 'me'])->middleware('role:patient|admin|super-admin');
     Route::get('doctor/me', [AuthController::class, 'me'])->middleware('role:doctor|admin|super-admin');
+    Route::match(['put', 'patch'], 'doctor/me', [AuthController::class, 'updateDoctorMe'])->middleware('role:doctor');
     Route::get('admin/me', [AuthController::class, 'me'])->middleware('role:admin|super-admin');
     Route::get('appointment/my', [AppointmentController::class, 'my']);
     Route::get('medical-records', [MedicalRecordController::class, 'index'])->middleware('role:patient|doctor|admin|super-admin');
