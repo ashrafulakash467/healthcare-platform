@@ -44,8 +44,6 @@ class UserResource extends JsonResource
                     ] : null,
                 ];
             }),
-<<<<<<< HEAD
-=======
             'doctor' => $this->whenLoaded('doctor', function (): array {
                 $doctor = $this->doctor;
 
@@ -90,7 +88,6 @@ class UserResource extends JsonResource
                     ] : null,
                 ];
             }),
->>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
             'roles' => $this->getRoleNames()->values(),
             'permissions' => $this->getAllPermissions()->pluck('name')->values(),
             'token_abilities' => $request->user()?->currentAccessToken()?->abilities ?? [],

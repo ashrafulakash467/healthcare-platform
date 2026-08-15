@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\User;
+use App\Notifications\PasswordResetLinkNotification;
 use App\Services\DoctorSlotSyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,11 +19,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use App\Notifications\PasswordResetLinkNotification;
-<<<<<<< HEAD
-=======
-use Illuminate\Support\Carbon;
->>>>>>> b2eff257 (add mailtrap auth)
+
 class AuthController extends Controller
 {
     public function login(LoginRequest $request): JsonResponse
@@ -72,11 +69,15 @@ class AuthController extends Controller
             'message' => 'Login successful.',
             'token' => $token,
             'token_type' => 'Bearer',
-<<<<<<< HEAD
-            'user' => new UserResource($user->fresh(['roles', 'permissions', 'patient', 'patient.hospital'])),
-=======
-            'user' => new UserResource($user->fresh(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals'])),
->>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
+            'user' => new UserResource($user->fresh([
+                'roles',
+                'permissions',
+                'patient',
+                'patient.hospital',
+                'doctor',
+                'doctor.primaryHospital',
+                'doctor.hospitals',
+            ])),
         ]);
     }
 
@@ -139,20 +140,24 @@ class AuthController extends Controller
             Hospital::updateOrCreate(
                 ['created_by_user_id' => $user->id],
                 [
-                    'name' => $data['name'].' Hospital',
-                    'slug' => Str::slug($data['name'].'-'.$user->id),
-                    'code' => 'HSP-'.$user->id,
+                    'name' => $data['name'] . ' Hospital',
+                    'slug' => Str::slug($data['name'] . '-' . $user->id),
+                    'code' => 'HSP-' . $user->id,
                     'type' => 'clinic',
                     'status' => 'active',
                 ],
             );
         }
 
-<<<<<<< HEAD
-        $user->refresh()->load(['roles', 'permissions', 'patient', 'patient.hospital']);
-=======
-        $user->refresh()->load(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals']);
->>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
+        $user->refresh()->load([
+            'roles',
+            'permissions',
+            'patient',
+            'patient.hospital',
+            'doctor',
+            'doctor.primaryHospital',
+            'doctor.hospitals',
+        ]);
 
         $token = $user->createToken('healthcare-api', [$role])->plainTextToken;
 
@@ -160,7 +165,15 @@ class AuthController extends Controller
             'message' => 'Account created successfully.',
             'token' => $token,
             'token_type' => 'Bearer',
-            'user' => new UserResource($user->loadMissing(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals'])),
+            'user' => new UserResource($user->loadMissing([
+                'roles',
+                'permissions',
+                'patient',
+                'patient.hospital',
+                'doctor',
+                'doctor.primaryHospital',
+                'doctor.hospitals',
+            ])),
         ], 201);
     }
 
@@ -178,10 +191,15 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
-<<<<<<< HEAD
-            'user' => new UserResource($user->loadMissing(['roles', 'permissions', 'patient', 'patient.hospital'])),
-=======
-            'user' => new UserResource($user->loadMissing(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals'])),
+            'user' => new UserResource($user->loadMissing([
+                'roles',
+                'permissions',
+                'patient',
+                'patient.hospital',
+                'doctor',
+                'doctor.primaryHospital',
+                'doctor.hospitals',
+            ])),
         ]);
     }
 
@@ -276,12 +294,19 @@ class AuthController extends Controller
 
         app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
 
-        $freshUser = $user->fresh(['roles', 'permissions', 'patient', 'patient.hospital', 'doctor', 'doctor.primaryHospital', 'doctor.hospitals']);
+        $freshUser = $user->fresh([
+            'roles',
+            'permissions',
+            'patient',
+            'patient.hospital',
+            'doctor',
+            'doctor.primaryHospital',
+            'doctor.hospitals',
+        ]);
 
         return response()->json([
             'message' => 'Doctor profile updated successfully.',
             'user' => new UserResource($freshUser),
->>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
         ]);
     }
 
@@ -376,20 +401,6 @@ class AuthController extends Controller
 
         $user = User::query()->where('email', $data['email'])->first();
 
-<<<<<<< HEAD
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $data['email']],
-            [
-                'token' => Hash::make($token),
-                'created_at' => now(),
-            ],
-        );
-            $user = User::query()->where('email', $data['email'])->firstOrFail();
-            $user->notify(new PasswordResetLinkNotification($token));
-
-        return response()->json([
-            'message' => 'Password reset link has been sent to your email.',
-=======
         if ($user) {
             $token = Str::random(64);
 
@@ -406,7 +417,6 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'If the email exists, we sent a password reset link.',
->>>>>>> b2eff257 (add mailtrap auth)
         ]);
     }
 
@@ -428,17 +438,17 @@ class AuthController extends Controller
             ->where('email', $data['email'])
             ->first();
 
-            if (! $tokenRecord) {
-                throw ValidationException::withMessages([
-                    'token' => ['Invalid or expired reset token.'],
-                ]);
-            }
+        if (! $tokenRecord) {
+            throw ValidationException::withMessages([
+                'token' => ['Invalid or expired reset token.'],
+            ]);
+        }
 
-            if ($tokenRecord->created_at && now()->diffInMinutes($tokenRecord->created_at) > 15) {
-                throw ValidationException::withMessages([
-                    'token' => ['Invalid or expired reset token.'],
-                ]);
-            }
+        if ($tokenRecord->created_at && now()->diffInMinutes($tokenRecord->created_at) > 15) {
+            throw ValidationException::withMessages([
+                'token' => ['Invalid or expired reset token.'],
+            ]);
+        }
 
         if (! Hash::check($data['token'], $tokenRecord->token)) {
             throw ValidationException::withMessages([
