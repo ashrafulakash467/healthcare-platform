@@ -24,6 +24,7 @@ export default function ResetPasswordPage() {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   function updateField(event) {
     const { name, value } = event.target;
     setForm((currentForm) => ({ ...currentForm, [name]: value }));
@@ -96,17 +97,7 @@ export default function ResetPasswordPage() {
           ) : null}
 
           <div className="grid gap-4">
-<<<<<<< HEAD
-            
-            <input 
-            type="hidden" 
-            name="token" 
-            value={form.token} 
-            />
-
-=======
             <input type="hidden" name="token" value={form.token} />
->>>>>>> b2eff257 (add mailtrap auth)
             <Field
               label="Email"
               name="email"
