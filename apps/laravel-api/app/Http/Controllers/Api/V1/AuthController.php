@@ -19,6 +19,10 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use App\Notifications\PasswordResetLinkNotification;
+<<<<<<< HEAD
+=======
+use Illuminate\Support\Carbon;
+>>>>>>> b2eff257 (add mailtrap auth)
 class AuthController extends Controller
 {
     public function login(LoginRequest $request): JsonResponse
@@ -367,11 +371,12 @@ class AuthController extends Controller
     public function forgotPassword(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'email' => ['required', 'email', 'exists:users,email'],
+            'email' => ['required', 'email'],
         ]);
 
-        $token = Str::random(64);
+        $user = User::query()->where('email', $data['email'])->first();
 
+<<<<<<< HEAD
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $data['email']],
             [
@@ -384,6 +389,24 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Password reset link has been sent to your email.',
+=======
+        if ($user) {
+            $token = Str::random(64);
+
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $data['email']],
+                [
+                    'token' => Hash::make($token),
+                    'created_at' => now(),
+                ],
+            );
+
+            $user->notify(new PasswordResetLinkNotification($token));
+        }
+
+        return response()->json([
+            'message' => 'If the email exists, we sent a password reset link.',
+>>>>>>> b2eff257 (add mailtrap auth)
         ]);
     }
 

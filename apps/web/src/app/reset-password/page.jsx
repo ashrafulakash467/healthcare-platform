@@ -96,6 +96,7 @@ export default function ResetPasswordPage() {
           ) : null}
 
           <div className="grid gap-4">
+<<<<<<< HEAD
             
             <input 
             type="hidden" 
@@ -103,6 +104,9 @@ export default function ResetPasswordPage() {
             value={form.token} 
             />
 
+=======
+            <input type="hidden" name="token" value={form.token} />
+>>>>>>> b2eff257 (add mailtrap auth)
             <Field
               label="Email"
               name="email"

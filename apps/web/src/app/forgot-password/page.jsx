@@ -22,15 +22,31 @@ export default function ForgotPasswordPage() {
         method: "POST",
         body: JSON.stringify({ email }),
       });
-      const result = await response.json();
+
+      let result = {};
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
 
       if (!response.ok) {
-        setError(result.message ?? "Could not request a password reset.");
+        setError(
+          result.message ??
+            "Could not request a password reset. Please check the email address and try again.",
+        );
         return;
       }
 
+<<<<<<< HEAD
       setMessage(result.message);
      
+=======
+      setMessage(result.message ?? "If that email exists, we sent a reset link.");
+      if (result.resetUrl) {
+        setResetUrl(result.resetUrl);
+      }
+>>>>>>> b2eff257 (add mailtrap auth)
     } catch {
       setError("Could not reach the API. Make sure the backend is running on port 3001.");
     } finally {
@@ -43,13 +59,14 @@ export default function ForgotPasswordPage() {
       <section className="mx-auto grid min-h-[calc(100vh-220px)] w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand">
-            Password Recovery
+            Forgot Password
           </p>
           <h1 className="mt-4 max-w-xl text-4xl font-extrabold leading-tight text-slate-950 sm:text-5xl">
-            Reset your patient password.
+            We&apos;ll help you get back in.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
-            Enter your registered email address to create a secure reset link.
+            Enter the email address linked to your patient account, and we&apos;ll send a
+            password reset link if the account exists.
           </p>
         </div>
 
@@ -66,6 +83,19 @@ export default function ForgotPasswordPage() {
           {message ? (
             <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
               <p>{message}</p>
+<<<<<<< HEAD
+=======
+              {resetUrl ? (
+                <a
+                  href={resetUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-flex font-semibold text-brand hover:text-brand-hover"
+                >
+                  Open reset link
+                </a>
+              ) : null}
+>>>>>>> b2eff257 (add mailtrap auth)
             </div>
           ) : null}
 
@@ -76,6 +106,7 @@ export default function ForgotPasswordPage() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               autoComplete="email"
+              required
               className="mt-2 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand-soft"
             />
           </label>
