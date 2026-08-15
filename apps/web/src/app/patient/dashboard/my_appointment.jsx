@@ -3,10 +3,6 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { FaCalendarAlt, FaEye, FaTimesCircle } from "react-icons/fa";
-<<<<<<< HEAD
-=======
-import { useState } from "react";
->>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
 import {
   InfoCard,
   formatCurrency,
@@ -37,18 +33,6 @@ export default function MyAppointmentPage({
   function getCancellationReason(appointmentId) {
     return String(cancellationReasons[appointmentId] ?? "").trim();
   }
-<<<<<<< HEAD
-=======
-const [toast, setToast] = useState(null);
-
-const showToast = (message, type = "error") => {
-  setToast({ message, type });
-
-  setTimeout(() => {
-    setToast(null);
-  }, 3000);
-};
->>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
 
   function handleToggleDetails(appointmentId) {
     onSelectAppointment(selectedAppointmentId === appointmentId ? "" : appointmentId);
@@ -66,11 +50,6 @@ const showToast = (message, type = "error") => {
     if (!reason) {
       onSelectAppointment(appointment.id);
       if (typeof setActionError === "function") {
-<<<<<<< HEAD
-        setActionError("Please add a cancellation reason first, then press Cancel again.");
-=======
-         showToast("Please add a cancellation reason first, then press Cancel again.");
->>>>>>> f9cc7de5599ae14df3aa723591bce86ae4580cf1
       }
       if (typeof setActionMessage === "function") {
         setActionMessage("");
