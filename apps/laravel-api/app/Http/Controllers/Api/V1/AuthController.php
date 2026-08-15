@@ -401,9 +401,15 @@ class AuthController extends Controller
 
         $user = User::query()->where('email', $data['email'])->first();
 
-        if ($user) {
-            $token = Str::random(64);
+        if (! $user) {
+            return response()->json([
+                'message' => 'Email not matched with any user.',
+            ], 404);
+        }
 
+        $token = Str::random(64);
+
+        try {
             DB::table('password_reset_tokens')->updateOrInsert(
                 ['email' => $data['email']],
                 [
@@ -413,10 +419,18 @@ class AuthController extends Controller
             );
 
             $user->notify(new PasswordResetLinkNotification($token));
+        } catch (\Throwable $throwable) {
+            DB::table('password_reset_tokens')->where('email', $data['email'])->delete();
+
+            report($throwable);
+
+            return response()->json([
+                'message' => 'Could not send the reset email right now. Please try again later.',
+            ], 500);
         }
 
         return response()->json([
-            'message' => 'If the email exists, we sent a password reset link.',
+            'message' => 'We sent a password reset link to your email address.',
         ]);
     }
 
