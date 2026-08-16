@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import DoctorDashboardSidebar from "../doctor_layouts/doctor-dashboard-sidebar";
+import DoctorDashboardSidebar from "../sidebar/sidebar";
 import { getStoredUser } from "@/lib/api";
 
 export default function SettingsLayout({ children }) {
@@ -33,7 +33,7 @@ export default function SettingsLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 lg:grid-cols-[280px_1fr]">
+      <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 lg:grid-cols-[320px_1fr]">
         <DoctorDashboardSidebar
           doctor={doctor}
           activeTab="settings"
@@ -41,7 +41,7 @@ export default function SettingsLayout({ children }) {
           onNavigateTab={handleNavigateTab}
         />
 
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="min-w-0 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

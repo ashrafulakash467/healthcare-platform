@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 
 const workflowSteps = [
   "Select Chamber / Consultation Type",
@@ -27,18 +29,27 @@ const dayOptions = [
 const defaultWorkingDays = ["mon", "tue", "wed", "thu", "sat"];
 
 export default function ScheduleManagementPage({ doctor, onNavigateSection }) {
-  const [schedule, setSchedule] = useState({
-    chamber: "Main Chamber",
-    consultationType: "In-person",
-    workingDays: defaultWorkingDays,
-    startTime: "09:00",
-    endTime: "17:00",
-    slotDuration: "20",
-    breakStart: "13:00",
-    breakEnd: "13:30",
-    capacity: "24",
-    exceptions: "Friday half-day clinic closure on 2026-08-07",
-  });
+const [schedule, setSchedule] = useState({
+  chamber: "Main Chamber",
+  consultationType: "In-person",
+
+  // Calendar selected dates
+  workingDates: [],
+
+  startTime: "09:00",
+  endTime: "17:00",
+
+  // 10 / 20 / 30 / 60 minutes
+  slotDuration: "20",
+
+  breakStart: "13:00",
+  breakEnd: "13:30",
+
+  capacity: "24",
+
+  exceptions: "",
+});
+
   const [savedMessage, setSavedMessage] = useState("");
   const [generatedSlots, setGeneratedSlots] = useState([]);
 
@@ -51,13 +62,11 @@ export default function ScheduleManagementPage({ doctor, onNavigateSection }) {
         : 0;
     const usableMinutes = Math.max(workingMinutes - breakMinutes, 0);
     const slotsPerDay = slotDuration > 0 ? Math.floor(usableMinutes / slotDuration) : 0;
-    const weeklySlots = slotsPerDay * schedule.workingDays.length;
 
     return {
       workingMinutes,
       breakMinutes,
       slotsPerDay,
-      weeklySlots,
       workingHoursLabel: formatDurationMinutes(workingMinutes),
     };
   }, [schedule]);
@@ -208,26 +217,28 @@ export default function ScheduleManagementPage({ doctor, onNavigateSection }) {
               </select>
             </label>
 
-            <div className="sm:col-span-2">
+          <div className="sm:col-span-2">
               <span className="text-sm font-semibold text-slate-700">
-                Define Working Days
+                Select Working Dates
               </span>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {dayOptions.map((day) => (
-                  <button
-                    key={day.key}
-                    type="button"
-                    onClick={() => toggleWorkingDay(day.key)}
-                    className={`rounded-md border px-3 py-2 text-sm font-semibold transition ${
-                      schedule.workingDays.includes(day.key)
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    {day.label}
-                  </button>
-                ))}
+
+              <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <DayPicker
+                  mode="multiple"
+                  selected={schedule.workingDates}
+                  onSelect={(dates) =>
+                    updateField("workingDates", dates ?? [])
+                  }
+                  disabled={{
+                    before: new Date(),
+                  }}
+                  className="mx-auto"
+                />
               </div>
+
+              <p className="mt-2 text-xs text-slate-500">
+                Select one or multiple dates when the doctor will be available.
+              </p>
             </div>
 
             <label className="block">

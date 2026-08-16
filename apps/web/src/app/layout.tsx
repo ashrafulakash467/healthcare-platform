@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "../components/layout/Header";
-import Footer from "../components/layout/Footer";
+import RouteChrome from "../components/layout/RouteChrome";
 
 export const metadata: Metadata = {
   title: "Health Care Platform",
@@ -19,9 +18,7 @@ export default function RootLayout({
        
         className="h-full bg-green-500 font-sans text-slate-900 antialiased"
       >
-        <Header />
-        {children}
-        <Footer />
+        <RouteChrome>{children}</RouteChrome>
       </body>
     </html>
   );

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardOverviewPage from "./doctor_layouts/dashboardoverview-page";
-import DoctorDashboardSidebar from "./doctor_layouts/doctor-dashboard-sidebar";
+import DoctorDashboardSidebar from "./sidebar/sidebar";
 import MyAppointmentPage from "./doctor_layouts/myappointment-page";
 import MedicalRecordsPage from "./doctor_layouts/medicalrecords-page";
 import ScheduleManagementPage from "./doctor_layouts/schedule-management-page";
@@ -228,7 +228,7 @@ export default function DoctorDashboardClient() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-7xl bg-slate-50 font-sans text-slate-900">
+    <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col bg-slate-50 font-sans text-slate-900 lg:flex-row">
       <DoctorDashboardSidebar
         doctor={doctor}
         activeTab={activeTab}
@@ -236,7 +236,7 @@ export default function DoctorDashboardClient() {
         onNavigateTab={handleTabChange}
       />
 
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         {activeTab === "dashboard" && (
           <DashboardOverviewPage
             doctor={doctor}
