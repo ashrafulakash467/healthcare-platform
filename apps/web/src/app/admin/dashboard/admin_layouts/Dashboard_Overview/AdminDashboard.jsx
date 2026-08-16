@@ -14,6 +14,7 @@ import SupportPage from "../Support/support-page";
 import RolesPage from "../Roles_&_permisions/roles-page";
 import SettingsPage from "../All_Settings/settings-page";
 import AuditPage from "../Audit_logs/audit-page";
+import DashboardHeader from "../../../../Header/header";
 import { apiFetch, getStoredToken } from "@/lib/api";
 
 const tabItems = [
@@ -665,14 +666,22 @@ export default function AdminDashboard() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px] bg-slate-50 text-slate-900">
+      <DashboardHeader
+        user={admin}
+        title="Admin Dashboard"
+        subtitle="Manage users, doctors, hospitals, and system operations."
+        roleLabel="Admin"
+        onLogout={handleLogout}
+      />
+
+      <div className="mx-auto flex min-h-[calc(100vh-92px)] w-full max-w-[1600px] bg-slate-50 text-slate-900">
         <aside className="sticky top-0 flex h-screen w-72 shrink-0 flex-col border-r border-slate-200 bg-white">
-          <div className="flex h-20 items-center border-b border-slate-100 px-6">
+          {/* <div className="flex h-20 items-center border-b border-slate-100 px-6">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Admin Portal</p>
               <h1 className="text-xl font-bold text-slate-950">Healthcare</h1>
             </div>
-          </div>
+          </div> */}
 
           <nav className="flex-1 space-y-1 overflow-y-auto p-4">
             {tabItems.map((item) => (

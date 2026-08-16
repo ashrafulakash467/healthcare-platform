@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardOverviewPage from "./doctor_layouts/dashboardoverview-page";
+import DashboardHeader from "../../Header/header";
 import DoctorDashboardSidebar from "./sidebar/sidebar";
 import MyAppointmentPage from "./doctor_layouts/myappointment-page";
 import MedicalRecordsPage from "./doctor_layouts/medicalrecords-page";
@@ -219,6 +220,14 @@ export default function DoctorDashboardClient() {
     setActiveTab(nextTab);
   }
 
+  function handleLogout() {
+    localStorage.removeItem("doctorToken");
+    localStorage.removeItem("doctorUser");
+    document.cookie = "doctorToken=; path=/; max-age=0; SameSite=Lax";
+    window.dispatchEvent(new Event("auth-change"));
+    router.replace("/doctor/login");
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 font-medium text-slate-500">
@@ -228,15 +237,24 @@ export default function DoctorDashboardClient() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col bg-slate-50 font-sans text-slate-900 lg:flex-row">
-      <DoctorDashboardSidebar
-        doctor={doctor}
-        activeTab={activeTab}
-        recordCategory={recordCategory}
-        onNavigateTab={handleTabChange}
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      <DashboardHeader
+        user={doctor}
+        title="Doctor Dashboard"
+        subtitle={doctor?.specialty ? `Welcome back, Dr. ${doctor.name}.` : "Welcome back."}
+        roleLabel="Doctor"
+        onLogout={handleLogout}
       />
 
-      <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto flex min-h-[calc(100vh-92px)] w-full max-w-7xl flex-col lg:flex-row">
+        <DoctorDashboardSidebar
+          doctor={doctor}
+          activeTab={activeTab}
+          recordCategory={recordCategory}
+          onNavigateTab={handleTabChange}
+        />
+
+        <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         {activeTab === "dashboard" && (
           <DashboardOverviewPage
             doctor={doctor}
@@ -333,7 +351,8 @@ export default function DoctorDashboardClient() {
             onNavigateTab={handleTabChange}
           />
         )}
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

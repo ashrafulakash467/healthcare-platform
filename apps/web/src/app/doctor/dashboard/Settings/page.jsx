@@ -203,7 +203,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div>
+            <div className="mt-4 space-y-1">
               <h2 className="text-2xl font-bold text-slate-950">
                 {doctor?.name ?? "Doctor"}
               </h2>

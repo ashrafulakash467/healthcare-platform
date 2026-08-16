@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import DashboardHeader from "../../../Header/header";
 import DoctorDashboardSidebar from "../sidebar/sidebar";
 import { getStoredUser } from "@/lib/api";
 
@@ -31,9 +32,25 @@ export default function SettingsLayout({ children }) {
     router.push("/doctor/dashboard");
   }
 
+  function handleLogout() {
+    localStorage.removeItem("doctorToken");
+    localStorage.removeItem("doctorUser");
+    document.cookie = "doctorToken=; path=/; max-age=0; SameSite=Lax";
+    window.dispatchEvent(new Event("auth-change"));
+    router.replace("/doctor/login");
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 lg:grid-cols-[320px_1fr]">
+      <DashboardHeader
+        user={doctor}
+        title="Doctor Dashboard"
+        subtitle="Manage your profile and settings."
+        roleLabel="Doctor"
+        onLogout={handleLogout}
+      />
+
+      <div className="mx-auto grid min-h-[calc(100vh-92px)] max-w-7xl grid-cols-1 lg:grid-cols-[320px_1fr]">
         <DoctorDashboardSidebar
           doctor={doctor}
           activeTab="settings"

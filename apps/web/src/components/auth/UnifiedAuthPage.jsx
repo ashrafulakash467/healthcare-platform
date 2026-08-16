@@ -7,14 +7,14 @@ import { apiFetch, persistAuthSession } from "@/lib/api";
 
 const ROUTES = {
   user: {
-    login: "/login",
+    login: "/login?role=patient",
     register: "/register",
     loginEndpoint: "/patient/login",
     registerEndpoint: "/patient/register",
     dashboard: "/patient/dashboard",
   },
   doctor: {
-    login: "/doctor/login",
+    login: "/login?role=doctor",
     loginEndpoint: "/doctor/login",
     registerEndpoint: "/doctor/register",
     dashboard: "/doctor/dashboard",
