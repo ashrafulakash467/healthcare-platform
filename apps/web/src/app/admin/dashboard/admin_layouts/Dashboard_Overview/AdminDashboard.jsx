@@ -644,6 +644,15 @@ export default function AdminDashboard() {
     }
   }
 
+  function handleSidebarItemClick(item) {
+    if (item.key === "visit-site") {
+      window.location.href = "/";
+      return;
+    }
+
+    setActiveTab(item.key);
+  }
+
   function toggleSetting(settingKey) {
     setSystemSettings((current) => ({
       ...current,
@@ -659,6 +668,7 @@ export default function AdminDashboard() {
         title="Admin Dashboard"
         subtitle="Manage users, doctors, hospitals, and system operations."
         roleLabel="Admin"
+        disableMobileSidebarToggle
         onLogout={handleLogout}
       />
 
@@ -672,7 +682,7 @@ export default function AdminDashboard() {
           renderIcon={(item) => <Icon name={item.icon} className="h-5 w-5 shrink-0" />}
           user={admin}
           onLogout={handleLogout}
-          onItemClick={(item) => setActiveTab(item.key)}
+          onItemClick={handleSidebarItemClick}
         />
 
         <main className="min-h-0 flex-1 overflow-y-auto px-6 py-8 lg:px-8">

@@ -13,7 +13,7 @@ export const doctorSidebarItems = [
 ];
 
 export const adminSidebarItems = [
-   { key: "visit-site", label: "Visit Site", icon: "share" },
+  { key: "visit-site", label: "Visit Site", icon: "share" },
   { key: "dashboard", label: "Dashboard Overview", icon: "dashboard" },
   { key: "users", label: "All Users", icon: "users" },
   { key: "doctors", label: "Doctors", icon: "doctors" },

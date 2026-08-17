@@ -11,6 +11,7 @@ export default function DashboardHeader({
   roleLabel,
   onToggleSidebar,
   showSidebarToggle = false,
+  disableMobileSidebarToggle = false,
   onLogout,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,6 +39,10 @@ export default function DashboardHeader({
   }
 
   function handleSidebarToggle() {
+    if (disableMobileSidebarToggle && window.innerWidth < 768) {
+      return;
+    }
+
     if (typeof onToggleSidebar === "function") {
       onToggleSidebar();
       return;
@@ -86,7 +91,7 @@ export default function DashboardHeader({
           {showSidebarToggle ? (
             <button
               type="button"
-              onClick={onToggleSidebar}
+              onClick={handleSidebarToggle}
               className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
               aria-label="Toggle sidebar"
             >
