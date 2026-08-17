@@ -32,6 +32,7 @@ export default function ScheduleManagementPage({ doctor, onNavigateSection }) {
 const [schedule, setSchedule] = useState({
   chamber: "Main Chamber",
   consultationType: "In-person",
+  workingDays: defaultWorkingDays,
 
   // Calendar selected dates
   workingDates: [],
@@ -81,10 +82,11 @@ const [schedule, setSchedule] = useState({
 
   function toggleWorkingDay(dayKey) {
     setSchedule((current) => {
-      const exists = current.workingDays.includes(dayKey);
+      const currentWorkingDays = current.workingDays ?? [];
+      const exists = currentWorkingDays.includes(dayKey);
       const nextWorkingDays = exists
-        ? current.workingDays.filter((day) => day !== dayKey)
-        : [...current.workingDays, dayKey];
+        ? currentWorkingDays.filter((day) => day !== dayKey)
+        : [...currentWorkingDays, dayKey];
 
       return {
         ...current,
@@ -101,8 +103,9 @@ const [schedule, setSchedule] = useState({
   function handleGenerateSlots() {
     const slotDuration = Number(schedule.slotDuration || 0);
     const generated = [];
+    const workingDays = schedule.workingDays ?? [];
 
-    schedule.workingDays.forEach((dayKey) => {
+    workingDays.forEach((dayKey) => {
       const dayLabel = dayOptions.find((day) => day.key === dayKey)?.label ?? dayKey;
       const daySlots = buildSlotsForDay(
         schedule.startTime,
@@ -373,8 +376,8 @@ const [schedule, setSchedule] = useState({
             />
             <PreviewCard
               label="Working Days"
-              value={schedule.workingDays.length}
-              detail={schedule.workingDays
+              value={(schedule.workingDays ?? []).length}
+              detail={(schedule.workingDays ?? [])
                 .map((dayKey) => dayOptions.find((day) => day.key === dayKey)?.label)
                 .filter(Boolean)
                 .join(", ")}

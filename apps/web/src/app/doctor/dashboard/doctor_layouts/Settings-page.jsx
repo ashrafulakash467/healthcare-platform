@@ -156,9 +156,9 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-emerald-50/30 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:px-6">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-7xl space-y-2">
+        <header className="rounded-[28px px-4 py-4 sm:px-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-600">
@@ -255,7 +255,7 @@ export default function SettingsPage() {
             </div>
           </aside>
 
-          <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:p-6">
+          <section className="rounded-[28px] p-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               <SettingsSection
                 title="Personal Information"

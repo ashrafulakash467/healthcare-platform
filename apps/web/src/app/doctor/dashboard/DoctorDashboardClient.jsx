@@ -15,7 +15,7 @@ import {
   emptyMedicalRecords,
   fetchMedicalRecords,
 } from "@/lib/medical-records";
-import SettingsPage from "./Settings/page";
+import SettingsPage from "./doctor_layouts/Settings-page";
 import SidebarShell from "../../Header_Sidebar-Admin-Doc-shareUi/SidebarShell";
 import { doctorSidebarItems } from "../../Header_Sidebar-Admin-Doc-shareUi/sidebar-config";
 import { Icon } from "./doctor_layouts/dashboard-shared";
@@ -235,7 +235,7 @@ export default function DoctorDashboardClient() {
     }
 
     if (nextTab === "settings") {
-      router.push("/doctor/dashboard/Settings");
+      setActiveTab("settings");
       return;
     }
 
@@ -297,7 +297,7 @@ export default function DoctorDashboardClient() {
           onItemClick={handleSidebarItemClick}
         />
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
         {activeTab === "dashboard" && (
           <DashboardOverviewPage
             doctor={doctor}
