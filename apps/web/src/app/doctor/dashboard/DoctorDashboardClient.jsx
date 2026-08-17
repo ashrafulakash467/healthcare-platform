@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUpRightFromSquare, faCalendarDays } from "@fortawesome/free-solid-svg-icons";
 import DashboardOverviewPage from "./doctor_layouts/dashboardoverview-page";
-import DashboardHeader from "../../Header/header";
-import DoctorDashboardSidebar from "./sidebar/sidebar";
+import DashboardHeader from "../../Header_Sidebar-Admin-Doc-shareUi/header";
 import MyAppointmentPage from "./doctor_layouts/myappointment-page";
 import MedicalRecordsPage from "./doctor_layouts/medicalrecords-page";
 import ScheduleManagementPage from "./doctor_layouts/schedule-management-page";
@@ -15,8 +16,11 @@ import {
   fetchMedicalRecords,
 } from "@/lib/medical-records";
 import SettingsPage from "./Settings/page";
+import SidebarShell from "../../Header_Sidebar-Admin-Doc-shareUi/SidebarShell";
+import { doctorSidebarItems } from "../../Header_Sidebar-Admin-Doc-shareUi/sidebar-config";
+import { Icon } from "./doctor_layouts/dashboard-shared";
 
-const notificationsSeed = [
+  const notificationsSeed = [
   {
     id: "note-1",
     title: "New consultation request",
@@ -32,7 +36,31 @@ const notificationsSeed = [
     title: "Earnings update",
     message: "Your clinic summary is ready for review.",
   },
-];
+  ];
+
+function renderDoctorSidebarIcon(item) {
+  if (item.key === "today") {
+    return <FontAwesomeIcon icon={faCalendarDays} />;
+  }
+
+  if (item.key === "visit-site") {
+    return <FontAwesomeIcon icon={faArrowUpRightFromSquare} />;
+  }
+
+  return <Icon name={item.icon} className="h-5 w-5" />;
+}
+
+function isDoctorSidebarItemActive(item, activeTab, recordCategory) {
+  if (item.key === "records") {
+    return activeTab === "records" && recordCategory !== "prescriptions";
+  }
+
+  if (item.key === "prescriptions") {
+    return activeTab === "records" && recordCategory === "prescriptions";
+  }
+
+  return activeTab === item.key;
+}
 
 
 export default function DoctorDashboardClient() {
@@ -220,6 +248,15 @@ export default function DoctorDashboardClient() {
     setActiveTab(nextTab);
   }
 
+  function handleSidebarItemClick(item) {
+    if (item.key === "visit-site") {
+      window.location.href = "/";
+      return;
+    }
+
+    handleTabChange(item.key);
+  }
+
   function handleLogout() {
     localStorage.removeItem("doctorToken");
     localStorage.removeItem("doctorUser");
@@ -246,12 +283,18 @@ export default function DoctorDashboardClient() {
         onLogout={handleLogout}
       />
 
-      <div className="mx-auto flex min-h-[calc(100vh-92px)] w-full max-w-7xl flex-col lg:flex-row">
-        <DoctorDashboardSidebar
-          doctor={doctor}
-          activeTab={activeTab}
-          recordCategory={recordCategory}
-          onNavigateTab={handleTabChange}
+      <div className="flex min-h-[calc(100vh-92px)] w-full flex-col lg:flex-row">
+        <SidebarShell
+          title="Doctor Dashboard"
+          subtitle="Manage appointments, records, earnings, and settings."
+          roleLabel="Doctor"
+          items={doctorSidebarItems}
+          activeKey={activeTab}
+          isItemActive={(item) => isDoctorSidebarItemActive(item, activeTab, recordCategory)}
+          renderIcon={renderDoctorSidebarIcon}
+          user={doctor}
+          onLogout={handleLogout}
+          onItemClick={handleSidebarItemClick}
         />
 
         <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">

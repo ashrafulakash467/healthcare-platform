@@ -14,24 +14,12 @@ import SupportPage from "../Support/support-page";
 import RolesPage from "../Roles_&_permisions/roles-page";
 import SettingsPage from "../All_Settings/settings-page";
 import AuditPage from "../Audit_logs/audit-page";
-import DashboardHeader from "../../../../Header/header";
+import DashboardHeader from "../../../../Header_Sidebar-Admin-Doc-shareUi/header";
 import { apiFetch, getStoredToken } from "@/lib/api";
+import SidebarShell from "../../../../Header_Sidebar-Admin-Doc-shareUi/SidebarShell";
+import { adminSidebarItems } from "../../../../Header_Sidebar-Admin-Doc-shareUi/sidebar-config";
 
-const tabItems = [
-  { key: "dashboard", label: "Dashboard Overview", icon: "dashboard" },
-  { key: "users", label: "All Users", icon: "users" },
-  { key: "doctors", label: "Doctors", icon: "doctors" },
-  { key: "hospitals", label: "Hospitals", icon: "hospitals" },
-  { key: "appointments", label: "Appointments", icon: "appointments" },
-  { key: "payments", label: "Payments", icon: "payments" },
-  { key: "content", label: "Content", icon: "content" },
-  { key: "reports", label: "Reports", icon: "reports" },
-  { key: "notifications", label: "Notifications", icon: "notifications" },
-  { key: "support", label: "Support", icon: "support" },
-  { key: "roles", label: "Roles & Permissions", icon: "roles" },
-  { key: "audit", label: "Audit Logs", icon: "audit" },
-  { key: "settings", label: "All Settings", icon: "settings" },
-];
+const tabItems = adminSidebarItems;
 
 const loginWorkflow = [
   "Admin Login",
@@ -674,49 +662,18 @@ export default function AdminDashboard() {
         onLogout={handleLogout}
       />
 
-      <div className="mx-auto flex min-h-[calc(100vh-92px)] w-full max-w-[1600px] bg-slate-50 text-slate-900">
-        <aside className="sticky top-0 flex h-screen w-72 shrink-0 flex-col border-r border-slate-200 bg-white">
-          {/* <div className="flex h-20 items-center border-b border-slate-100 px-6">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Admin Portal</p>
-              <h1 className="text-xl font-bold text-slate-950">Healthcare</h1>
-            </div>
-          </div> */}
-
-          <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-            {tabItems.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => setActiveTab(item.key)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition ${
-                  activeTab === item.key
-                    ? "bg-slate-950 text-white shadow-[0_10px_20px_rgba(15,23,42,0.18)]"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-                }`}
-              >
-                <Icon name={item.icon} className="h-5 w-5 shrink-0" />
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="border-t border-slate-100 p-4">
-            <div className="rounded-2xl bg-slate-950 p-4 text-white">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">Signed in as</p>
-              <p className="mt-2 text-sm font-bold">{admin?.name ?? "Admin"}</p>
-              <p className="text-xs text-slate-300">{admin?.email ?? "admin@healthcare.com"}</p>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/15"
-              >
-                <Icon name="logout" className="h-4 w-4" />
-                Sign out
-              </button>
-            </div>
-          </div>
-        </aside>
+      <div className="flex min-h-[calc(100vh-92px)] w-full bg-slate-50 text-slate-900">
+        <SidebarShell
+          title="Admin Dashboard"
+          subtitle="Manage users, doctors, hospitals, and system operations."
+          roleLabel="Admin"
+          items={tabItems}
+          activeKey={activeTab}
+          renderIcon={(item) => <Icon name={item.icon} className="h-5 w-5 shrink-0" />}
+          user={admin}
+          onLogout={handleLogout}
+          onItemClick={(item) => setActiveTab(item.key)}
+        />
 
         <main className="flex-1 overflow-y-auto px-6 py-8 lg:px-8">
           {statusMessage ? (
