@@ -283,7 +283,7 @@ export default function DoctorDashboardClient() {
         onLogout={handleLogout}
       />
 
-      <div className="flex min-h-[calc(100vh-92px)] w-full flex-col lg:flex-row">
+      <div className="flex h-[calc(100vh-5rem)] w-full overflow-hidden flex-col lg:flex-row">
         <SidebarShell
           title="Doctor Dashboard"
           subtitle="Manage appointments, records, earnings, and settings."
@@ -297,7 +297,7 @@ export default function DoctorDashboardClient() {
           onItemClick={handleSidebarItemClick}
         />
 
-        <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         {activeTab === "dashboard" && (
           <DashboardOverviewPage
             doctor={doctor}

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+const SIDEBAR_TOGGLE_EVENT = "dashboard-sidebar-toggle";
+
 export default function DashboardHeader({
   user,
   title,
@@ -35,6 +37,15 @@ export default function DashboardHeader({
     onLogout?.();
   }
 
+  function handleSidebarToggle() {
+    if (typeof onToggleSidebar === "function") {
+      onToggleSidebar();
+      return;
+    }
+
+    window.dispatchEvent(new Event(SIDEBAR_TOGGLE_EVENT));
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b h-20 border-slate-200 bg-white/95 backdrop-blur">
       <div className="flex w-full items-center justify-between px-2 py-2">
@@ -59,7 +70,7 @@ export default function DashboardHeader({
           <button
             type="button"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
-            onClick={() => setSidebarOpen?.((prev) => !prev)}
+            onClick={handleSidebarToggle}
           >
             <span className="flex flex-col gap-1">
               <span className="block h-0.5 w-5 bg-current" />

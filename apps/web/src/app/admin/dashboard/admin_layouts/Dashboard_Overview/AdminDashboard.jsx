@@ -662,7 +662,7 @@ export default function AdminDashboard() {
         onLogout={handleLogout}
       />
 
-      <div className="flex min-h-[calc(100vh-92px)] w-full bg-slate-50 text-slate-900">
+      <div className="flex h-[calc(100vh-5rem)] w-full overflow-hidden bg-slate-50 text-slate-900">
         <SidebarShell
           title="Admin Dashboard"
           subtitle="Manage users, doctors, hospitals, and system operations."
@@ -675,7 +675,7 @@ export default function AdminDashboard() {
           onItemClick={(item) => setActiveTab(item.key)}
         />
 
-        <main className="flex-1 overflow-y-auto px-6 py-8 lg:px-8">
+        <main className="min-h-0 flex-1 overflow-y-auto px-6 py-8 lg:px-8">
           {statusMessage ? (
             <p className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
               {statusMessage}
