@@ -60,64 +60,55 @@ const kpiCards = [
   {
     key: "users",
     label: "Total Patients",
-    value: "12,480",
-    detail: "Registered patients across web and mobile.",
+    value: "0000",
     tone: "blue",
   },
   {
     key: "doctors",
     label: "Total Doctors",
-    value: "386",
-    detail: "Verified doctors currently active on the platform.",
+    value: "000",
     tone: "emerald",
   },
   {
     key: "hospitals",
     label: "Hospitals",
-    value: "24",
-    detail: "Partner hospitals and clinic networks.",
+    value: "0000",
     tone: "slate",
   },
   {
     key: "appointments",
     label: "Today's Appointments",
-    value: "128",
-    detail: "Bookings scheduled to be handled today.",
+    value: "0000",
     tone: "amber",
   },
   {
     key: "payments",
     label: "Revenue",
     value: formatCurrency(9650000, "BDT"),
-    detail: "Gross consultation revenue collected this cycle.",
     tone: "emerald",
   },
   {
     key: "doctors",
     label: "Pending Verifications",
-    value: "14",
-    detail: "Doctor onboarding requests waiting for review.",
+    value: "0000",
     tone: "amber",
   },
   {
     key: "payments",
     label: "Refund Requests",
-    value: "6",
-    detail: "Payment disputes and refund cases in progress.",
+    value: "0000",
     tone: "blue",
   },
   {
     key: "support",
     label: "Support Tickets",
-    value: "9",
-    detail: "Open tickets waiting for support attention.",
+    value: "0000",
     tone: "slate",
   },
   {
     key: "settings",
-    label: "System Health",
+    label: "Update Profile",
     value: "98%",
-    detail: "Core services are operating normally.",
     tone: "emerald",
   },
 ];
@@ -782,7 +773,7 @@ function DashboardOverviewPanel({ admin, totals, onNavigate }) {
             </p>
             <h2 className="text-3xl font-bold tracking-tight text-slate-950">Admin Dashboard</h2>
             <p className="text-sm leading-7 text-slate-600">
-              Welcome back, {admin?.name ?? "Admin"}. This enterprise control panel follows the workflow from login and MFA through RBAC and module management.
+              Welcome back, {admin?.name ?? "Admin"}.
             </p>
             <div className="flex flex-wrap gap-2">
               <ActionChip label="Users" onClick={() => onNavigate("users")} />

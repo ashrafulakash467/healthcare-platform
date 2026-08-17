@@ -124,7 +124,7 @@ export default function SidebarShell({
               <button
                 type="button"
                 onClick={onLogout}
-                className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-red-100"
               >
                 Sign out
               </button>
