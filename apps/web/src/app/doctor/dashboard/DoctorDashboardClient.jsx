@@ -283,7 +283,7 @@ export default function DoctorDashboardClient() {
         onLogout={handleLogout}
       />
 
-      <div className="flex h-[calc(100vh-5rem)] w-full overflow-hidden flex-col lg:flex-row">
+      <div className="flex h-[calc(100vh-5rem)] w-full overflow-hidden flex-row">
         <SidebarShell
           title="Doctor Dashboard"
           subtitle="Manage appointments, records, earnings, and settings."

@@ -20,12 +20,26 @@ export default function SidebarShell({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
+    function syncCollapsedState() {
+      setIsCollapsed(window.innerWidth < 768);
+    }
+
     function handleToggle() {
+      if (window.innerWidth < 768) {
+        return;
+      }
+
       setIsCollapsed((current) => !current);
     }
 
+    syncCollapsedState();
     window.addEventListener(SIDEBAR_TOGGLE_EVENT, handleToggle);
-    return () => window.removeEventListener(SIDEBAR_TOGGLE_EVENT, handleToggle);
+    window.addEventListener("resize", syncCollapsedState);
+
+    return () => {
+      window.removeEventListener(SIDEBAR_TOGGLE_EVENT, handleToggle);
+      window.removeEventListener("resize", syncCollapsedState);
+    };
   }, []);
 
   function getIsActive(item) {
@@ -44,13 +58,13 @@ export default function SidebarShell({
   return (
     <aside
       className={[
-        "flex w-full shrink-0 flex-col overflow-hidden border-b border-slate-200 bg-white/95 px-4 py-4 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur transition-all duration-300 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:px-4 lg:py-4",
-        isCollapsed ? "w-30 lg:w-30" : "w-full lg:w-80",
+        "flex h-full shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white/95 px-4 py-4 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur transition-all duration-300 md:px-4 md:py-4",
+        isCollapsed ? "w-30" : "w-20 sm:w-24 md:w-72 lg:w-80",
         className,
       ].join(" ")}
     >
       <nav className="flex-1 overflow-y-auto py-4">
-        <div className="space-y-1">
+        <div className="space-y-2">
           {items.map((item) => {
             const active = getIsActive(item);
 
