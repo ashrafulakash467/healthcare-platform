@@ -45,7 +45,7 @@ export default function HomeHeroBanner() {
   }
 
   return (
-   <div className="relative h-[520px] overflow-hidden">
+   <div className="relative h-130 overflow-hidden">
   {/* Background Slider */}
   {slides.map((slide, index) => (
     <div

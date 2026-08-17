@@ -8,8 +8,8 @@ export default function RouteChrome({ children }) {
   const pathname = usePathname();
 
   const hideChrome =
-    pathname.startsWith("/doctor") ||
-    pathname.startsWith("/admin");
+    pathname.startsWith("/doctor/dashboard") ||
+    pathname.startsWith("/admin/dashboard");
 
   if (hideChrome) {
     return <>{children}</>;
@@ -18,7 +18,7 @@ export default function RouteChrome({ children }) {
   return (
     <>
       <Header />
-      {children}
+      <div className="pt-30 sm:pt-32.5 ">{children}</div>
       <Footer />
     </>
   );

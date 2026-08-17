@@ -29,19 +29,6 @@ const doctorLinks = [
   "Account Deletion",
 ];
 
-const paymentBadges = [
-  "VISA",
-  "MC",
-  "AMEX",
-  "dbBL",
-  "bKash",
-  "Nagad",
-  "Rocket",
-  "Upay",
-  "QCash",
-  "SSLCommerz",
-];
-
 const socialLinks = [
   { label: "Facebook", icon: <FacebookIcon /> },
   { label: "LinkedIn", icon: <LinkedInIcon /> },
@@ -116,15 +103,6 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-white/10 pt-8">
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
-            <span className="mr-2">Pay with</span>
-            {paymentBadges.map((badge) => (
-              <span
-                key={badge}
-                className="inline-flex h-9 min-w-9 items-center justify-center rounded-md bg-[#eef7f0] px-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#345c32] shadow-sm"
-              >
-                {badge}
-              </span>
-            ))}
           </div>
 
           <p className="mt-10 text-center text-sm text-white/70">
