@@ -259,7 +259,7 @@ export default function UnifiedAuthPage({ mode, initialRole = "user" }) {
                   onChange={updateField}
                   autoComplete="username"
                   error={errors.identifier}
-                />
+                 />
                 <Field
                   label="Password"
                   name="password"
