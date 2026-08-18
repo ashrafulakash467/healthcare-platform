@@ -1236,7 +1236,6 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `username` varchar(100) DEFAULT NULL,
   `email` varchar(191) NOT NULL,
   `phone` varchar(100) DEFAULT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
@@ -1251,7 +1250,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_email_unique` (`email`),
-  UNIQUE KEY `users_username_unique` (`username`),
   UNIQUE KEY `users_phone_unique` (`phone`),
   KEY `users_status_index` (`status`)
 ) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1260,16 +1258,16 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `username`, `email`, `phone`, `email_verified_at`, `password`, `status`, `two_factor_enabled`, `two_factor_secret`, `two_factor_confirmed_at`, `last_login_at`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Admin User', 'admin', 'admin@healthcare.com', '01700000001', '2026-08-02 01:12:38', '$2y$12$o9aGroy3RW0n3hOSb0qb6uA/77s4XxUS9K2xrj6AkaPLgknhdMCBK', 'active', 0, NULL, NULL, '2026-08-10 03:40:40', NULL, '2026-08-02 01:12:39', '2026-08-10 03:40:40'),
-(2, 'Muhammad Isalam', 'doctor', 'muhammad @gmail.com', '01700000002', '2026-08-02 01:12:39', '$2y$12$vY0SQizmWeuao9yVeoPJ4O9Iq7XPy.O10/CQeqJR.KWTh9Hjg0Uc2', 'active', 0, NULL, NULL, '2026-08-09 04:50:46', NULL, '2026-08-02 01:12:39', '2026-08-09 04:50:46'),
-(4, 'Hospital Admin', 'hospital', 'hospital@healthcare.com', '01700000004', '2026-08-02 01:12:40', '$2y$12$.oyJEUZq5UP4X8MfxxgWPumv4RYzSrQdi41gfF6IXbCRI7jexfif.', 'active', 0, NULL, NULL, NULL, NULL, '2026-08-02 01:12:40', '2026-08-02 01:12:40'),
-(5, 'Fuad Islam', 'pending-doctor', 'fuad@gmail.com', '01700000005', '2026-08-02 01:12:40', '$2y$12$Z3bQ8tqNi/6edvGe450WmeF.EQcAJy.kU5888GjG7H1xCdM9rmO1K', 'active', 0, NULL, NULL, '2026-08-09 04:43:48', NULL, '2026-08-02 01:12:40', '2026-08-09 04:43:48'),
-(6, 'Arafat Alif', 'arafat-alif-23i2cd', 'arafat@gmail.com', '01710000011', NULL, '$2y$12$5N3zIoYxHEmOI3YMnAeeTeFJg1pZtM1bS5jQk9WwSnjw9rNiW1FAi', 'active', 0, NULL, NULL, '2026-08-11 04:16:47', NULL, '2026-08-02 06:29:00', '2026-08-11 04:16:47'),
-(7, 'Ahad', 'ahad-rbrlmv', 'ahad@gmail.com', '0171000022', NULL, '$2y$12$YKZOiCucMN4/2PHlKYZRFuQVOC5i4cyfTMR3O/GpjC8vgvivav69m', 'active', 0, NULL, NULL, '2026-08-09 04:51:47', NULL, '2026-08-02 06:38:23', '2026-08-09 04:51:47'),
-(8, 'akash', NULL, 'a@gmail.com', '+8801710000000', NULL, '$2y$12$1EgGDGF9kMpA3UYAw73fFO7OvTw6jQ6CidCPHDwK9AsdN.m6J/T5y', 'active', 0, NULL, NULL, '2026-08-04 01:24:01', NULL, '2026-08-04 01:23:39', '2026-08-04 01:24:01'),
-(11, 'test2', NULL, 'test2@gmail.com', '01500000017', NULL, '$2y$12$ZPLCrOXLuBPsSC3eRlSuyOhnaqQzlSWOPcNhUZxuYYFEEJmB7AuEa', 'active', 0, NULL, NULL, '2026-08-11 05:14:46', NULL, '2026-08-11 00:19:49', '2026-08-11 05:14:46'),
-(10, 'test', NULL, 'test@gmail.com', '01709098787', NULL, '$2y$12$Q9ADUj9V4nXepWuVLRkcD.FoQzmTYGRXPIBBWnT15iihG.3nlzAoS', 'active', 0, NULL, NULL, '2026-08-10 00:57:52', NULL, '2026-08-09 01:54:04', '2026-08-10 00:57:52');
+INSERT INTO `users` (`id`, `name`, `role`, `email`, `phone`, `email_verified_at`, `password`, `status`, `two_factor_enabled`, `two_factor_secret`, `two_factor_confirmed_at`, `last_login_at`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'Admin User', 'admin', 'admin', 'admin@healthcare.com', '01700000001', '2026-08-02 01:12:38', '$2y$12$o9aGroy3RW0n3hOSb0qb6uA/77s4XxUS9K2xrj6AkaPLgknhdMCBK', 'active', 0, NULL, NULL, '2026-08-10 03:40:40', NULL, '2026-08-02 01:12:39', '2026-08-10 03:40:40'),
+(2, 'Muhammad Isalam', 'doctor', 'doctor', 'muhammad @gmail.com', '01700000002', '2026-08-02 01:12:39', '$2y$12$vY0SQizmWeuao9yVeoPJ4O9Iq7XPy.O10/CQeqJR.KWTh9Hjg0Uc2', 'active', 0, NULL, NULL, '2026-08-09 04:50:46', NULL, '2026-08-02 01:12:39', '2026-08-09 04:50:46'),
+(4, 'Hospital Admin', 'hospital', 'hospital', 'hospital@healthcare.com', '01700000004', '2026-08-02 01:12:40', '$2y$12$.oyJEUZq5UP4X8MfxxgWPumv4RYzSrQdi41gfF6IXbCRI7jexfif.', 'active', 0, NULL, NULL, NULL, NULL, '2026-08-02 01:12:40', '2026-08-02 01:12:40'),
+(5, 'Fuad Islam', 'doctor', 'doctor', 'fuad@gmail.com', '01700000005', '2026-08-02 01:12:40', '$2y$12$Z3bQ8tqNi/6edvGe450WmeF.EQcAJy.kU5888GjG7H1xCdM9rmO1K', 'active', 0, NULL, NULL, '2026-08-09 04:43:48', NULL, '2026-08-02 01:12:40', '2026-08-09 04:43:48'),
+(6, 'Arafat Alif', 'arafat-alif-23i2cd', 'doctor', 'arafat@gmail.com', '01710000011', NULL, '$2y$12$5N3zIoYxHEmOI3YMnAeeTeFJg1pZtM1bS5jQk9WwSnjw9rNiW1FAi', 'active', 0, NULL, NULL, '2026-08-11 04:16:47', NULL, '2026-08-02 06:29:00', '2026-08-11 04:16:47'),
+(7, 'Ahad', 'ahad-rbrlmv', 'doctor', 'ahad@gmail.com', '0171000022', NULL, '$2y$12$YKZOiCucMN4/2PHlKYZRFuQVOC5i4cyfTMR3O/GpjC8vgvivav69m', 'active', 0, NULL, NULL, '2026-08-09 04:51:47', NULL, '2026-08-02 06:38:23', '2026-08-09 04:51:47'),
+(8, 'akash', 'akash', 'patient', 'a@gmail.com', '+8801710000000', NULL, '$2y$12$1EgGDGF9kMpA3UYAw73fFO7OvTw6jQ6CidCPHDwK9AsdN.m6J/T5y', 'active', 0, NULL, NULL, '2026-08-04 01:24:01', NULL, '2026-08-04 01:23:39', '2026-08-04 01:24:01'),
+(11, 'test2', 'test2', 'patient', 'test2@gmail.com', '01500000017', NULL, '$2y$12$ZPLCrOXLuBPsSC3eRlSuyOhnaqQzlSWOPcNhUZxuYYFEEJmB7AuEa', 'active', 0, NULL, NULL, '2026-08-11 05:14:46', NULL, '2026-08-11 00:19:49', '2026-08-11 05:14:46'),
+(10, 'test', 'test', 'patient', 'test@gmail.com', '01709098787', NULL, '$2y$12$Q9ADUj9V4nXepWuVLRkcD.FoQzmTYGRXPIBBWnT15iihG.3nlzAoS', 'active', 0, NULL, NULL, '2026-08-10 00:57:52', NULL, '2026-08-09 01:54:04', '2026-08-10 00:57:52');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

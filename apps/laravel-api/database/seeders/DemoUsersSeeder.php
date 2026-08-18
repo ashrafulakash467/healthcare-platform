@@ -105,6 +105,7 @@ class DemoUsersSeeder extends Seeder
                 [
                     'name' => $data['name'],
                     'username' => $data['username'],
+                    'role' => $data['role'],
                     'phone' => $data['phone'],
                     'password' => $data['password'],
                     'status' => $data['status'],

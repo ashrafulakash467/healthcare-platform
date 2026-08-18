@@ -182,7 +182,7 @@ class DoctorController extends Controller
         $doctor = DB::transaction(function () use ($data, $request): Doctor {
             $user = User::create([
                 'name' => $data['name'],
-                'username' => Str::slug($data['name']).'-'.Str::lower(Str::random(6)),
+                'role' => 'doctor',
                 'email' => $data['email'],
                 'phone' => $data['phone'] ?? null,
                 'password' => Hash::make($data['password']),

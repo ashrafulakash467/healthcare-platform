@@ -32,8 +32,8 @@ class AuthController extends Controller
             ->with(['roles', 'permissions'])
             ->where(function ($query) use ($identifier): void {
                 $query->where('email', $identifier)
-                    ->orWhere('phone', $identifier)
-                    ->orWhere('username', $identifier);
+                    ->orWhere('phone', $identifier);
+
             })
             ->first();
 
@@ -94,7 +94,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $data['name'],
-            'username' => $data['username'] ?? null,
+            'role' => $role,
             'email' => $data['email'],
             'phone' => $data['phone'] ?? null,
             'password' => $data['password'],
