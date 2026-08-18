@@ -75,9 +75,7 @@ export default function DashboardOverviewPage({
   notifications = [],
   records = {},
   onNavigateTab,
-  ...props
 }) {
-    const router = useRouter();
   const patientRecordCount =
     (records.diagnostics?.length ?? 0) +
     (records.notes?.length ?? 0) +
@@ -193,7 +191,7 @@ export default function DashboardOverviewPage({
           value={"Update Profile"}
           detail="Update and Edit your profile settings."
           tone="amber"
-          onClick={() => router.push("/doctor/dashboard/Settings")}
+          onClick={() => onNavigateTab("Settings")}
         />
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
