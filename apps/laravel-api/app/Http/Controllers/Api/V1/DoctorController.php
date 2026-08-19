@@ -179,7 +179,7 @@ class DoctorController extends Controller
         $availableTimeSlots = $this->normalizeListField($data['available_time_slots'] ?? null);
         $hospitalIds = $this->normalizeHospitalIds($data['hospital_ids'] ?? null);
 
-        $doctor = DB::transaction(function () use ($data, $request): Doctor {
+        $doctor = DB::transaction(function () use ($data, $request, $availableDates, $availableTimeSlots, $hospitalIds): Doctor {
             $user = User::create([
                 'name' => $data['name'],
                 'role' => 'doctor',

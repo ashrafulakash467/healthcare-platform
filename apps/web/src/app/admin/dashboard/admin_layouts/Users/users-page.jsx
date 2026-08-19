@@ -1,9 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DOCTOR_IMAGE_FALLBACK, resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
 import { apiFetch, getStoredToken } from "@/lib/api";
+import {
+  createDoctorDirectoryChannel,
+  getDoctorDirectoryUpdateEventName,
+  notifyDoctorDirectoryUpdated,
+} from "@/lib/doctor-directory";
 import UpdateUserPage from "./update-user-page";
 
 const categoryOptions = [
@@ -29,7 +34,7 @@ export default function UsersPage() {
   const [editForm, setEditForm] = useState({});
   const [deleteConfirmUser, setDeleteConfirmUser] = useState(null);
 
-  async function loadUsers() {
+  const loadUsers = useCallback(async () => {
     const token = getStoredToken("admin");
 
     if (!token) {
@@ -57,7 +62,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -65,7 +70,30 @@ export default function UsersPage() {
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [loadUsers]);
+
+  useEffect(() => {
+    const handleDirectoryUpdate = () => {
+      void loadUsers();
+    };
+
+    const channel = createDoctorDirectoryChannel();
+
+    if (channel) {
+      channel.addEventListener("message", handleDirectoryUpdate);
+    }
+
+    window.addEventListener(getDoctorDirectoryUpdateEventName(), handleDirectoryUpdate);
+
+    return () => {
+      if (channel) {
+        channel.removeEventListener("message", handleDirectoryUpdate);
+        channel.close();
+      }
+
+      window.removeEventListener(getDoctorDirectoryUpdateEventName(), handleDirectoryUpdate);
+    };
+  }, [loadUsers]);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => matchesCategory(user, userCategory));
@@ -121,6 +149,13 @@ export default function UsersPage() {
         }
 
         setDeleteConfirmUser(null);
+        const deletedDoctor = deleteConfirmUser?.doctor ?? null;
+        if (deleteConfirmUser?.role === "doctor" || deleteConfirmUser?.roles?.includes?.("doctor") || deletedDoctor) {
+          notifyDoctorDirectoryUpdated({
+            action: "deleted",
+            doctor: deletedDoctor ? { ...deletedDoctor, id: deletedDoctor.id ?? deleteConfirmUser.id } : { id: deleteConfirmUser.id },
+          });
+        }
         await loadUsers();
       }
     } catch {
@@ -203,6 +238,19 @@ export default function UsersPage() {
               : current.map((user) => (user.id === userId ? nextUser : user)),
           );
           setSelectedUserId(nextUser.id ?? userId ?? null);
+
+          const nextDoctor = nextUser.doctor ?? null;
+          const hasDoctorRole =
+            String(nextUser.role ?? "").toLowerCase() === "doctor" ||
+            (Array.isArray(nextUser.roles) && nextUser.roles.some((role) => String(role).toLowerCase() === "doctor")) ||
+            Boolean(nextDoctor);
+
+          if (hasDoctorRole) {
+            notifyDoctorDirectoryUpdated({
+              action: isCreateMode ? "created" : "updated",
+              doctor: nextDoctor ? { ...nextDoctor, id: nextDoctor.id ?? nextUser.doctor?.id } : { id: nextUser.id ?? userId },
+            });
+          }
         }
 
         setEditingUser(null);

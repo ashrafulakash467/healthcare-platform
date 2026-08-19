@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Icon, formatCurrency } from "./dashboard-shared";
 import UsersPage from "../Users/users-page";
 import DoctorsPage from "../Doctors/doctors-page";
@@ -16,6 +16,11 @@ import SettingsPage from "../All_Settings/settings-page";
 import AuditPage from "../Audit_logs/audit-page";
 import DashboardHeader from "../../../../Header_Sidebar-Admin-Doc-shareUi/header";
 import { apiFetch, getStoredToken } from "@/lib/api";
+import {
+  createDoctorDirectoryChannel,
+  getDoctorDirectoryUpdateEventName,
+  notifyDoctorDirectoryUpdated,
+} from "@/lib/doctor-directory";
 import SidebarShell from "../../../../Header_Sidebar-Admin-Doc-shareUi/SidebarShell";
 import { adminSidebarItems } from "../../../../Header_Sidebar-Admin-Doc-shareUi/sidebar-config";
 
@@ -292,7 +297,7 @@ export default function AdminDashboard() {
     queueMicrotask(() => setIsReady(true));
   }, []);
 
-  async function loadDoctors() {
+  const loadDoctors = useCallback(async () => {
     const token = getStoredToken("admin");
     if (!token) return;
 
@@ -310,7 +315,7 @@ export default function AdminDashboard() {
     } finally {
       setDoctorsLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     if (activeTab === "doctors") {
@@ -320,7 +325,30 @@ export default function AdminDashboard() {
 
       return () => window.clearTimeout(timer);
     }
-  }, [activeTab]);
+  }, [activeTab, loadDoctors]);
+
+  useEffect(() => {
+    const handleDirectoryUpdate = () => {
+      void loadDoctors();
+    };
+
+    const channel = createDoctorDirectoryChannel();
+
+    if (channel) {
+      channel.addEventListener("message", handleDirectoryUpdate);
+    }
+
+    window.addEventListener(getDoctorDirectoryUpdateEventName(), handleDirectoryUpdate);
+
+    return () => {
+      if (channel) {
+        channel.removeEventListener("message", handleDirectoryUpdate);
+        channel.close();
+      }
+
+      window.removeEventListener(getDoctorDirectoryUpdateEventName(), handleDirectoryUpdate);
+    };
+  }, [loadDoctors]);
 
   useEffect(() => {
     if (!toast) {
@@ -425,6 +453,10 @@ export default function AdminDashboard() {
               ? [result.doctor, ...current]
               : current.map((doctor) => (doctor.id === doctorId ? result.doctor : doctor)),
           );
+          notifyDoctorDirectoryUpdated({
+            action: isCreateMode ? "created" : "updated",
+            doctor: result.doctor,
+          });
           setEditingDoctor(null);
           setEditForm({});
           showToast(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
@@ -483,6 +515,10 @@ export default function AdminDashboard() {
             ? [result.doctor, ...current]
             : current.map((doctor) => (doctor.id === doctorId ? result.doctor : doctor)),
         );
+        notifyDoctorDirectoryUpdated({
+          action: isCreateMode ? "created" : "updated",
+          doctor: result.doctor,
+        });
         setEditingDoctor(null);
         setEditForm({});
         showToast(isCreateMode ? "Doctor created successfully." : "Doctor updated successfully.");
@@ -506,6 +542,10 @@ export default function AdminDashboard() {
 
       if (response.ok) {
         setDoctors((current) => current.filter((doctor) => doctor.id !== doctorId));
+        notifyDoctorDirectoryUpdated({
+          action: "deleted",
+          doctor: { id: doctorId },
+        });
         setDeleteConfirmId(null);
         showToast("Doctor deleted successfully.");
       } else {

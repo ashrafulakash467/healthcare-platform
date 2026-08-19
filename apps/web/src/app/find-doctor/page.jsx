@@ -1,9 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import DoctorCard from "@/components/shared/DoctorCard";
 import { apiFetch } from "@/lib/api";
+import {
+  createDoctorDirectoryChannel,
+  getDoctorDirectoryUpdateEventName,
+} from "@/lib/doctor-directory";
 
 const initialFilters = {
   search: "",
@@ -31,6 +34,7 @@ export default function FindDoctor() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshToken, setRefreshToken] = useState(0);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
@@ -84,7 +88,30 @@ export default function FindDoctor() {
     loadDoctors();
 
     return () => controller.abort();
-  }, [queryString]);
+  }, [queryString, refreshToken]);
+
+  useEffect(() => {
+    const handleDirectoryUpdate = () => {
+      setRefreshToken((current) => current + 1);
+    };
+
+    const channel = createDoctorDirectoryChannel();
+
+    if (channel) {
+      channel.addEventListener("message", handleDirectoryUpdate);
+    }
+
+    window.addEventListener(getDoctorDirectoryUpdateEventName(), handleDirectoryUpdate);
+
+    return () => {
+      if (channel) {
+        channel.removeEventListener("message", handleDirectoryUpdate);
+        channel.close();
+      }
+
+      window.removeEventListener(getDoctorDirectoryUpdateEventName(), handleDirectoryUpdate);
+    };
+  }, []);
 
   function updateFilter(event) {
     const { name, value } = event.target;
