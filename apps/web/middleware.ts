@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const ROUTE_RULES = [
-  { prefix: "/admin/dashboard", tokenKey: "adminToken", login: "/login?role=admin" },
-  { prefix: "/doctor/dashboard", tokenKey: "doctorToken", login: "/doctor/login" },
+  { prefix: "/admin/dashboard", tokenKey: "adminToken", login: "/login" },
+  { prefix: "/doctor/dashboard", tokenKey: "doctorToken", login: "/login" },
   { prefix: "/patient/dashboard", tokenKey: "patientToken", login: "/login" },
 ];
 

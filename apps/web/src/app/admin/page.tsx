@@ -208,7 +208,7 @@ export default function AdminPage() {
     clearAdminSession();
     setIdentifier("");
     setPassword("");
-    router.replace("/login?role=admin");
+    router.replace("/login");
   }
 
   if (isLoading && !admin) {

@@ -420,8 +420,6 @@ class AuthController extends Controller
 
             $user->notify(new PasswordResetLinkNotification($token));
         } catch (\Throwable $throwable) {
-            DB::table('password_reset_tokens')->where('email', $data['email'])->delete();
-
             report($throwable);
 
             return response()->json([

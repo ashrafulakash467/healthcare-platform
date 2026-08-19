@@ -8,7 +8,6 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [resetUrl, setResetUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event) {
@@ -39,9 +38,6 @@ export default function ForgotPasswordPage() {
       }
 
       setMessage(result.message ?? "If that email exists, we sent a reset link.");
-      if (result.resetUrl) {
-        setResetUrl(result.resetUrl);
-      }
     } catch {
       setError("Could not reach the API. Make sure the backend is running on port 3001.");
     } finally {
@@ -78,16 +74,6 @@ export default function ForgotPasswordPage() {
           {message ? (
             <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
               <p>{message}</p>
-              {resetUrl ? (
-                <a
-                  href={resetUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-2 inline-flex font-semibold text-brand hover:text-brand-hover"
-                >
-                  Open reset link
-                </a>
-              ) : null}
             </div>
           ) : null}
 

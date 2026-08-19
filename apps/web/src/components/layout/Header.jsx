@@ -37,11 +37,7 @@ export default function Header() {
   }, []);
 
   function handleLogout() {
-    const nextLoginPath = dashboardPath.startsWith("/admin")
-      ? "/login?role=admin"
-      : dashboardPath.startsWith("/doctor")
-        ? "/doctor/login"
-        : "/login";
+    const nextLoginPath = "/login";
 
     clearAllAuthSessions();
     setIsLoggedIn(false);

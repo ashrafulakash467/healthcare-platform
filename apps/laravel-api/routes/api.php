@@ -16,6 +16,7 @@ Route::get('health', function () {
     ]);
 });
 
+Route::post('login', [AuthController::class, 'login']);
 Route::post('patient/login', [AuthController::class, 'login'])->defaults('role', 'patient');
 Route::post('patient/register', [AuthController::class, 'register'])->defaults('role', 'patient');
 Route::post('doctor/login', [AuthController::class, 'login'])->defaults('role', 'doctor');
