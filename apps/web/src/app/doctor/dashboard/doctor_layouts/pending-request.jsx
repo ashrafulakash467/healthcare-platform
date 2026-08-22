@@ -354,7 +354,7 @@ export default function PendingRequestPage({
               </div>
             </>
           ) : (
-            <div className="flex min-h-[460px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
+            <div className="flex min-h-115 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
               <div className="max-w-sm space-y-2">
                 <h3 className="text-lg font-bold text-slate-900">
                   Open a pending request
