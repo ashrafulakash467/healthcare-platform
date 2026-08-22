@@ -7,6 +7,7 @@ import { faArrowUpRightFromSquare, faCalendarDays } from "@fortawesome/free-soli
 import DashboardOverviewPage from "./doctor_layouts/dashboardoverview-page";
 import DashboardHeader from "../../Header_Sidebar-Admin-Doc-shareUi/header";
 import MyAppointmentPage from "./doctor_layouts/myappointment-page";
+import PendingRequestPage from "./doctor_layouts/pending-request";
 import MedicalRecordsPage from "./doctor_layouts/medicalrecords-page";
 import ScheduleManagementPage from "./doctor_layouts/schedule-management-page";
 import { apiFetch, getStoredToken } from "@/lib/api";
@@ -74,7 +75,7 @@ export default function DoctorDashboardClient() {
   const [now, setNow] = useState(() => Date.now());
   const [records, setRecords] = useState(emptyMedicalRecords());
 
-  function loadAppointments(token) {
+  function loadAppointments(token = getStoredToken("doctor")) {
     return apiFetch("/appointment/my", {}, token)
       .then((response) => response.json().then((result) => ({ response, result })))
       .then(({ response, result }) => {
@@ -342,13 +343,12 @@ export default function DoctorDashboardClient() {
         )}
 
         {activeTab === "pending" && (
-          <MyAppointmentPage
+          <PendingRequestPage
             appointments={pendingRequests}
             selectedAppointmentId={selectedAppointmentId}
             onSelectAppointment={setSelectedAppointmentId}
-            mode="pending"
             now={now}
-            onMedicalRecordsChanged={loadMedicalRecords}
+            onAppointmentsChanged={loadAppointments}
           />
         )}
 

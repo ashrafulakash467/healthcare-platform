@@ -58,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('doctor/dashboard', [DashboardController::class, 'doctor']);
         Route::post('consultations/{appointmentId}/notes', [MedicalRecordController::class, 'storeNote']);
         Route::post('consultations/{appointmentId}/prescriptions', [MedicalRecordController::class, 'storePrescription']);
+        Route::post('appointment/decision', [AppointmentController::class, 'decision']);
     });
 
     Route::middleware('role:patient|admin|super-admin')->group(function (): void {

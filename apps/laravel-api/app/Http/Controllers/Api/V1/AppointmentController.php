@@ -349,6 +349,61 @@ class AppointmentController extends Controller
         ]);
     }
 
+    public function decision(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'appointmentId' => ['required', 'string'],
+            'decision' => ['required', 'string', 'in:accepted,rejected,reschedule'],
+            'note' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $appointment = $this->findAppointmentForCurrentUser($request->user(), $data['appointmentId']);
+
+        if (! $appointment) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['Appointment not found.'],
+            ]);
+        }
+
+        $decision = $data['decision'];
+        $updates = [
+            'doctor_notes' => $data['note'] ?? $appointment->doctor_notes,
+        ];
+
+        if ($decision === 'accepted') {
+            $updates['status'] = 'confirmed';
+            $updates['accepted_at'] = now();
+            $updates['rejected_at'] = null;
+            $updates['rescheduled_at'] = null;
+        } elseif ($decision === 'rejected') {
+            $this->releaseSlotIfNeeded($appointment);
+            $updates['status'] = 'cancelled';
+            $updates['rejected_at'] = now();
+            $updates['accepted_at'] = null;
+            $updates['rescheduled_at'] = null;
+            $updates['cancel_reason'] = 'Rejected by doctor';
+        } else {
+            $this->releaseSlotIfNeeded($appointment);
+            $updates['status'] = 'reschedule_requested';
+            $updates['rescheduled_at'] = now();
+            $updates['accepted_at'] = null;
+            $updates['rejected_at'] = null;
+            $updates['cancel_reason'] = null;
+        }
+
+        $appointment->forceFill($updates)->save();
+        $appointment->loadMissing(['patient.user', 'doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital']);
+
+        return response()->json([
+            'message' => match ($decision) {
+                'accepted' => 'Appointment accepted successfully.',
+                'rejected' => 'Appointment rejected successfully.',
+                default => 'Appointment moved to the reschedule queue.',
+            },
+            'appointment' => $this->formatAppointment($appointment),
+        ]);
+    }
+
     private function appointmentsForUser(?\Illuminate\Contracts\Auth\Authenticatable $user): Collection
     {
         if (! $user instanceof \App\Models\User) {
