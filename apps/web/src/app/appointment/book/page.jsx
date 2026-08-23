@@ -121,11 +121,24 @@ export default function BookAppointmentPage() {
         }
 
         setBookingOptions(result);
-        setClinicId(
+
+        const clinics = Array.isArray(result.clinics)
+          ? result.clinics
+          : Array.isArray(result.doctor?.clinics)
+            ? result.doctor.clinics
+            : [];
+
+        const chamberAddress =
           result.doctor?.chamberAddress ??
-            result.doctor?.chamber_address ??
-            "",
-        );
+          result.doctor?.chamber_address ??
+          "";
+
+        // Prefer a concrete clinic/hospital id so the clinic dropdown and the
+        // "Confirm appointment" button stay usable even when the doctor has no
+        // chamber address. Keep the chamber address (which the backend treats
+        // as "any clinic") as the default when present, and only fall back to a
+        // clinic id so doctors with an address keep their existing behaviour.
+        setClinicId(chamberAddress || clinics[0]?.id || "");
       } catch {
         setError("Could not load booking options. Make sure the backend is running on port 3001.");
       } finally {
@@ -231,7 +244,14 @@ export default function BookAppointmentPage() {
     null;
   const selectedDoctorClinicAddress =
     selectedDoctor?.chamberAddress ?? selectedDoctor?.chamber_address ?? "";
-  const effectiveClinicId = clinicId || selectedDoctorClinicAddress;
+  const selectedDoctorClinics = Array.isArray(bookingOptions?.clinics)
+    ? bookingOptions.clinics
+    : Array.isArray(selectedDoctor?.clinics)
+      ? selectedDoctor.clinics
+      : [];
+  const primaryClinicId = selectedDoctorClinics[0]?.id ?? "";
+  const effectiveClinicId =
+    clinicId || selectedDoctorClinicAddress || primaryClinicId;
   const selectedDoctorAvailableDates =
     selectedDoctor?.availableDates ?? selectedDoctor?.available_dates ?? [];
   const availableTimeSlots = formatDoctorList(
@@ -247,12 +267,37 @@ export default function BookAppointmentPage() {
   const activeAppointmentDate = selectableDates.includes(appointmentDate)
     ? appointmentDate
     : "";
-  const visibleSlots = slots.filter(
-    (slot) =>
-      activeAppointmentDate &&
-      !slot.isBooked &&
-      !isPastAppointmentSlot(activeAppointmentDate, slot.time, now),
-  );
+const visibleSlots = activeAppointmentDate
+  ? (slots.length > 0
+      ? slots.filter(
+          (slot) =>
+            !slot.isBooked &&
+            !isPastAppointmentSlot(
+              activeAppointmentDate,
+              slot.time,
+              now
+            )
+        )
+      : availableTimeSlots
+          .split(",")
+          .map((time) => time.trim())
+          .filter(Boolean)
+          .map((time) => ({
+            time: time.split(" - ")[0].trim(),
+            isBooked: false,
+          }))
+          .filter(
+            (slot) =>
+              !isPastAppointmentSlot(
+                activeAppointmentDate,
+                slot.time,
+                now
+              )
+          ))
+  : [];
+
+  const slotDurationMinutes =
+    Number(bookingOptions?.schedule?.slotDurationMinutes) || 15;
   const activeSlotTime = visibleSlots.some((slot) => slot.time === slotTime)
     ? slotTime
     : "";
@@ -262,9 +307,20 @@ export default function BookAppointmentPage() {
     setError("");
     setBookingToast(null);
 
-    const token = getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient");
+    const token =
+      getStoredToken("patient") ||
+      getStoredToken("admin") ||
+      getStoredToken("doctor");
+
     if (!token) {
       setError("Please log in before booking an appointment.");
+      return;
+    }
+
+    if (!doctorId || !effectiveClinicId || !activeAppointmentDate || !activeSlotTime) {
+      setError(
+        "Please select a doctor, clinic, appointment date, and time slot before booking.",
+      );
       return;
     }
 
@@ -300,11 +356,15 @@ export default function BookAppointmentPage() {
       });
       setSlotTime("");
       setSlots((currentSlots) =>
-        currentSlots.filter((slot) => slot.time !== result.appointment.slotTime),
+        currentSlots.filter(
+          (slot) => slot.time !== (result.appointment?.slotTime ?? activeSlotTime),
+        ),
       );
       setSlotRefreshTick((current) => current + 1);
     } catch {
-      setError("Could not book appointment. Make sure the backend is running on port 3001.");
+      setError(
+        "Could not book appointment. Make sure the backend is running on port 3001.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -399,19 +459,35 @@ export default function BookAppointmentPage() {
                 disabled={isLoading || !effectiveClinicId}
                 className="mt-2 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand disabled:opacity-60"
               >
-                <option value="">{selectedDoctorClinicAddress || "Select clinic"}</option>
-                {selectedDoctorClinicAddress ? (
-                  <option value={selectedDoctorClinicAddress}>{selectedDoctorClinicAddress}</option>
-                ) : null}
+                {selectedDoctorClinics.length > 0 ? (
+                  <>
+                    {selectedDoctorClinics.map((clinic) => (
+                      <option key={clinic.id} value={clinic.id}>
+                        {clinic.name} - {clinic.location}
+                      </option>
+                    ))}
+                    {selectedDoctorClinicAddress &&
+                    !selectedDoctorClinics.some(
+                      (clinic) => String(clinic.id) === selectedDoctorClinicAddress,
+                    ) ? (
+                      <option value={selectedDoctorClinicAddress}>
+                        {selectedDoctorClinicAddress}
+                      </option>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    <option value="">{selectedDoctorClinicAddress || "Select clinic"}</option>
+                    {selectedDoctorClinicAddress ? (
+                      <option value={selectedDoctorClinicAddress}>
+                        {selectedDoctorClinicAddress}
+                      </option>
+                    ) : null}
+                  </>
+                )}
               </select>
             </label>
           </div>
-
-          {selectedDoctor ? (
-            <div className="mt-5">
-              <DoctorCardDetails doctor={selectedDoctor} />
-            </div>
-          ) : null}
 
           <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between gap-3">
@@ -487,6 +563,7 @@ export default function BookAppointmentPage() {
               ) : (
                 visibleSlots.map((slot) => {
                   const isSlotSelected = activeSlotTime === slot.time;
+
                   return (
                     <button
                       key={slot.time}
@@ -499,7 +576,7 @@ export default function BookAppointmentPage() {
                           : "border-emerald-300 bg-emerald-50 text-emerald-800 hover:border-green-300 hover:bg-green-100 hover:text-green-700"
                       }`}
                     >
-                      {slot.time}
+                      {formatSlotRange(slot.time, slotDurationMinutes)}
                     </button>
                   );
                 })
@@ -512,7 +589,7 @@ export default function BookAppointmentPage() {
             disabled={
               !isPatientLoggedIn ||
               !doctorId ||
-              !clinicId ||
+              !effectiveClinicId ||
               !activeAppointmentDate ||
               !activeSlotTime ||
               isSubmitting
@@ -609,6 +686,61 @@ function parseAppointmentDateTimeLocal(appointmentDate, slotTime) {
   }
 
   return new Date(year, month, day, hours, minutes, 0, 0);
+}
+
+function parseTimeText(dateText) {
+  if (typeof dateText !== "string") {
+    return null;
+  }
+
+  const match = dateText
+    .trim()
+    .match(/^(\d{1,2})(?::(\d{2}))?\s*([AaPp][Mm])?$/);
+  if (!match) {
+    return null;
+  }
+
+  let hours = Number(match[1]);
+  const minutes = Number(match[2] ?? "0");
+  const meridiem = (match[3] ?? "").toLowerCase();
+
+  if (meridiem === "am") {
+    if (hours === 12) {
+      hours = 0;
+    }
+  } else if (meridiem === "pm" && hours !== 12) {
+    hours += 12;
+  }
+
+  const parsed = new Date(2000, 0, 1, hours, minutes, 0, 0);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatTimeText(date) {
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const suffix = hours >= 12 ? "PM" : "AM";
+  hours %= 12;
+  if (hours === 0) {
+    hours = 12;
+  }
+  return `${hours}:${minutes} ${suffix}`;
+}
+
+function formatSlotRange(startTime, durationMinutes) {
+  const duration = Number(durationMinutes);
+  if (typeof startTime !== "string" || !Number.isFinite(duration) || duration <= 0) {
+    return startTime ?? "";
+  }
+
+  const start = parseTimeText(startTime);
+
+  if (!start) {
+    return startTime;
+  }
+
+  const end = new Date(start.getTime() + duration * 60_000);
+  return `${startTime} - ${formatTimeText(end)}`;
 }
 
 function formatDoctorList(value) {
