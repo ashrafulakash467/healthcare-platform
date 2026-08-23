@@ -198,6 +198,7 @@ export default function SettingsPage() {
 
   function commitSelectedDates(nextDates) {
     setSelectedDates(nextDates);
+    setGeneratedTimeSlots((current) => current.filter((group) => nextDates.includes(group.date)));
     setForm((current) => ({ ...current, availableDates: nextDates.join("\n") }));
     setError("");
     setToastMessage("");
@@ -253,21 +254,11 @@ export default function SettingsPage() {
     );
   }
 
-  function toggleSlotForDate(dateKey, slot) {
-    const nextGroups = generatedTimeSlots.map((group) =>
-      group.date === dateKey ? { ...group, slots: group.slots.filter((item) => item !== slot) } : group,
-    );
-    commitGeneratedSlots(nextGroups);
-  }
-
-  function resetSlotsForDate(dateKey) {
-    const generated = generateTimeSlots(startTime, endTime, Number(slotDuration));
-    const nextGroups = generatedTimeSlots.map((group) => (group.date === dateKey ? { ...group, slots: [...generated] } : group));
-    commitGeneratedSlots(nextGroups);
-  }
-
-  function clearSlotsForDate(dateKey) {
-    const nextGroups = generatedTimeSlots.map((group) => (group.date === dateKey ? { ...group, slots: [] } : group));
+  function removeSlotEverywhere(slot) {
+    const nextGroups = generatedTimeSlots.map((group) => ({
+      ...group,
+      slots: group.slots.filter((item) => item !== slot),
+    }));
     commitGeneratedSlots(nextGroups);
   }
 
@@ -425,7 +416,7 @@ export default function SettingsPage() {
                 title="Availability"
                 description="Select your available working dates and generate the time slots for each one."
               >
-                <div className="space-y-6">
+                <div className="grid gap-6 lg:grid-cols-2">
                   <div>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
@@ -436,15 +427,7 @@ export default function SettingsPage() {
                             : "Click any day on the calendar to add it as an available working date."}
                         </p>
                       </div>
-                      {selectedDates.length ? (
-                        <button
-                          type="button"
-                          onClick={clearAllDates}
-                          className="text-xs font-semibold text-slate-500 transition hover:text-rose-600"
-                        >
-                          Clear all ({selectedDates.length})
-                        </button>
-                      ) : null}
+                      
                     </div>
 
                     <div className="mt-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
@@ -454,6 +437,18 @@ export default function SettingsPage() {
                         onSelect={handleDateSelect}
                         className="mx-auto"
                       />
+                    </div>
+
+                    <div className="flex justify-center mt-3 p-2">
+                    {selectedDates.length ? (
+                        <button
+                          type="button"
+                          onClick={clearAllDates}
+                          className="p-2 bg-slate-50 border border-white-50 text-xs font-semibold text-black transition hover:text-rose-600"
+                        >
+                          Clear all ({selectedDates.length})
+                        </button>
+                      ) : null}
                     </div>
 
                     <div className="mt-3">
@@ -481,17 +476,13 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <hr className="border-slate-100" />
-
-                  <div>
-                  <div>
+                    <div>
                       <p className="text-sm font-bold text-slate-900">Available Time Slots</p>
                       <p className="mt-1 text-xs text-slate-500">
-                        Set a daily working window and interval, then generate slots for every selected date.
+                        Set a daily working window and interval, then generate slots for all selected dates.
                       </p>
-                    </div>
 
-                    <div className="mt-3 grid gap-4 md:grid-cols-3">
+                      <div className="mt-3 space-y-4">
                       <label className="block">
                         <span className="text-sm font-semibold text-slate-700">Start Time</span>
                         <input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100" />
@@ -511,53 +502,43 @@ export default function SettingsPage() {
                       </label>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
                       <button type="button" onClick={handleGenerateSlots} className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
                         Generate Slots
                       </button>
                       {generatedTimeSlots.some((group) => group.slots.length) ? (
-                        <span className="text-xs text-slate-500">
-                          {flattenAllSlots(generatedTimeSlots).length} slot{flattenAllSlots(generatedTimeSlots).length === 1 ? "" : "s"} generated
-                        </span>
-                      ) : null}
-                      {generatedTimeSlots.some((group) => group.slots.length) ? (
-                        <button type="button" onClick={clearGeneratedSlots} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                          Clear all slots
+                        <button type="button" onClick={clearGeneratedSlots} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:text-rose-600">
+                          Clear all
                         </button>
                       ) : null}
                     </div>
-
-                  <div>
-                    {generatedTimeSlots.some((group) => group.slots.length) ? (
-                      <div className="space-y-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Generated Slot Preview</p>
-                        {generatedTimeSlots.filter((group) => group.slots.length).map((group) => (
-                          <div key={group.date} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                            <div className="flex flex-wrap items-center justify-between gap-2">
-                              <p className="text-sm font-bold text-slate-900">{formatDateLabel(group.date)}</p>
-                              <div className="flex flex-wrap gap-2">
-                                <button type="button" onClick={() => resetSlotsForDate(group.date)} className="text-xs font-semibold text-emerald-600 transition hover:text-emerald-700">Regenerate</button>
-                                <button type="button" onClick={() => clearSlotsForDate(group.date)} className="text-xs font-semibold text-slate-500 transition hover:text-rose-600">Clear</button>
-                              </div>
-                            </div>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {group.slots.map((slot) => (
-                                <button key={slot} type="button" onClick={() => toggleSlotForDate(group.date, slot)} title="Click to remove this slot" className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700">
-                                  {slot}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
-                        No generated slots yet. Set a start time, end time and interval, then press Generate Slots.
-                      </p>
-                    )}
+                     {generatedTimeSlots.some((group) => group.slots.length) ? (
+                  <div className="mt-6">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Generated Time Slots ({flattenAllSlots(generatedTimeSlots).length})
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      These slots apply to every selected available date. Click a slot to remove it.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {flattenAllSlots(generatedTimeSlots).map((slot) => (
+                        <button key={slot} type="button" onClick={() => removeSlotEverywhere(slot)} title="Click to remove this slot" className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700">
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-6">
+                    <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                      No generated slots yet. Set a start time, end time and interval, then press Generate Slots.
+                    </p>
+                  </div>
+                )}
                   </div>
                 </div>
-                </div>
+
+               
               </SettingsSection>
 
               <SettingsSection
