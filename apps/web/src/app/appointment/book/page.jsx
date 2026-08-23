@@ -21,12 +21,13 @@ export default function BookAppointmentPage() {
   const [bookingToast, setBookingToast] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
-  const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(() =>
-    Boolean(
-      getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
-    ),
-  );
+  // NOTE: initialize SSR-safe deterministic values (false / 0) so the server
+  // and the first client render produce identical HTML, then sync real values
+  // inside effects below (which only run after hydration on the client).
+  // This avoids hydration mismatches caused by Date.now() / localStorage reads
+  // inside useState initializers.
+  const [now, setNow] = useState(0);
+  const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(false);
 
   useEffect(() => {
     const syncAuth = () => {
@@ -214,6 +215,9 @@ export default function BookAppointmentPage() {
   const effectiveClinicId = clinicId || selectedDoctorClinicAddress;
   const selectedDoctorAvailableDates =
     selectedDoctor?.availableDates ?? selectedDoctor?.available_dates ?? [];
+  const availableTimeSlots = formatDoctorList(
+    selectedDoctor?.availableTimeSlots ?? selectedDoctor?.available_time_slots,
+  );
   const todayDateKey = getLocalDateKey(new Date(now));
   const visibleAvailableDates = selectedDoctorAvailableDates.filter((date) =>
     isDateOnOrAfterToday(date, todayDateKey),
@@ -433,6 +437,11 @@ export default function BookAppointmentPage() {
                 </span>
               ) : null}
             </div>
+            {selectedDoctor ? (
+              <div className="mt-3">
+                <InfoRow label="Available Time " value={availableTimeSlots || "Not available"} />
+              </div>
+            ) : null}
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {!activeAppointmentDate ? (
                 <p className="col-span-full text-sm text-slate-500">
@@ -553,4 +562,27 @@ function parseAppointmentDateTimeLocal(appointmentDate, slotTime) {
   }
 
   return new Date(year, month, day, hours, minutes, 0, 0);
+}
+
+function formatDoctorList(value) {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean).join(", ");
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return "";
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <div className="flex items-start justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3">
+      <p className="text-right text-sm font-semibold text-slate-700">{value}</p>
+      <p className="min-w-0 pr-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+        {label}
+      </p>
+    </div>
+  );
 }

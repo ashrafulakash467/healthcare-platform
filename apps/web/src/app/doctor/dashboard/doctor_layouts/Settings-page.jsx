@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch, getStoredToken, getStoredUser } from "@/lib/api";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 import { DOCTOR_IMAGE_FALLBACK, resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
 
 export default function SettingsPage() {
@@ -14,10 +16,27 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [error, setError] = useState("");
+  const [selectedDates, setSelectedDates] = useState(() =>
+    normalizeAvailableDates(profile?.doctor?.availableDates),
+  );
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("12:30");
+  const [slotDuration, setSlotDuration] = useState("20");
+  const [generatedTimeSlots, setGeneratedTimeSlots] = useState(() =>
+    buildInitialSlotList(
+      normalizeAvailableDates(profile?.doctor?.availableDates),
+      normalizeSlotList(profile?.doctor?.availableTimeSlots),
+    ),
+  );
 
   const doctor = profile?.doctor ?? {};
   const imageSrc = resolveDoctorImageSrc(doctor);
   const completion = calculateCompletion(form);
+
+  function applyAvailabilityToState(dates, slots) {
+    setSelectedDates(dates);
+    setGeneratedTimeSlots(buildInitialSlotList(dates, slots));
+  }
 
   useEffect(() => {
     if (!toastMessage) {
@@ -66,10 +85,12 @@ export default function SettingsPage() {
         setProfile(nextUser);
         setForm(buildProfileForm(nextUser));
         syncDoctorCache(nextUser);
+        applyAvailabilityToState(normalizeAvailableDates(nextUser?.doctor?.availableDates), normalizeSlotList(nextUser?.doctor?.availableTimeSlots));
       } catch {
         const cachedDoctor = normalizeDoctorUser(getStoredUser("doctor"));
         setProfile(cachedDoctor);
         setForm(buildProfileForm(cachedDoctor));
+        applyAvailabilityToState(normalizeAvailableDates(cachedDoctor?.doctor?.availableDates), normalizeSlotList(cachedDoctor?.doctor?.availableTimeSlots));
       } finally {
         setIsLoading(false);
       }
@@ -88,6 +109,10 @@ export default function SettingsPage() {
   function resetForm() {
     const cachedDoctor = normalizeDoctorUser(getStoredUser("doctor")) ?? profile;
     setForm(buildProfileForm(cachedDoctor));
+    applyAvailabilityToState(
+      normalizeAvailableDates(cachedDoctor?.doctor?.availableDates),
+      normalizeSlotList(cachedDoctor?.doctor?.availableTimeSlots),
+    );
     setError("");
     setToastMessage("");
   }
@@ -101,7 +126,31 @@ export default function SettingsPage() {
       return;
     }
 
-    const payload = buildProfilePayload(form);
+    let submitGeneratedSlots = generatedTimeSlots;
+
+    if (selectedDates.length && !submitGeneratedSlots.some((group) => group.slots.length)) {
+      const availabilityError = validateAvailability(startTime, endTime, slotDuration, selectedDates);
+
+      if (availabilityError) {
+        setError(availabilityError);
+        return;
+      }
+
+      const generated = generateTimeSlots(startTime, endTime, Number(slotDuration));
+
+      if (!generated.length) {
+        setError("No complete slots can be generated for the chosen times. Please adjust the range or interval.");
+        return;
+      }
+
+      submitGeneratedSlots = selectedDates.map((date) => ({ date, slots: [...generated] }));
+    }
+
+    const payload = buildProfilePayload({
+      ...form,
+      availableDates: selectedDates.join("\n"),
+      availableTimeSlots: flattenAllSlots(submitGeneratedSlots).join("\n"),
+    });
     const validationError = validateProfilePayload(payload);
 
     if (validationError) {
@@ -145,6 +194,85 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false);
     }
+  }
+
+  function commitSelectedDates(nextDates) {
+    setSelectedDates(nextDates);
+    setForm((current) => ({ ...current, availableDates: nextDates.join("\n") }));
+    setError("");
+    setToastMessage("");
+  }
+
+  function handleDateSelect(dates) {
+    const nextDates = [...new Set((dates ?? []).map(formatDateKey))];
+    commitSelectedDates(nextDates);
+  }
+
+  function removeDate(dateKey) {
+    commitSelectedDates(selectedDates.filter((item) => item !== dateKey));
+  }
+
+  function clearAllDates() {
+    commitSelectedDates([]);
+  }
+
+  function commitGeneratedSlots(nextGroups) {
+    setGeneratedTimeSlots(nextGroups);
+    setForm((current) => ({
+      ...current,
+      availableTimeSlots: flattenAllSlots(nextGroups).join("\n"),
+    }));
+    setError("");
+    setToastMessage("");
+  }
+
+  function handleGenerateSlots() {
+    setError("");
+    setToastMessage("");
+
+    const availabilityError = validateAvailability(startTime, endTime, slotDuration, selectedDates);
+
+    if (availabilityError) {
+      setError(availabilityError);
+      return;
+    }
+
+    const generated = generateTimeSlots(startTime, endTime, Number(slotDuration));
+
+    if (!generated.length) {
+      setError("No complete slots can be generated for the chosen times. Please adjust the range or interval.");
+      return;
+    }
+
+    const nextGroups = selectedDates.map((date) => ({ date, slots: [...generated] }));
+    commitGeneratedSlots(nextGroups);
+    setToastMessage(
+      `Generated ${generated.length} time slot${generated.length === 1 ? "" : "s"}${
+        selectedDates.length > 1 ? ` for each of ${selectedDates.length} dates` : ""
+      }. Click any slot to remove it for that date.`,
+    );
+  }
+
+  function toggleSlotForDate(dateKey, slot) {
+    const nextGroups = generatedTimeSlots.map((group) =>
+      group.date === dateKey ? { ...group, slots: group.slots.filter((item) => item !== slot) } : group,
+    );
+    commitGeneratedSlots(nextGroups);
+  }
+
+  function resetSlotsForDate(dateKey) {
+    const generated = generateTimeSlots(startTime, endTime, Number(slotDuration));
+    const nextGroups = generatedTimeSlots.map((group) => (group.date === dateKey ? { ...group, slots: [...generated] } : group));
+    commitGeneratedSlots(nextGroups);
+  }
+
+  function clearSlotsForDate(dateKey) {
+    const nextGroups = generatedTimeSlots.map((group) => (group.date === dateKey ? { ...group, slots: [] } : group));
+    commitGeneratedSlots(nextGroups);
+  }
+
+  function clearGeneratedSlots() {
+    commitGeneratedSlots(generatedTimeSlots.map((group) => ({ ...group, slots: [] })));
   }
 
   if (isLoading) {
@@ -295,25 +423,140 @@ export default function SettingsPage() {
 
               <SettingsSection
                 title="Availability"
-                description="Store your available dates and time slots."
+                description="Select your available working dates and generate the time slots for each one."
               >
-                <div className="grid gap-4 md:grid-cols-2">
-                  <TextareaField
-                    label="Available Dates"
-                    name="availableDates"
-                    value={form.availableDates}
-                    onChange={updateField}
-                    placeholder={"2026-08-15\n2026-08-16"}
-                    hint="Use one date per line or separate with commas."
-                  />
-                  <TextareaField
-                    label="Available Time Slots"
-                    name="availableTimeSlots"
-                    value={form.availableTimeSlots}
-                    onChange={updateField}
-                    placeholder={"09:00 AM\n02:00 PM"}
-                    hint="Use one slot per line or separate with commas."
-                  />
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">Available Dates</p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {selectedDates.length
+                            ? `${selectedDates.length} available date${selectedDates.length === 1 ? "" : "s"} selected. Click a chosen day again to unselect it.`
+                            : "Click any day on the calendar to add it as an available working date."}
+                        </p>
+                      </div>
+                      {selectedDates.length ? (
+                        <button
+                          type="button"
+                          onClick={clearAllDates}
+                          className="text-xs font-semibold text-slate-500 transition hover:text-rose-600"
+                        >
+                          Clear all ({selectedDates.length})
+                        </button>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                      <DayPicker
+                        mode="multiple"
+                        selected={selectedDates.map(parseDateKeyToDate)}
+                        onSelect={handleDateSelect}
+                        className="mx-auto"
+                      />
+                    </div>
+
+                    <div className="mt-3">
+                      {selectedDates.length ? (
+                        <div className="flex flex-wrap gap-2">
+                          {selectedDates.map((dateKey) => (
+                            <button
+                              key={dateKey}
+                              type="button"
+                              onClick={() => removeDate(dateKey)}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+                            >
+                              {formatDateLabel(dateKey)}
+                              <span className="text-rose-500" aria-hidden="true">
+                                ✕
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                          No available dates selected.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <hr className="border-slate-100" />
+
+                  <div>
+                  <div>
+                      <p className="text-sm font-bold text-slate-900">Available Time Slots</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Set a daily working window and interval, then generate slots for every selected date.
+                      </p>
+                    </div>
+
+                    <div className="mt-3 grid gap-4 md:grid-cols-3">
+                      <label className="block">
+                        <span className="text-sm font-semibold text-slate-700">Start Time</span>
+                        <input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100" />
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-semibold text-slate-700">End Time</span>
+                        <input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100" />
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-semibold text-slate-700">Interval / Slot Duration</span>
+                        <select value={slotDuration} onChange={(event) => setSlotDuration(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100">
+                          <option value="10">10 minutes</option>
+                          <option value="20">20 minutes</option>
+                          <option value="30">30 minutes</option>
+                          <option value="60">60 minutes</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <button type="button" onClick={handleGenerateSlots} className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
+                        Generate Slots
+                      </button>
+                      {generatedTimeSlots.some((group) => group.slots.length) ? (
+                        <span className="text-xs text-slate-500">
+                          {flattenAllSlots(generatedTimeSlots).length} slot{flattenAllSlots(generatedTimeSlots).length === 1 ? "" : "s"} generated
+                        </span>
+                      ) : null}
+                      {generatedTimeSlots.some((group) => group.slots.length) ? (
+                        <button type="button" onClick={clearGeneratedSlots} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                          Clear all slots
+                        </button>
+                      ) : null}
+                    </div>
+
+                  <div>
+                    {generatedTimeSlots.some((group) => group.slots.length) ? (
+                      <div className="space-y-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Generated Slot Preview</p>
+                        {generatedTimeSlots.filter((group) => group.slots.length).map((group) => (
+                          <div key={group.date} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <p className="text-sm font-bold text-slate-900">{formatDateLabel(group.date)}</p>
+                              <div className="flex flex-wrap gap-2">
+                                <button type="button" onClick={() => resetSlotsForDate(group.date)} className="text-xs font-semibold text-emerald-600 transition hover:text-emerald-700">Regenerate</button>
+                                <button type="button" onClick={() => clearSlotsForDate(group.date)} className="text-xs font-semibold text-slate-500 transition hover:text-rose-600">Clear</button>
+                              </div>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {group.slots.map((slot) => (
+                                <button key={slot} type="button" onClick={() => toggleSlotForDate(group.date, slot)} title="Click to remove this slot" className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700">
+                                  {slot}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                        No generated slots yet. Set a start time, end time and interval, then press Generate Slots.
+                      </p>
+                    )}
+                  </div>
+                </div>
                 </div>
               </SettingsSection>
 
@@ -645,6 +888,195 @@ function splitList(value) {
     .split(/[\n,]/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+const WEEKDAY_LABELS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const MONTH_LABELS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const AVAILABLE_DURATIONS = ["10", "20", "30", "60"];
+
+function normalizeAvailableDates(value) {
+  const items = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? splitList(value)
+      : [];
+
+  return [...new Set(items.map((item) => String(item ?? "").trim()).filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item)))];
+}
+
+function normalizeSlotList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item ?? "").trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return splitList(value);
+  }
+
+  return [];
+}
+
+function parseDateKeyToDate(dateKey) {
+  const parts = String(dateKey).split("-").map(Number);
+
+  if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) {
+    return new Date();
+  }
+
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function formatDateKey(date) {
+  if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateLabel(dateKey) {
+  const date = parseDateKeyToDate(dateKey);
+
+  if (Number.isNaN(date.getTime())) {
+    return dateKey;
+  }
+
+  const weekday = WEEKDAY_LABELS[date.getDay()] ?? "";
+  const month = MONTH_LABELS[date.getMonth()] ?? "";
+  return `${weekday}, ${month} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+function timeToMinutes(time) {
+  if (!time) {
+    return 0;
+  }
+
+  const parts = String(time).split(":").map(Number);
+
+  if (parts.length !== 2 || parts.some((part) => !Number.isFinite(part))) {
+    return 0;
+  }
+
+  return parts[0] * 60 + parts[1];
+}
+
+function minutesToDisplay(totalMinutes) {
+  const safeMinutes = Math.max(0, Math.floor(totalMinutes));
+  const hours24 = Math.floor(safeMinutes / 60) % 24;
+  const minutes = safeMinutes % 60;
+  const period = hours24 >= 12 ? "PM" : "AM";
+  let hour12 = hours24 % 12;
+
+  if (hour12 === 0) {
+    hour12 = 12;
+  }
+
+  return `${String(hour12).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period}`;
+}
+
+function generateTimeSlots(startTime, endTime, durationMinutes) {
+  const slots = [];
+  const duration = Number(durationMinutes) || 0;
+
+  if (!startTime || !endTime || duration <= 0) {
+    return slots;
+  }
+
+  const startMinutes = timeToMinutes(startTime);
+  const endMinutes = timeToMinutes(endTime);
+
+  if (endMinutes <= startMinutes) {
+    return slots;
+  }
+
+  let currentMinutes = startMinutes;
+
+  while (currentMinutes + duration <= endMinutes) {
+    const nextMinutes = currentMinutes + duration;
+    slots.push(`${minutesToDisplay(currentMinutes)} - ${minutesToDisplay(nextMinutes)}`);
+    currentMinutes = nextMinutes;
+  }
+
+  return slots;
+}
+
+function buildInitialSlotList(dateKeys, slots) {
+  return dateKeys.map((date) => ({ date, slots: [...normalizeSlotList(slots)] }));
+}
+
+function flattenAllSlots(groups) {
+  const seen = new Set();
+  const result = [];
+
+  groups.forEach((group) => {
+    (group.slots || []).forEach((slot) => {
+      if (!seen.has(slot)) {
+        seen.add(slot);
+        result.push(slot);
+      }
+    });
+  });
+
+  return result;
+}
+
+function validateAvailability(startTime, endTime, slotDuration, selectedDates) {
+  if (!selectedDates || !selectedDates.length) {
+    return "Select at least one available date.";
+  }
+
+  if (!startTime) {
+    return "Start time is required.";
+  }
+
+  if (!endTime) {
+    return "End time is required.";
+  }
+
+  const startMinutes = timeToMinutes(startTime);
+  const endMinutes = timeToMinutes(endTime);
+
+  if (startMinutes >= endMinutes) {
+    return "End time must be later than start time.";
+  }
+
+  const duration = Number(slotDuration);
+
+  if (!Number.isFinite(duration) || duration <= 0) {
+    return "Please choose a valid slot duration.";
+  }
+
+  if (!AVAILABLE_DURATIONS.includes(String(slotDuration))) {
+    return "The selected slot duration is not supported.";
+  }
+
+  return "";
 }
 
 function trimValue(value) {
