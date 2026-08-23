@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import DoctorCardDetails from "@/components/shared/DoctorCardDetails";
 import { apiFetch, getStoredToken } from "@/lib/api";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 
 export default function BookAppointmentPage() {
   const searchParams = useSearchParams();
@@ -16,6 +18,7 @@ export default function BookAppointmentPage() {
   const [slots, setSlots] = useState([]);
   const [slotRefreshTick, setSlotRefreshTick] = useState(0);
   const [isSlotsLoading, setIsSlotsLoading] = useState(false);
+  const [bookedOutDates, setBookedOutDates] = useState(() => new Set());
   const [slotTime, setSlotTime] = useState("");
   const [error, setError] = useState("");
   const [bookingToast, setBookingToast] = useState(null);
@@ -102,6 +105,7 @@ export default function BookAppointmentPage() {
       setSlots([]);
       setSlotTime("");
       setClinicId("");
+      setBookedOutDates(new Set());
 
       try {
         const response = await apiFetch(
@@ -155,6 +159,21 @@ export default function BookAppointmentPage() {
         }
 
         setSlots(result.slots ?? []);
+
+        const upcomingSlotsForDate = (result.slots ?? []).filter(
+          (slot) =>
+            !slot.isBooked &&
+            !isPastAppointmentSlot(appointmentDate, slot.time, now),
+        );
+        setBookedOutDates((current) => {
+          const next = new Set(current);
+          if (upcomingSlotsForDate.length === 0) {
+            next.add(appointmentDate);
+          } else {
+            next.delete(appointmentDate);
+          }
+          return next;
+        });
       } catch {
         setError("Could not load slots. Make sure the backend is running on port 3001.");
       } finally {
@@ -222,7 +241,10 @@ export default function BookAppointmentPage() {
   const visibleAvailableDates = selectedDoctorAvailableDates.filter((date) =>
     isDateOnOrAfterToday(date, todayDateKey),
   );
-  const activeAppointmentDate = visibleAvailableDates.includes(appointmentDate)
+  const selectableDates = visibleAvailableDates.filter(
+    (date) => !bookedOutDates.has(date),
+  );
+  const activeAppointmentDate = selectableDates.includes(appointmentDate)
     ? appointmentDate
     : "";
   const visibleSlots = slots.filter(
@@ -400,32 +422,39 @@ export default function BookAppointmentPage() {
                 </span>
               ) : null}
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-              {visibleAvailableDates.length === 0 ? (
-                <p className="col-span-full text-sm text-slate-500">
-                  No future dates available.
-                </p>
-              ) : (
-                visibleAvailableDates.map((date) => (
-                  <button
-                    key={date}
-                    type="button"
-                    onClick={() => {
-                      setAppointmentDate(date);
-                      setSlotTime("");
-                      setSlots([]);
-                    }}
-                    className={`h-10 rounded-full border px-3 text-xs font-semibold transition ${
-                      activeAppointmentDate === date
-                        ? "border-brand bg-brand text-brand-foreground"
-                        : "border-slate-300 bg-slate-50 text-slate-700 hover:border-brand hover:bg-white"
-                    }`}
-                  >
-                    {date}
-                  </button>
-                ))
-              )}
-            </div>
+            {!selectedDoctor ? (
+              <p className="mt-3 text-sm text-slate-500">
+                Select a doctor to see available dates.
+              </p>
+            ) : selectableDates.length === 0 ? (
+              <p className="mt-3 text-sm text-slate-500">
+                No future dates available.
+              </p>
+            ) : (
+              <div className="mt-3 rounded-xl border border-emerald-200 bg-white shadow-sm">
+                <DayPicker
+                  mode="single"
+                  selected={
+                    activeAppointmentDate
+                      ? parseDateKeyToDate(activeAppointmentDate)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    setAppointmentDate(date ? getLocalDateKey(date) : "");
+                    setSlotTime("");
+                    setSlots([]);
+                  }}
+                  disabled={(date) =>
+                    !selectableDates.includes(getLocalDateKey(date))
+                  }
+                  defaultMonth={now ? new Date(now) : undefined}
+                  className="mx-auto"
+                />
+              </div>
+            )}
+            <p className="mt-2 text-xs text-slate-400">
+              Select a future available date to see its time slots.
+            </p>
           </div>
 
           <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
@@ -442,34 +471,38 @@ export default function BookAppointmentPage() {
                 <InfoRow label="Available Time " value={availableTimeSlots || "Not available"} />
               </div>
             ) : null}
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-3 flex flex-wrap gap-2">
               {!activeAppointmentDate ? (
-                <p className="col-span-full text-sm text-slate-500">
+                <p className="text-sm text-slate-500">
                   Choose a future date to see available time slots.
                 </p>
               ) : isSlotsLoading ? (
-                <p className="col-span-full text-sm text-slate-500">
+                <p className="text-sm text-slate-500">
                   Loading available time slots...
                 </p>
               ) : visibleSlots.length === 0 ? (
-                <p className="col-span-full text-sm text-slate-500">
-                  No slots available.
+                <p className="text-sm text-slate-500">
+                  No available time slots for this date.
                 </p>
               ) : (
-                visibleSlots.map((slot) => (
-                  <button
-                    key={slot.time}
-                    type="button"
-                    onClick={() => setSlotTime(slot.time)}
-                    className={`h-10 rounded-full border px-3 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                      activeSlotTime === slot.time
-                        ? "border-brand bg-brand text-brand-foreground"
-                        : "border-slate-300 bg-slate-50 text-slate-700 hover:border-brand hover:bg-white"
-                    }`}
-                  >
-                    {slot.time}
-                  </button>
-                ))
+                visibleSlots.map((slot) => {
+                  const isSlotSelected = activeSlotTime === slot.time;
+                  return (
+                    <button
+                      key={slot.time}
+                      type="button"
+                      onClick={() => setSlotTime(slot.time)}
+                      aria-pressed={isSlotSelected}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                        isSlotSelected
+                          ? "border-emerald-600 bg-emerald-600 text-white ring-2 ring-emerald-600 shadow-sm"
+                          : "border-emerald-300 bg-emerald-50 text-emerald-800 hover:border-green-300 hover:bg-green-100 hover:text-green-700"
+                      }`}
+                    >
+                      {slot.time}
+                    </button>
+                  );
+                })
               )}
             </div>
           </div>
@@ -510,6 +543,20 @@ function getLocalDateKey(input = new Date()) {
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
+}
+
+function parseDateKeyToDate(dateKey) {
+  if (typeof dateKey !== "string") {
+    return undefined;
+  }
+
+  const parts = dateKey.split("-").map(Number);
+
+  if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) {
+    return undefined;
+  }
+
+  return new Date(parts[0], parts[1] - 1, parts[2]);
 }
 
 function isDateOnOrAfterToday(dateString, todayDateKey) {
