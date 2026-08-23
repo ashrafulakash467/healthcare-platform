@@ -444,7 +444,7 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={clearAllDates}
-                          className="p-2 bg-slate-50 border border-white-50 text-xs font-semibold text-black transition hover:text-rose-600"
+                          className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:text-rose-600"
                         >
                           Clear all ({selectedDates.length})
                         </button>
@@ -459,11 +459,11 @@ export default function SettingsPage() {
                               key={dateKey}
                               type="button"
                               onClick={() => removeDate(dateKey)}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
                             >
                               {formatDateLabel(dateKey)}
                               <span className="text-rose-500" aria-hidden="true">
-                                ✕
+                                
                               </span>
                             </button>
                           ))}
