@@ -1,13 +1,10 @@
 ﻿"use client";
 
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
 import { apiFetch, getStoredToken } from "@/lib/api";
 import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 
 const verificationStatusOptions = [
   { value: "approved", label: "Approved" },
@@ -53,6 +50,72 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
       ...current,
       [key]: value,
     }));
+  };
+
+  const [selectedDates, setSelectedDates] = useState(() =>
+    normalizeAvailableDates(availabilityDateSource(form, doctor)),
+  );
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("12:30");
+  const [slotDuration, setSlotDuration] = useState("20");
+  const [generatedTimeSlots, setGeneratedTimeSlots] = useState(() =>
+    buildInitialSlotList(
+      normalizeAvailableDates(availabilityDateSource(form, doctor)),
+      normalizeSlotList(availabilitySlotSource(form, doctor)),
+    ),
+  );
+
+  const commitSelectedDates = (nextDates) => {
+    setSelectedDates(nextDates);
+    updateField("availableDates", nextDates.join("\n"));
+  };
+
+  const handleDateSelect = (dates) => {
+    commitSelectedDates([...new Set((dates ?? []).map(formatDateKey))]);
+  };
+
+  const removeDate = (dateKey) => {
+    commitSelectedDates(selectedDates.filter((item) => item !== dateKey));
+  };
+
+  const clearAllDates = () => {
+    commitSelectedDates([]);
+  };
+
+  const commitGeneratedSlots = (nextGroups) => {
+    setGeneratedTimeSlots(nextGroups);
+    updateField("availableTimeSlots", flattenAllSlots(nextGroups).join("\n"));
+  };
+
+  const handleGenerateSlots = () => {
+    const availabilityError = validateAvailability(startTime, endTime, slotDuration, selectedDates);
+
+    if (availabilityError) {
+      window.alert(availabilityError);
+      return;
+    }
+
+    const generated = generateTimeSlots(startTime, endTime, Number(slotDuration));
+
+    if (!generated.length) {
+      window.alert("No complete slots can be generated for the chosen times. Please adjust the range or interval.");
+      return;
+    }
+
+    commitGeneratedSlots(selectedDates.map((date) => ({ date, slots: [...generated] })));
+  };
+
+  const removeSlotEverywhere = (slot) => {
+    commitGeneratedSlots(
+      generatedTimeSlots.map((group) => ({
+        ...group,
+        slots: group.slots.filter((item) => item !== slot),
+      })),
+    );
+  };
+
+  const clearGeneratedSlots = () => {
+    commitGeneratedSlots(generatedTimeSlots.map((group) => ({ ...group, slots: [] })));
   };
 
   useEffect(() => {
@@ -273,19 +336,169 @@ export default function UpdateDoctorPage({ doctor, form, setForm, onSave, onCanc
             )}
           </div>
         </div>
-        <CalendarField
-          label="Available dates"
-          value={currentValue("availableDates", parseDoctorDateList(doctor.availableDates ?? doctor.available_dates))}
-          onChange={(value) => updateField("availableDates", value)}
-          hint="Click dates on the calendar to select or unselect multiple days."
-        />
-        <TextareaField
-          label="Available time slots"
-          value={currentValue("availableTimeSlots", formatDoctorList(doctor.availableTimeSlots ?? doctor.available_time_slots))}
-          onChange={(value) => updateField("availableTimeSlots", value)}
-          placeholder={"09:00 AM\n02:00 PM"}
-          hint="Add one slot per line or separate by commas."
-        />
+        <div className="md:col-span-2 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Availability
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                Select the available working dates and generate the time slots for each one.
+              </p>
+            </div>
+            <p className="text-xs font-medium text-slate-600">
+              Selected: {selectedDates.length}
+            </p>
+          </div>
+
+          <div className="mt-4 grid gap-6 lg:grid-cols-2">
+            <div>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Available Dates</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {selectedDates.length
+                      ? `${selectedDates.length} available date${selectedDates.length === 1 ? "" : "s"} selected. Click a chosen day again to unselect it.`
+                      : "Click any day on the calendar to add it as an available working date."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <DayPicker
+                  mode="multiple"
+                  selected={selectedDates.map(parseDateKeyToDate)}
+                  onSelect={handleDateSelect}
+                  className="mx-auto"
+                />
+              </div>
+
+              <div className="mt-3 flex justify-center p-2">
+                {selectedDates.length ? (
+                  <button
+                    type="button"
+                    onClick={clearAllDates}
+                    className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:text-rose-600"
+                  >
+                    Clear all ({selectedDates.length})
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="mt-3">
+                {selectedDates.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedDates.map((dateKey) => (
+                      <button
+                        key={dateKey}
+                        type="button"
+                        onClick={() => removeDate(dateKey)}
+                        className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 gap-3 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+                      >
+                        {formatDateLabel(dateKey)}
+                        <span className="text-rose-500" aria-hidden="true">
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                    No available dates selected.
+                  </p>
+                )}
+              </div>
+            </div>
+        <div>
+                    <p className="text-sm font-bold text-slate-900">Available Time Slots</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Set a daily working window and interval, then generate slots for all selected dates.
+                    </p>
+
+                    <div className="mt-3 space-y-4">
+                      <label className="block">
+                        <span className="text-sm font-semibold text-slate-700">Start Time</span>
+                        <input
+                          type="time"
+                          value={startTime}
+                          onChange={(event) => setStartTime(event.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-semibold text-slate-700">End Time</span>
+                        <input
+                          type="time"
+                          value={endTime}
+                          onChange={(event) => setEndTime(event.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-semibold text-slate-700">Interval / Slot Duration</span>
+                        <select
+                          value={slotDuration}
+                          onChange={(event) => setSlotDuration(event.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                        >
+                          <option value="10">10 minutes</option>
+                          <option value="20">20 minutes</option>
+                          <option value="30">30 minutes</option>
+                          <option value="60">60 minutes</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleGenerateSlots}
+                        className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                      >
+                        Generate Slots
+                      </button>
+                      {generatedTimeSlots.some((group) => group.slots.length) ? (
+                        <button
+                          type="button"
+                          onClick={clearGeneratedSlots}
+                          className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:text-rose-600"
+                        >
+                          Clear all
+                        </button>
+                      ) : null}
+
+                         {generatedTimeSlots.some((group) => group.slots.length) ? (
+                  <div className="mt-6">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Generated Time Slots ({flattenAllSlots(generatedTimeSlots).length})
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {flattenAllSlots(generatedTimeSlots).map((slot) => (
+                        <button
+                          key={slot}
+                          type="button"
+                          onClick={() => removeSlotEverywhere(slot)}
+                          title="Click to remove this slot"
+                          className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+                        >
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-6">
+                    <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                      No generated slots yet.
+                    </p>
+                  </div>
+                )}
+
+                    </div>
+                  </div>
+                </div>
+
+               
+              </div>
         <Field
           label="Consultation Fee"
           value={currentValue("consultationFee", doctor.consultationFee ?? "")}
@@ -439,243 +652,11 @@ function Field({ label, value, onChange, placeholder, type = "text" }) {
   );
 }
 
-function TextareaField({ label, value, onChange, placeholder, hint }) {
-  return (
-    <label className="block md:col-span-2">
-      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {label}
-      </span>
-      <textarea
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        rows={4}
-        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400"
-      />
-      {hint ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
-    </label>
-  );
-}
-
 function Tag({ children }) {
   return (
     <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
       {children}
     </span>
-  );
-}
-
-function CalendarField({ label, value, onChange, hint }) {
-  const fieldRef = useRef(null);
-  const [selectedDates, setSelectedDates] = useState(() => parseDoctorDateList(value));
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-  useEffect(() => {
-    const handlePointerDown = (event) => {
-      if (!isCalendarOpen) {
-        return;
-      }
-
-      if (fieldRef.current && !fieldRef.current.contains(event.target)) {
-        setIsCalendarOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        setIsCalendarOpen(false);
-      }
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isCalendarOpen]);
-
-  const toggleCalendar = () => {
-    setIsCalendarOpen((current) => !current);
-  };
-
-  const toggleDate = (dateStr) => {
-    const nextDates = selectedDates.includes(dateStr)
-      ? selectedDates.filter((item) => item !== dateStr)
-      : [...selectedDates, dateStr].sort();
-
-    setSelectedDates(nextDates);
-    onChange(nextDates);
-  };
-
-  const clearDates = () => {
-    setSelectedDates([]);
-    onChange([]);
-  };
-
-  const displaySelectedDates = selectedDates.length
-    ? selectedDates.map((date) => formatDoctorDateLabel(date)).join(", ")
-    : "";
-
-  return (
-    <div ref={fieldRef} className="relative md:col-span-2">
-      <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {label}
-      </div>
-      <button
-        type="button"
-        aria-label={isCalendarOpen ? "Close available dates calendar" : "Open available dates calendar"}
-        aria-expanded={isCalendarOpen}
-        onClick={toggleCalendar}
-        className="mt-2 flex min-h-10 w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-sm text-slate-900 outline-none transition hover:border-slate-400 focus:border-slate-400"
-      >
-        <span className={selectedDates.length ? "text-slate-900" : "text-slate-400"}>
-          {displaySelectedDates || "Select available dates"}
-        </span>
-        <span className="ml-auto inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-600 transition hover:bg-slate-100">
-          <FontAwesomeIcon icon={faCalendarDays} className="h-4 w-4" />
-        </span>
-      </button>
-
-      {isCalendarOpen ? (
-        <div className="absolute left-0 right-0 top-full z-20 mt-2 w-full max-w-[38rem] overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-[0_16px_40px_rgba(15,23,42,0.14)]">
-          <FullCalendar
-            className="fc-compact-calendar"
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            height="auto"
-            fixedWeekCount={true}
-            showNonCurrentDates={true}
-            dayMaxEventRows={1}
-            headerToolbar={{
-              left: "title",
-              center: "",
-              right: "prev,next",
-            }}
-            dayHeaderFormat={{ weekday: "short" }}
-            dateClick={(info) => toggleDate(info.dateStr)}
-            dayCellClassNames={(arg) => {
-              const dateKey = getLocalDateKey(arg.date);
-              const isSelected = selectedDates.includes(dateKey);
-              const isToday = arg.isToday;
-
-              return [
-                "rounded-lg transition",
-                isSelected ? "!bg-blue-100 ring-2 ring-inset ring-blue-500" : "",
-                isToday ? "ring-1 ring-inset ring-amber-400" : "",
-              ];
-            }}
-            events={selectedDates.map((date) => ({
-              id: date,
-              start: date,
-              allDay: true,
-              display: "background",
-              backgroundColor: "#dbeafe",
-            }))}
-          />
-        </div>
-      ) : null}
-
-      <style jsx global>{`
-        .fc-compact-calendar .fc-toolbar {
-          margin-bottom: 0.35rem;
-        }
-
-        .fc-compact-calendar .fc-toolbar-title {
-          font-size: 0.82rem;
-          line-height: 1rem;
-          font-weight: 600;
-          color: rgb(15 23 42);
-        }
-
-        .fc-compact-calendar .fc-button {
-          padding: 0.18rem 0.45rem;
-          font-size: 0.7rem;
-          line-height: 1rem;
-          border-radius: 9999px;
-          border-color: rgb(226 232 240);
-          background: rgb(255 255 255);
-          color: rgb(51 65 85);
-          box-shadow: none;
-        }
-
-        .fc-compact-calendar .fc-col-header-cell-cushion {
-          padding: 0.22rem 0;
-          font-size: 0.66rem;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: rgb(100 116 139);
-        }
-
-        .fc-compact-calendar .fc-daygrid-day-number {
-          padding: 0.08rem 0.18rem;
-          font-size: 0.68rem;
-          color: rgb(15 23 42);
-        }
-
-        .fc-compact-calendar .fc-daygrid-day-frame {
-          min-height: 2.1rem;
-        }
-
-        .fc-compact-calendar .fc-daygrid-day-top {
-          padding: 0.04rem 0.1rem;
-        }
-
-        .fc-compact-calendar .fc-daygrid-body-balanced .fc-daygrid-day-events {
-          display: none;
-        }
-
-        .fc-compact-calendar .fc-scrollgrid,
-        .fc-compact-calendar .fc-scrollgrid-section > td,
-        .fc-compact-calendar .fc-scrollgrid-section > th {
-          border-color: rgb(226 232 240);
-        }
-
-        .fc-compact-calendar .fc-scroller,
-        .fc-compact-calendar .fc-scroller-liquid-absolute {
-          overflow: hidden !important;
-        }
-
-        .fc-compact-calendar .fc-daygrid-day.fc-day-today {
-          background: rgb(239 246 255);
-        }
-
-        .fc-compact-calendar .fc-daygrid-day.fc-day-selected,
-        .fc-compact-calendar .fc-daygrid-day.fc-day-selected:hover {
-          background: rgb(219 234 254);
-        }
-      `}</style>
-
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        {selectedDates.length ? (
-          selectedDates.map((date) => (
-            <button
-              key={date}
-              type="button"
-              onClick={() => toggleDate(date)}
-              className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
-            >
-              {formatDoctorDateLabel(date)}
-            </button>
-          ))
-        ) : (
-          <p className="text-xs text-slate-400">Select available dates</p>
-        )}
-
-        {selectedDates.length ? (
-          <button
-            type="button"
-            onClick={clearDates}
-            className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-          >
-            Clear all dates
-          </button>
-        ) : null}
-      </div>
-
-      {hint ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
-    </div>
   );
 }
 
@@ -752,48 +733,6 @@ function badgeTone(label) {
   };
 }
 
-function formatDoctorList(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean).join("\n");
-  }
-
-  if (typeof value === "string") {
-    return value;
-  }
-
-  return "";
-}
-
-function parseDoctorDateList(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean);
-  }
-
-  if (typeof value !== "string") {
-    return [];
-  }
-
-  const trimmed = value.trim();
-
-  if (!trimmed) {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(trimmed);
-    if (Array.isArray(parsed)) {
-      return parsed.filter(Boolean);
-    }
-  } catch {
-    // fall through to line/comma splitting
-  }
-
-  return trimmed
-    .split(/[\n,]/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function normalizeHospitalIdList(value) {
   if (Array.isArray(value)) {
     return value.map((item) => String(item)).filter(Boolean);
@@ -822,24 +761,209 @@ function toggleHospitalIdField(value, hospitalId) {
   return Array.from(next);
 }
 
-function getLocalDateKey(date) {
+const AVAILABILITY_WEEKDAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const AVAILABILITY_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const AVAILABILITY_DURATIONS = ["10", "20", "30", "60"];
+
+function availabilityDateSource(form, doctor) {
+  return form?.availableDates ?? doctor?.availableDates ?? doctor?.available_dates ?? [];
+}
+
+function availabilitySlotSource(form, doctor) {
+  return form?.availableTimeSlots ?? doctor?.availableTimeSlots ?? doctor?.available_time_slots ?? "";
+}
+
+function normalizeAvailableDates(value) {
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? splitDoctorLines(value)
+      : [];
+
+  return [
+    ...new Set(
+      raw
+        .map((item) => String(item ?? "").trim())
+        .filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item)),
+    ),
+  ];
+}
+
+function normalizeSlotList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item ?? "").trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return splitDoctorLines(value);
+  }
+
+  return [];
+}
+
+function splitDoctorLines(value) {
+  return String(value ?? "")
+    .split(/[\n,]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseDateKeyToDate(dateKey) {
+  const parts = String(dateKey).split("-").map(Number);
+
+  if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) {
+    return new Date();
+  }
+
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function formatDateKey(date) {
+  if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return "";
+  }
+
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-
   return `${year}-${month}-${day}`;
 }
 
-function formatDoctorDateLabel(dateString) {
-  const date = new Date(`${dateString}T00:00:00`);
+function formatDateLabel(dateKey) {
+  const date = parseDateKeyToDate(dateKey);
 
   if (Number.isNaN(date.getTime())) {
-    return dateString;
+    return dateKey;
   }
 
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(date);
+  const weekday = AVAILABILITY_WEEKDAYS[date.getDay()] ?? "";
+  const month = AVAILABILITY_MONTHS[date.getMonth()] ?? "";
+  return `${weekday}, ${month} ${date.getDate()}, ${date.getFullYear()}`;
 }
 
+function timeToMinutes(time) {
+  if (!time) {
+    return 0;
+  }
+
+  const parts = String(time).split(":").map(Number);
+
+  if (parts.length !== 2 || parts.some((part) => !Number.isFinite(part))) {
+    return 0;
+  }
+
+  return parts[0] * 60 + parts[1];
+}
+
+function minutesToDisplay(totalMinutes) {
+  const safeMinutes = Math.max(0, Math.floor(totalMinutes));
+  const hours24 = Math.floor(safeMinutes / 60) % 24;
+  const minutes = safeMinutes % 60;
+  const period = hours24 >= 12 ? "PM" : "AM";
+  let hour12 = hours24 % 12;
+
+  if (hour12 === 0) {
+    hour12 = 12;
+  }
+
+  return `${String(hour12).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period}`;
+}
+
+function generateTimeSlots(startTime, endTime, durationMinutes) {
+  const slots = [];
+  const duration = Number(durationMinutes) || 0;
+
+  if (!startTime || !endTime || duration <= 0) {
+    return slots;
+  }
+
+  const startMinutes = timeToMinutes(startTime);
+  const endMinutes = timeToMinutes(endTime);
+
+  if (endMinutes <= startMinutes) {
+    return slots;
+  }
+
+  let currentMinutes = startMinutes;
+
+  while (currentMinutes + duration <= endMinutes) {
+    const nextMinutes = currentMinutes + duration;
+    slots.push(`${minutesToDisplay(currentMinutes)} - ${minutesToDisplay(nextMinutes)}`);
+    currentMinutes = nextMinutes;
+  }
+
+  return slots;
+}
+
+function buildInitialSlotList(dateKeys, slots) {
+  return dateKeys.map((date) => ({ date, slots: [...normalizeSlotList(slots)] }));
+}
+
+function flattenAllSlots(groups) {
+  const seen = new Set();
+  const result = [];
+
+  groups.forEach((group) => {
+    (group.slots || []).forEach((slot) => {
+      if (!seen.has(slot)) {
+        seen.add(slot);
+        result.push(slot);
+      }
+    });
+  });
+
+  return result;
+}
+
+function validateAvailability(startTime, endTime, slotDuration, selectedDates) {
+  if (!selectedDates || !selectedDates.length) {
+    return "Select at least one available date.";
+  }
+
+  if (!startTime) {
+    return "Start time is required.";
+  }
+
+  if (!endTime) {
+    return "End time is required.";
+  }
+
+  if (timeToMinutes(startTime) >= timeToMinutes(endTime)) {
+    return "End time must be later than start time.";
+  }
+
+  const duration = Number(slotDuration);
+
+  if (!Number.isFinite(duration) || duration <= 0) {
+    return "Please choose a valid slot duration.";
+  }
+
+  if (!AVAILABILITY_DURATIONS.includes(String(slotDuration))) {
+    return "The selected slot duration is not supported.";
+  }
+
+  return "";
+}
