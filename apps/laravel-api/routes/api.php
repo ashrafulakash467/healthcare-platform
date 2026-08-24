@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DoctorController;
 use App\Http\Controllers\Api\V1\MedicalRecordController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,12 @@ Route::post('patient/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('doctor/search', [DoctorController::class, 'search']);
 Route::get('doctor/public/{doctorId}', [DoctorController::class, 'show']);
 Route::get('doctor-images/{filename}', [DoctorController::class, 'image']);
+
+// SSLCOMMERZ callbacks (public - called by the payment gateway)
+Route::post('payments/sslcommerz/success', [PaymentController::class, 'success']);
+Route::post('payments/sslcommerz/fail', [PaymentController::class, 'fail']);
+Route::post('payments/sslcommerz/cancel', [PaymentController::class, 'cancel']);
+Route::post('payments/sslcommerz/ipn', [PaymentController::class, 'ipn']);
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -73,6 +80,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('appointment/reschedule-options', [AppointmentController::class, 'rescheduleOptions']);
         Route::get('appointment/reschedule-slots', [AppointmentController::class, 'rescheduleSlots']);
         Route::post('appointment/reschedule', [AppointmentController::class, 'reschedule']);
+
+        // Payment routes
+        Route::get('appointments/{appointmentId}/payment-details', [PaymentController::class, 'paymentDetails']);
+        Route::post('payments/initialize', [PaymentController::class, 'initialize']);
     });
 
     Route::middleware('role:hospital|admin|super-admin')->group(function (): void {

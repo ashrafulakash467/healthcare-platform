@@ -5,11 +5,11 @@
   "workspaces": [
     "apps/web"
   ],
- "scripts": {
-  "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
-  "dev:web": "npm --workspace apps/web run dev",
-  "dev:api": "cd apps/laravel-api && php artisan serve --port=3001"
-},
+  "scripts": {
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:api": "cd apps/laravel-api && php artisan serve --port=3001"
+  },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^7.3.1",
     "@fortawesome/react-fontawesome": "^3.5.0",

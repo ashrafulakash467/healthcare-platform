@@ -179,39 +179,14 @@ export default function PatientDashboardPage() {
     }
   }
 
-  async function handlePayAppointment(appointmentId) {
+  function handlePayAppointment(appointmentId) {
     if (!authToken) {
       setActionError("You need to be logged in to make a payment.");
       return;
     }
 
-    setIsPayingId(appointmentId);
-    setActionError("");
-    setActionMessage("");
-
-    try {
-      const response = await apiFetch(
-        `/appointment/${appointmentId}/payment`,
-        { method: "POST" },
-        authToken,
-      );
-      const result = await response.json();
-
-      if (!response.ok) {
-        setActionError(result.message ?? "Could not create payment.");
-        return;
-      }
-
-      setActionMessage(result.message ?? "Payment created successfully.");
-      await loadAppointments(authToken);
-      setSelectedAppointmentId(appointmentId);
-    } catch {
-      setActionError(
-        "Could not create payment. Make sure the backend is running on port 3001.",
-      );
-    } finally {
-      setIsPayingId("");
-    }
+    // Redirect to the payment page with the appointment ID in the URL.
+    router.push(`/Payment?appointmentId=${encodeURIComponent(appointmentId)}`);
   }
 
   if (isLoading) {

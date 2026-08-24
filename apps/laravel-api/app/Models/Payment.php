@@ -29,6 +29,9 @@ class Payment extends Model
         'status',
         'paid_at',
         'meta',
+        'gateway',
+        'gateway_transaction_id',
+        'gateway_response',
     ];
 
     protected function casts(): array
@@ -42,6 +45,7 @@ class Payment extends Model
             'due_amount' => 'decimal:2',
             'paid_at' => 'datetime',
             'meta' => 'array',
+            'gateway_response' => 'array',
         ];
     }
 

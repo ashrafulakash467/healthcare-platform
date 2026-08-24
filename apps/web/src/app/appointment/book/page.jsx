@@ -489,6 +489,19 @@ const visibleSlots = activeAppointmentDate
             </label>
           </div>
 
+               
+                  {selectedDoctor ? (
+                    <div className="mt-6">
+                      <DoctorCardDetails doctor={selectedDoctor} />
+                    </div>
+                  ) : (
+                    <p className="mt-6 text-sm text-slate-500">
+                      Select a doctor to see their details.
+                    </p>
+                  )}
+                
+
+
           <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold text-slate-700">Available dates</p>
