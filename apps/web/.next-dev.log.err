@@ -10952,3 +10952,553 @@ https://react.dev/link/hydration-mismatch
   62 |     }
   63 |
   64 |     if (!settings || typeof settings !== "object") {
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx:22:1
+Error: Expression expected
+  20 |
+  21 |
+> 22 | const USER_IMAGE_FALLBACK = "/images/male-doctor-smiling-happy-face-260nw-2481032615.jpg";
+     | ^^^^^
+  23 |
+  24 | export default function UsersPage() {
+  25 |   const [users, setUsers] = useState([]);
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx:22:1
+Error: Expression expected
+  20 |
+  21 |
+> 22 | const USER_IMAGE_FALLBACK = "/images/male-doctor-smiling-happy-face-260nw-2481032615.jpg";
+     | ^^^^^
+  23 |
+  24 | export default function UsersPage() {
+  25 |   const [users, setUsers] = useState([]);
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx:21:1
+Error: Expression expected
+  19 |   { value: "admin", label: "Admins" },
+  20 |
+> 21 | const USER_IMAGE_FALLBACK = "/images/male-doctor-smiling-happy-face-260nw-2481032615.jpg";
+     | ^^^^^
+  22 |
+  23 | export default function UsersPage() {
+  24 |   const [users, setUsers] = useState([]);
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx:21:1
+Error: Expression expected
+  19 |   { value: "admin", label: "Admins" },
+  20 |
+> 21 | const USER_IMAGE_FALLBACK = "/images/male-doctor-smiling-happy-face-260nw-2481032615.jpg";
+     | ^^^^^
+  22 |
+  23 | export default function UsersPage() {
+  24 |   const [users, setUsers] = useState([]);
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx:22:1
+Error: Expression expected
+  20 |
+  21 |
+> 22 | const USER_IMAGE_FALLBACK = "/images/male-doctor-smiling-happy-face-260nw-2481032615.jpg";
+     | ^^^^^
+  23 |
+  24 | export default function UsersPage() {
+  25 |   const [users, setUsers] = useState([]);
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx:21:1
+Error: Expression expected
+  19 |   { value: "admin", label: "Admins" },
+  20 |
+> 21 | const USER_IMAGE_FALLBACK = "/images/male-doctor-smiling-happy-face-260nw-2481032615.jpg";
+     | ^^^^^
+  22 |
+  23 | export default function UsersPage() {
+  24 |   const [users, setUsers] = useState([]);
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Users/users-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] Uncaught ReferenceError: avatarSrc is not defined
+    at DoctorAvatar (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:98:15)
+    at AppointmentViewDoctor/<.children<.children< (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:54:17)
+    at AppointmentViewDoctor (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:48:19)
+    at AppointmentsPage (src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx:84:19)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:746:67)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+   96 |             <Image
+   97 |               key={avatarSrc}
+>  98 |               src={avatarSrc}
+      |               ^
+   99 |               alt={doctor.name ?? "Doctor"}
+  100 |               fill
+  101 |               className="object-cover"
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  [90m4 |[0m [36mimport[0m { [33mIcon[0m } [36mfrom[0m [32m"../Dashboard_Overview/dashboard-shared"[0m;
+  [90m5 |[0m [36mimport[0m { resolveDoctorImageSrc } [36mfrom[0m [32m"@/components/shared/DoctorCard"[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m [33mDoctorDetailsView[0m [36mfrom[0m [32m"./doctor_details_view"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mconst[0m [33mPRINT_STYLES[0m = [32m`[0m
+  [90m8 |[0m [32m  @media print {[0m
+  [90m9 |[0m [32m    body * { visibility: hidden; }[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  4 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+  5 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+> 6 | import DoctorDetailsView from "./doctor_details_view";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | const PRINT_STYLES = `
+  8 |   @media print {
+  9 |     body * { visibility: hidden; }
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  4 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+  5 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+> 6 | import DoctorDetailsView from "./doctor_details_view";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | const PRINT_STYLES = `
+  8 |   @media print {
+  9 |     body * { visibility: hidden; }
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] Uncaught ReferenceError: getDoctorInitial is not defined
+    at DoctorAvatar (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:94:25)
+    at AppointmentViewDoctor/<.children<.children< (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:55:17)
+    at AppointmentViewDoctor (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:49:19)
+    at AppointmentsPage (src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx:87:10)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:746:67)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  92 | function DoctorAvatar({ doctor }) {
+  93 |   const avatarSrc = resolveDoctorImageSrc(doctor);
+> 94 |   const avatarInitial = getDoctorInitial(doctor.name);
+     |                         ^
+  95 |   return (
+  96 |           <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-blue-50">
+  97 |             <Image
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:6:1
+Error: Module not found: Can't resolve './doctor_details_view'
+  4 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+  5 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+> 6 | import DoctorDetailsView from "./doctor_details_view";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | const PRINT_STYLES = `
+  8 |   @media print {
+  9 |     body * { visibility: hidden; }
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found 

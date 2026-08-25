@@ -15,11 +15,7 @@ const categoryOptions = [
   { value: "all", label: "All Users" },
   { value: "doctor", label: "Doctors" },
   { value: "patient", label: "Patients" },
-  { value: "hospital admin", label: "Hospital Admins" },
   { value: "admin", label: "Admins" },
-  { value: "support", label: "Support" },
-  { value: "super-admin", label: "Super Admins" },
-  { value: "user", label: "Users" },
 ];
 
 const USER_IMAGE_FALLBACK = "/images/male-doctor-smiling-happy-face-260nw-2481032615.jpg";
