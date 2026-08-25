@@ -1,99 +1,131 @@
 "use client";
 
-export default function AppointmentsPage({
-  appointments,
-  selectedAppointmentId,
-  onSelectAppointment,
-  onMessage,
-}) {
-  const selectedAppointment =
-    appointments.find((appointment) => appointment.id === selectedAppointmentId) ??
-    appointments[0];
+import { useCallback, useEffect, useState } from "react";
+import { Icon } from "../Dashboard_Overview/dashboard-shared";
+import { apiFetch, getStoredToken } from "@/lib/api";
+import AppointmentViewDoctor from "./appointment_view_doctor";
+import AppointmentViewPatient from "./appointment_view_patient";
+
+export default function AppointmentsPage() {
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedDoctorId, setSelectedDoctorId] = useState(null);
+
+  const loadAppointments = useCallback(() => {
+    const token = getStoredToken("admin");
+
+    if (!token) {
+      setLoading(false);
+      setError("You must be signed in as an admin to view appointments.");
+      return undefined;
+    }
+
+    setLoading(true);
+    setError("");
+
+    const controller = new AbortController();
+
+    apiFetch("/admin/appointments", { signal: controller.signal }, token)
+      .then(async (response) => {
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && Array.isArray(result.doctors)) {
+          setDoctors(result.doctors);
+        } else {
+          setError(result.message ?? "Failed to load appointments from the server.");
+        }
+      })
+      .catch((err) => {
+        if (err?.name === "AbortError") {
+          return;
+        }
+
+        setError("Could not reach the server. Please check your connection and try again.");
+      })
+      .finally(() => setLoading(false));
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadAppointments();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadAppointments]);
+
+  const selectedDoctor =
+    doctors.find((doctor) => String(doctor.id) === String(selectedDoctorId)) ?? null;
+
+  function goBack() {
+    setSelectedDoctorId(null);
+  }
 
   return (
     <PanelCard
       eyebrow="Appointment Management"
-      title="Appointments"
-      description="Open bookings, review details, and process accept, reject, or reschedule actions."
+      title={selectedDoctor ? "Patient Appointments" : "Doctor Appointments"}
+      description={
+        selectedDoctor
+          ? "Patient bookings for the selected doctor. Use the date and status filters, then print when needed."
+          : "Doctors with appointments. Select a doctor to view their patient appointments."
+      }
     >
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <section className="space-y-3">
-          {appointments.map((appointment) => (
-            <button
-              key={appointment.id}
-              type="button"
-              onClick={() => onSelectAppointment(appointment.id)}
-              className={`w-full rounded-2xl border p-5 text-left transition ${
-                selectedAppointment?.id === appointment.id
-                  ? "border-slate-950 bg-slate-950 text-white"
-                  : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-base font-bold">{appointment.patient}</p>
-                <Badge tone={appointment.status}>{appointment.status}</Badge>
-              </div>
-              <p className="mt-2 text-sm opacity-80">
-                {appointment.doctor} - {appointment.type}
-              </p>
-              <p className="mt-1 text-sm opacity-80">
-                {appointment.time} - Payment {appointment.payment}
-              </p>
-            </button>
-          ))}
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <SectionHeader
-            eyebrow="Open Appointment"
-            title={selectedAppointment?.patient ?? "Select appointment"}
-            description="Review the selected appointment and move it through the workflow."
-          />
-
-          {selectedAppointment ? (
-            <>
-              <div className="mt-5 grid gap-3 text-sm text-slate-600">
-                <InfoRow label="Doctor" value={selectedAppointment.doctor} />
-                <InfoRow label="Time" value={selectedAppointment.time} />
-                <InfoRow label="Type" value={selectedAppointment.type} />
-                <InfoRow label="Payment" value={selectedAppointment.payment} />
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => onMessage("Patient details reviewed.")}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Review Patient Details
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onMessage("Appointment accepted.")}
-                  className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                >
-                  Accept
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onMessage("Appointment rejected.")}
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-                >
-                  Reject
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onMessage("Appointment moved to reschedule queue.")}
-                  className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
-                >
-                  Reschedule
-                </button>
-              </div>
-            </>
-          ) : null}
-        </section>
-      </div>
+      {loading ? (
+        <LoadingState />
+      ) : error ? (
+        <ErrorState message={error} onRetry={loadAppointments} />
+      ) : selectedDoctor ? (
+        <AppointmentViewPatient
+          patients={selectedDoctor.patients ?? []}
+          doctorName={selectedDoctor.name}
+          onBack={goBack}
+        />
+      ) : doctors.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <AppointmentViewDoctor doctors={doctors} onSelectDoctor={setSelectedDoctorId} />
+      )}
     </PanelCard>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="flex min-h-64 flex-col items-center justify-center gap-4 text-slate-500">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
+      <p className="text-sm font-medium">Loading appointments…</p>
+    </div>
+  );
+}
+
+function ErrorState({ message, onRetry }) {
+  return (
+    <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-2xl border border-rose-200 bg-rose-50 px-6 py-10 text-center">
+      <Icon name="audit" className="h-8 w-8 text-rose-500" />
+      <p className="max-w-md text-sm text-rose-700">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+      >
+        Try Again
+      </button>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+      <Icon name="appointments" className="h-10 w-10 text-slate-300" />
+      <p className="text-sm font-semibold text-slate-700">No appointments yet</p>
+      <p className="max-w-md text-sm text-slate-500">
+        Once patients book appointments, they will appear here grouped by doctor.
+      </p>
+    </div>
   );
 }
 
@@ -101,7 +133,7 @@ function PanelCard({ eyebrow, title, description, children }) {
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
       <SectionHeader eyebrow={eyebrow} title={title} description={description} />
-      <div className="mt-5">{children}</div>
+      <div className="mt-6">{children}</div>
     </section>
   );
 }
@@ -113,63 +145,7 @@ function SectionHeader({ eyebrow, title, description }) {
         {eyebrow}
       </p>
       <h2 className="mt-2 text-2xl font-bold text-slate-950">{title}</h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-        {description}
-      </p>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{description}</p>
     </div>
   );
-}
-
-function InfoRow({ label, value }) {
-  return (
-    <div className="flex items-start justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3">
-      <span className="text-slate-500">{label}</span>
-      <span className="text-right font-semibold text-slate-900">{value}</span>
-    </div>
-  );
-}
-
-function Badge({ children, tone }) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${badgeTone(tone)}`}
-    >
-      {children}
-    </span>
-  );
-}
-
-function badgeTone(value) {
-  const text = String(value ?? "").toLowerCase();
-
-  if (
-    text.includes("approved") ||
-    text.includes("paid") ||
-    text.includes("settled") ||
-    text.includes("active") ||
-    text.includes("onboarded") ||
-    text.includes("ready")
-  ) {
-    return "bg-emerald-50 text-emerald-700";
-  }
-
-  if (
-    text.includes("pending") ||
-    text.includes("review") ||
-    text.includes("refund") ||
-    text.includes("otp") ||
-    text.includes("high")
-  ) {
-    return "bg-amber-50 text-amber-700";
-  }
-
-  if (text.includes("reject") || text.includes("suspend")) {
-    return "bg-red-50 text-red-700";
-  }
-
-  if (text.includes("open") || text.includes("draft")) {
-    return "bg-blue-50 text-blue-700";
-  }
-
-  return "bg-slate-100 text-slate-700";
 }

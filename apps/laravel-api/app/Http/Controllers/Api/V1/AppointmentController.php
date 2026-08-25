@@ -30,6 +30,49 @@ class AppointmentController extends Controller
         ]);
     }
 
+    public function adminIndex(Request $request): JsonResponse
+    {
+        $appointments = Appointment::query()
+            ->with(['patient.user', 'doctor.user', 'doctor.primaryHospital', 'payment'])
+            ->orderByDesc('appointment_date')
+            ->orderByDesc('start_time')
+            ->limit(300)
+            ->get();
+
+        $doctors = $appointments
+            ->groupBy('doctor_id')
+            ->map(function (Collection $doctorAppointments) {
+                $appointment = $doctorAppointments->first();
+                $doctor = $appointment?->doctor;
+
+                $patientCount = $doctorAppointments
+                    ->pluck('patient_id')
+                    ->unique()
+                    ->count();
+
+                return [
+                    'id' => (string) $appointment?->doctor_id,
+                    'name' => $doctor?->user?->name ?? ('Doctor #'.$appointment?->doctor_id),
+                    'email' => $doctor?->user?->email ?? '',
+                    'phone' => $doctor?->user?->phone ?? '',
+                    'hospital' => $doctor?->primaryHospital?->name ?? '',
+                    'specialty' => $this->displayLabel($doctor?->specialty),
+                    'imagePath' => $doctor?->image_path ?? '',
+                    'imageUrl' => $this->doctorImageUrl($doctor?->image_path),
+                    'totalPatients' => $patientCount,
+                    'patients' => $doctorAppointments
+                        ->map(fn (Appointment $appointment) => $this->formatAdminPatient($appointment))
+                        ->values(),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'doctors' => $doctors,
+            'total' => $doctors->count(),
+        ]);
+    }
+
     public function bookingOptions(Request $request): JsonResponse
     {
         $doctorId = (string) $request->query('doctorId', '');
@@ -744,5 +787,102 @@ class AppointmentController extends Controller
             'booked_count' => max(0, $slot->booked_count - 1),
             'status' => max(0, $slot->booked_count - 1) === 0 ? 'available' : $slot->status,
         ])->save();
+    }
+
+    private function formatAdminPatient(Appointment $appointment): array
+    {
+        $patient = $appointment->patient;
+        $user = $patient?->user;
+
+        $name = $patient?->name ?? $user?->name ?? ('Patient #'.$appointment->patient_id);
+
+        $addressParts = array_filter([
+            $patient?->address_line1,
+            $patient?->address_line2,
+            $patient?->city,
+            $patient?->state,
+            $patient?->postal_code,
+            $patient?->country,
+        ]);
+
+        // Prefer the actual payment record; fall back to the appointment column.
+        $paymentStatus = $appointment->payment?->status
+            ?? $appointment->payment_status
+            ?? 'pending';
+
+        return [
+            'appointmentId' => (string) $appointment->id,
+            'patientId' => (string) $appointment->patient_id,
+            'name' => $name,
+            'email' => $patient?->email ?? $user?->email ?? '',
+            'phone' => $patient?->phone ?? $user?->phone ?? '',
+            'address' => implode(', ', $addressParts),
+            'age' => $patient?->date_of_birth?->age,
+            'gender' => $patient?->gender ?? '',
+            'date' => $appointment->appointment_date?->toDateString() ?? '',
+            'time' => $this->appointmentTime($appointment),
+            'type' => $this->displayLabel($appointment->consultation_type, 'Consultation'),
+            'status' => $this->displayLabel($appointment->status, 'Pending'),
+            'paymentStatus' => $this->paymentStatusLabel($paymentStatus),
+        ];
+    }
+
+    private function appointmentTime(Appointment $appointment): string
+    {
+        if ($appointment->start_time) {
+            try {
+                return Carbon::parse($appointment->start_time)->format('h:i A');
+            } catch (\Throwable) {
+                return $appointment->start_time;
+            }
+        }
+
+        return $appointment->appointment_date?->format('M d') ?? '';
+    }
+
+    private function displayLabel(?string $value, string $default = ''): string
+    {
+        $raw = trim((string) $value);
+
+        if ($raw === '') {
+            return $default;
+        }
+
+        $lookup = [
+            'pending' => 'Pending',
+            'pending_verification' => 'Pending Review',
+            'confirmed' => 'Confirmed',
+            'completed' => 'Completed',
+            'cancelled' => 'Cancelled',
+            'reschedule_requested' => 'Reschedule Requested',
+            'in_person' => 'In Person',
+            'video' => 'Video',
+            'initial_consultation' => 'Initial Consultation',
+            'follow_up' => 'Follow-up',
+            'reschedule' => 'Reschedule',
+        ];
+
+        $key = strtolower(str_replace('-', '_', $raw));
+
+        return $lookup[$key] ?? ucwords(str_replace(['-', '_'], ' ', $key));
+    }
+
+    private function paymentStatusLabel(?string $status): string
+    {
+        $lookup = [
+            'paid' => 'Paid',
+            'pending' => 'Pending',
+            'unpaid' => 'Unpaid',
+            'partial' => 'Partial',
+            'refund_requested' => 'Refund Requested',
+            'refunded' => 'Refunded',
+            'cancelled' => 'Cancelled',
+            'completed' => 'Completed',
+            'failed' => 'Failed',
+        ];
+
+        $key = strtolower((string) $status);
+
+        return $lookup[$key] ?? ucwords(str_replace(['-', '_'], ' ', $key));
     }
 }

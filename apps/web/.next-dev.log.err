@@ -446,3 +446,612 @@
   856 |               <WorkflowStep key={step} index={index + 1} title={step} />
   857 |             ))}
 ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+   7 | import ReportsPage from "../Doctors/reports-page";
+   8 | import HospitalsPage from "../Hospitals/hospitals-page";
+>  9 | import AppointmentsPage from "../Appointments/appointments-page";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import PaymentsPage from "../Payments/payments-page";
+  11 | import ContentPage from "../Content/content-page";
+  12 | import NotificationsPage from "../Notifications/notifications-page";
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+   7 | import ReportsPage from "../Doctors/reports-page";
+   8 | import HospitalsPage from "../Hospitals/hospitals-page";
+>  9 | import AppointmentsPage from "../Appointments/appointments-page";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import PaymentsPage from "../Payments/payments-page";
+  11 | import ContentPage from "../Content/content-page";
+  12 | import NotificationsPage from "../Notifications/notifications-page";
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+   7 | import ReportsPage from "../Doctors/reports-page";
+   8 | import HospitalsPage from "../Hospitals/hospitals-page";
+>  9 | import AppointmentsPage from "../Appointments/appointments-page";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import PaymentsPage from "../Payments/payments-page";
+  11 | import ContentPage from "../Content/content-page";
+  12 | import NotificationsPage from "../Notifications/notifications-page";
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+   7 | import ReportsPage from "../Doctors/reports-page";
+   8 | import HospitalsPage from "../Hospitals/hospitals-page";
+>  9 | import AppointmentsPage from "../Appointments/appointments-page";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import PaymentsPage from "../Payments/payments-page";
+  11 | import ContentPage from "../Content/content-page";
+  12 | import NotificationsPage from "../Notifications/notifications-page";
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+   7 | import ReportsPage from "../Doctors/reports-page";
+   8 | import HospitalsPage from "../Hospitals/hospitals-page";
+>  9 | import AppointmentsPage from "../Appointments/appointments-page";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import PaymentsPage from "../Payments/payments-page";
+  11 | import ContentPage from "../Content/content-page";
+  12 | import NotificationsPage from "../Notifications/notifications-page";
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+   7 | import ReportsPage from "../Doctors/reports-page";
+   8 | import HospitalsPage from "../Hospitals/hospitals-page";
+>  9 | import AppointmentsPage from "../Appointments/appointments-page";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import PaymentsPage from "../Payments/payments-page";
+  11 | import ContentPage from "../Content/content-page";
+  12 | import NotificationsPage from "../Notifications/notifications-page";
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found 
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+  [90m 7 |[0m [36mimport[0m [33mReportsPage[0m [36mfrom[0m [32m"../Doctors/reports-page"[0m;
+  [90m 8 |[0m [36mimport[0m [33mHospitalsPage[0m [36mfrom[0m [32m"../Hospitals/hospitals-page"[0m;
+[31m[1m>[0m [90m 9 |[0m [36mimport[0m [33mAppointmentsPage[0m [36mfrom[0m [32m"../Appointments/appointments-page"[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m10 |[0m [36mimport[0m [33mPaymentsPage[0m [36mfrom[0m [32m"../Payments/payments-page"[0m;
+  [90m11 |[0m [36mimport[0m [33mContentPage[0m [36mfrom[0m [32m"../Content/content-page"[0m;
+  [90m12 |[0m [36mimport[0m [33mNotificationsPage[0m [36mfrom[0m [32m"../Notifications/notifications-page"[0m;
+
+
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+   7 | import ReportsPage from "../Doctors/reports-page";
+   8 | import HospitalsPage from "../Hospitals/hospitals-page";
+>  9 | import AppointmentsPage from "../Appointments/appointments-page";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import PaymentsPage from "../Payments/payments-page";
+  11 | import ContentPage from "../Content/content-page";
+  12 | import NotificationsPage from "../Notifications/notifications-page";
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:9:1
+Error: Module not found: Can't resolve '../Appointments/appointments-page'
+   7 | import ReportsPage from "../Doctors/reports-page";
+   8 | import HospitalsPage from "../Hospitals/hospitals-page";
+>  9 | import AppointmentsPage from "../Appointments/appointments-page";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import PaymentsPage from "../Payments/payments-page";
+  11 | import ContentPage from "../Content/content-page";
+  12 | import NotificationsPage from "../Notifications/notifications-page";
+
+Import trace:
+  Server Component:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx
+    ./apps/web/src/app/admin/dashboard/page.jsx
+
+https://nextjs.org/docs/messages/module-not-found 

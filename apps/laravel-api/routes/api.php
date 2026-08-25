@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('admin/users/{userId}', [AdminController::class, 'destroy']);
         Route::patch('admin/doctor-verifications/{doctorId}/decision', [AdminController::class, 'decision']);
         Route::get('admin/doctors', [DoctorController::class, 'adminIndex']);
+        Route::get('admin/appointments', [AppointmentController::class, 'adminIndex']);
         Route::post('admin/doctors', [DoctorController::class, 'adminStore']);
         Route::put('admin/doctors/{doctorId}', [DoctorController::class, 'adminUpdate']);
         Route::delete('admin/doctors/{doctorId}', [DoctorController::class, 'adminDestroy']);
