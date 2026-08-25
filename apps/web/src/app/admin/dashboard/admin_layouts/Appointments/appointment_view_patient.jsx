@@ -15,7 +15,6 @@ const PRINT_STYLES = `
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All Patients" },
-  { value: "active", label: "Active Patients" },
   { value: "cancelled", label: "Cancelled Patients" },
   { value: "pending", label: "Pending Patients" },
   { value: "confirmed", label: "Confirmed Patients" },
@@ -142,7 +141,7 @@ function PatientRow({ patient }) {
   const schedule = [patient.date, patient.time].filter(Boolean).join(" • ");
 
   return (
-    <article className="appt-print-card flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center">
+    <article className="appt-print-card flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center">
       <div className="flex items-center gap-3 lg:w-56 lg:shrink-0">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-200 text-base font-bold text-slate-600">
           {getInitial(patient.name)}
@@ -162,8 +161,8 @@ function PatientRow({ patient }) {
       </div>
 
       <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
-        <Badge tone={patient.paymentStatus}>{patient.paymentStatus}</Badge>
-        <Badge tone={patient.status}>{patient.status || "Pending"}</Badge>
+       <Badge tone={patient.paymentStatus}><spam>Payment :</spam>{patient.paymentStatus}</Badge>
+        <Badge tone={patient.status}><spam>Status :</spam>{patient.status || "Pending"}</Badge>
       </div>
     </article>
   );

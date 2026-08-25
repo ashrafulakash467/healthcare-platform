@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { Icon } from "../Dashboard_Overview/dashboard-shared";
 import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
 
@@ -48,7 +48,7 @@ export default function AppointmentViewDoctor({ doctors, onSelectDoctor }) {
           doctors.map((doctor) => (
             <article
               key={doctor.id}
-              className="appt-print-card flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md md:flex-row md:items-center"
+              className="appt-print-card flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm transition hover:shadow-md md:flex-row md:items-center"
             >
               <div className="flex items-center gap-4 md:w-72 md:shrink-0">
                 <DoctorAvatar doctor={doctor} />
@@ -92,19 +92,22 @@ function DoctorAvatar({ doctor }) {
   const src = resolveDoctorImageSrc(doctor);
 
   return (
-    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
-      {src ? (
-        <img
-          src={src}
-          alt={doctor?.name || "Doctor"}
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center text-lg font-bold text-slate-600">
-          {getInitial(doctor?.name)}
-        </div>
-      )}
+<div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+  {src ? (
+    <Image
+      src={src}
+      alt={doctor?.name || "Doctor"}
+      fill
+      sizes="56px"
+      className="object-cover"
+    />
+  ) : (
+    // fallback
+    <div className="flex h-full w-full items-center justify-center">
+      Doctor
     </div>
+  )}
+</div>
   );
 }
 

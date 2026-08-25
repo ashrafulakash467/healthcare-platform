@@ -11502,3 +11502,768 @@ Import traces:
     ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
 
 https://nextjs.org/docs/messages/module-not-found 
+[browser] Uncaught TypeError: Image constructor: 'new' is required
+    at DoctorAvatar (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:97:9)
+    at AppointmentViewDoctor/<.children<.children< (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:54:17)
+    at AppointmentViewDoctor (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:48:19)
+    at AppointmentsPage (src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx:89:66)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:752:26)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+   95 |     <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+   96 |       {src ? (
+>  97 |         <Image
+      |         ^
+   98 |           src={src}
+   99 |           alt={doctor?.name || "Doctor"}
+  100 |           className="h-full w-full object-cover"
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import 
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import 
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {i}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import 
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import 
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {i}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {ima}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {ima}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {image}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] Uncaught Error: Image with src "http://localhost:3001/storage/images/doctors/22671335-fb8d-415e-b4d3-6370759ae06f.png" is missing required "width" property.
+    at DoctorAvatar (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:97:9)
+    at AppointmentViewDoctor/<.children<.children< (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:54:17)
+    at AppointmentViewDoctor (src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:48:19)
+    at AppointmentsPage (src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx:89:9)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:748:13)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+   95 |     <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+   96 |       {src ? (
+>  97 |         <Image
+      |         ^
+   98 |           src={src}
+   99 |           alt={doctor?.name || "Doctor"}
+  100 |           className="h-full w-full object-cover"
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ upstream image http://localhost:3001/storage/images/doctors/22671335-fb8d-415e-b4d3-6370759ae06f.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/a554b829-b4d1-4eec-949a-60e96d7e53cc.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/20e7055e-0b9a-4381-9213-0321cfbe2ed0.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/4c0e6851-b59c-4ca4-b59b-1bce22715cc1.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/22671335-fb8d-415e-b4d3-6370759ae06f.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/a554b829-b4d1-4eec-949a-60e96d7e53cc.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/4c0e6851-b59c-4ca4-b59b-1bce22715cc1.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/20e7055e-0b9a-4381-9213-0321cfbe2ed0.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/22671335-fb8d-415e-b4d3-6370759ae06f.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/a554b829-b4d1-4eec-949a-60e96d7e53cc.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/4c0e6851-b59c-4ca4-b59b-1bce22715cc1.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/20e7055e-0b9a-4381-9213-0321cfbe2ed0.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import 
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import 
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {i}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {ima}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx:3:1
+Error: Expected 'from', got 'import'
+  1 | "use client";
+  2 | import {image}
+> 3 | import { Icon } from "../Dashboard_Overview/dashboard-shared";
+    | ^^^^^^
+  4 | import { resolveDoctorImageSrc } from "@/components/shared/DoctorCard";
+  5 |
+  6 | const PRINT_STYLES = `
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_doctor.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:165:12
+Error: Expression expected
+  163 |
+  164 |       <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+> 165 |         <h1<Badge tone={patient.paymentStatus}>{patient.paymentStatus}</Badge>
+      |            ^
+  166 |         <Badge tone={patient.status}>{patient.status || "Pending"}</Badge>
+  167 |       </div>
+  168 |     </article>
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:165:12
+Error: Expression expected
+  163 |
+  164 |       <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+> 165 |         <h1<Badge tone={patient.paymentStatus}>{patient.paymentStatus}</Badge>
+      |            ^
+  166 |         <Badge tone={patient.status}>{patient.status || "Pending"}</Badge>
+  167 |       </div>
+  168 |     </article>
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+⨯ upstream image http://localhost:3001/storage/images/doctors/a554b829-b4d1-4eec-949a-60e96d7e53cc.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/22671335-fb8d-415e-b4d3-6370759ae06f.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/4c0e6851-b59c-4ca4-b59b-1bce22715cc1.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/20e7055e-0b9a-4381-9213-0321cfbe2ed0.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:165:58
+Error: Expected '</', got '{'
+  163 |
+  164 |       <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+> 165 |        <Badge tone={patient.paymentStatus}><spamPayment :{patient.paymentStatus}</Badge>
+      |                                                          ^
+  166 |         <Badge tone={patient.status}>{patient.status || "Pending"}</Badge>
+  167 |       </div>
+  168 |     </article>
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:165:58
+Error: Expected '</', got '{'
+  163 |
+  164 |       <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+> 165 |        <Badge tone={patient.paymentStatus}><spamPayment :{patient.paymentStatus}</Badge>
+      |                                                          ^
+  166 |         <Badge tone={patient.status}>{patient.status || "Pending"}</Badge>
+  167 |       </div>
+  168 |     </article>
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] The tag <spam> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter. 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:165:58
+Error: Expected '</', got '{'
+  163 |
+  164 |       <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+> 165 |        <Badge tone={patient.paymentStatus}><spamPayment :{patient.paymentStatus}</Badge>
+      |                                                          ^
+  166 |         <Badge tone={patient.status}>{patient.status || "Pending"}</Badge>
+  167 |       </div>
+  168 |     </article>
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:165:58
+Error: Expected '</', got '{'
+  163 |
+  164 |       <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+> 165 |        <Badge tone={patient.paymentStatus}><spamPayment :{patient.paymentStatus}</Badge>
+      |                                                          ^
+  166 |         <Badge tone={patient.status}>{patient.status || "Pending"}</Badge>
+  167 |       </div>
+  168 |     </article>
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+⨯ upstream image http://localhost:3001/storage/images/doctors/22671335-fb8d-415e-b4d3-6370759ae06f.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/a554b829-b4d1-4eec-949a-60e96d7e53cc.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/4c0e6851-b59c-4ca4-b59b-1bce22715cc1.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/20e7055e-0b9a-4381-9213-0321cfbe2ed0.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+[browser] The tag <spam> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter. 
+[browser] Invalid DOM property `class`. Did you mean `className`? 
+[browser] Received `true` for a non-boolean attribute `className`.
+
+If you want to write it to the DOM, pass a string instead: className="true" or className={value.toString()}. 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:165:59
+Error: Expected '</', got '=>'
+  163 | ...
+  164 | ...Name="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+> 165 | ...ne={patient.paymentStatus}><spam className=>Payment :</spam>{patient.paymentStatus}</B...
+      |                                              ^^
+  166 | ...one={patient.status}>{patient.status || "Pending"}</Badge>
+  167 | ...
+  168 | ...
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+⨯ upstream image http://localhost:3001/storage/images/doctors/22671335-fb8d-415e-b4d3-6370759ae06f.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/a554b829-b4d1-4eec-949a-60e96d7e53cc.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/4c0e6851-b59c-4ca4-b59b-1bce22715cc1.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/20e7055e-0b9a-4381-9213-0321cfbe2ed0.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:166:65
+Error: Unterminated string constant
+  164 | ... items-center justify-between gap-3 lg:flex-col lg:items-end">
+  165 | ...t.paymentStatus}><spam className=">Payment :</spam>{patient.paymentStatus}</Badge>
+> 166 | ...nt.status}>{patient.status || "Pending"}</Badge>
+      |                                          ^^^^^^^^^^
+  167 | ...
+  168 | ...
+  169 | ...
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:165:59
+Error: Expected '</', got '=>'
+  163 | ...
+  164 | ...Name="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+> 165 | ...ne={patient.paymentStatus}><spam className=>Payment :</spam>{patient.paymentStatus}</B...
+      |                                              ^^
+  166 | ...one={patient.status}>{patient.status || "Pending"}</Badge>
+  167 | ...
+  168 | ...
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+[browser] ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx:166:65
+Error: Unterminated string constant
+  164 | ... items-center justify-between gap-3 lg:flex-col lg:items-end">
+  165 | ...t.paymentStatus}><spam className=">Payment :</spam>{patient.paymentStatus}</Badge>
+> 166 | ...nt.status}>{patient.status || "Pending"}</Badge>
+      |                                          ^^^^^^^^^^
+  167 | ...
+  168 | ...
+  169 | ...
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component Browser]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointment_view_patient.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Appointments/appointments-page.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Client Component SSR]
+    ./apps/web/src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx [Server Component]
+    ./apps/web/src/app/admin/dashboard/page.jsx [Server Component] 
+⨯ upstream image http://localhost:3001/storage/images/doctors/22671335-fb8d-415e-b4d3-6370759ae06f.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/a554b829-b4d1-4eec-949a-60e96d7e53cc.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/4c0e6851-b59c-4ca4-b59b-1bce22715cc1.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
+⨯ upstream image http://localhost:3001/storage/images/doctors/20e7055e-0b9a-4381-9213-0321cfbe2ed0.png hostname resolved to private IP ["::1","127.0.0.1"] If this is expected and you understand SSRF risk, use images.dangerouslyAllowLocalIP = true to continue.
