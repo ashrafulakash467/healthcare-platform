@@ -290,7 +290,7 @@ export default function AdminDashboard() {
     const storedToken = localStorage.getItem("adminToken");
 
     if (!storedToken) {
-      window.location.replace("/admin");
+      window.location.replace("/login");
       return;
     }
 
@@ -665,7 +665,7 @@ export default function AdminDashboard() {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
     document.cookie = "adminToken=; path=/; max-age=0; SameSite=Lax";
-    window.location.replace("/admin");
+    window.location.replace("/login");
   }
 
   function openModule(tabKey, message) {

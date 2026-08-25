@@ -17,7 +17,7 @@ const slides = [
     alt: "Healthcare banner slide 3",
   },
   {
-    src: "/images/image001.jpg",
+    src: "/images/image004.jpg",
     alt: "Healthcare banner slide 4",
   },
 ].map((slide) => ({

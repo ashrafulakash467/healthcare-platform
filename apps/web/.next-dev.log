@@ -1,0 +1,55 @@
+
+> @healthcare-platform/web@0.1.0 dev
+> next dev
+
+▲ Next.js 16.3.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.106:3000
+✓ Ready in 970ms
+✓ Running next.config.ts took 74ms
+Creating turbopack project { dir: 'C:\\Akash\\healthcare-platform\\apps\\web', testMode: true }
+
+○ Compiling /login ...
+ GET /login 200 in 4.3s (next.js: 3.9s, application-code: 419ms)
+ GET /login 200 in 4.3s (next.js: 3.9s, application-code: 399ms)
+ GET /login 200 in 62ms (next.js: 9ms, application-code: 53ms)
+ GET / 200 in 1161ms (next.js: 617ms, application-code: 544ms)
+ GET /login 200 in 57ms (next.js: 4ms, application-code: 53ms)
+ GET /register 200 in 380ms (next.js: 326ms, application-code: 54ms)
+ GET /doctor/login 200 in 337ms (next.js: 272ms, application-code: 65ms)
+ GET /find-doctor 200 in 385ms (next.js: 273ms, application-code: 112ms)
+ GET /about 404 in 424ms (next.js: 250ms, application-code: 174ms)
+ GET /reset-password 200 in 378ms (next.js: 312ms, application-code: 65ms)
+ GET /login 200 in 65ms (next.js: 8ms, application-code: 57ms)
+ GET /login 200 in 54ms (next.js: 4ms, application-code: 51ms)
+ GET / 200 in 172ms (next.js: 8ms, application-code: 164ms)
+ GET /login 200 in 22ms (next.js: 4ms, application-code: 18ms)
+ GET /admin/dashboard 200 in 1710ms (next.js: 1678ms, application-code: 32ms)
+ GET /login 200 in 32ms (next.js: 5ms, application-code: 27ms)
+ GET /admin/dashboard 200 in 33ms (next.js: 7ms, application-code: 25ms)
+ GET /admin/dashboard 200 in 123ms (next.js: 3ms, application-code: 120ms)
+ GET /admin 200 in 732ms (next.js: 677ms, application-code: 56ms)
+ GET / 200 in 395ms (next.js: 19ms, application-code: 376ms)
+ GET /login 200 in 58ms (next.js: 4ms, application-code: 54ms)
+ GET /admin 200 in 54ms (next.js: 6ms, application-code: 47ms)
+ GET /login 200 in 25ms (next.js: 3ms, application-code: 22ms)
+ GET /patient/dashboard 200 in 994ms (next.js: 857ms, application-code: 137ms)
+ GET /patient/dashboard/settings 200 in 534ms (next.js: 506ms, application-code: 28ms)
+ GET /login 200 in 58ms (next.js: 6ms, application-code: 53ms)
+ GET /doctor/dashboard 200 in 621ms (next.js: 588ms, application-code: 34ms)
+ GET /doctor/login 200 in 45ms (next.js: 12ms, application-code: 34ms)
+ GET /admin/dashboard 200 in 28ms (next.js: 6ms, application-code: 22ms)
+ GET /admin 200 in 56ms (next.js: 4ms, application-code: 52ms)
+ GET /login 200 in 23ms (next.js: 4ms, application-code: 19ms)
+ GET /doctor/dashboard 200 in 29ms (next.js: 8ms, application-code: 22ms)
+ GET /doctor/login 200 in 26ms (next.js: 5ms, application-code: 21ms)
+ GET /patient/dashboard 200 in 28ms (next.js: 5ms, application-code: 23ms)
+ GET /login 200 in 25ms (next.js: 4ms, application-code: 21ms)
+ GET /login 200 in 23ms (next.js: 5ms, application-code: 18ms)
+ GET /login 200 in 49ms (next.js: 17ms, application-code: 32ms)
+ GET /login 200 in 30ms (next.js: 3ms, application-code: 27ms)
+ GET /login 200 in 31ms (next.js: 9ms, application-code: 22ms)
+ GET /login 200 in 26ms (next.js: 3ms, application-code: 22ms)
+ GET /login 200 in 54ms (next.js: 7ms, application-code: 47ms)
+ GET /admin 200 in 52ms (next.js: 6ms, application-code: 46ms)
+ GET /admin/dashboard 200 in 52ms (next.js: 14ms, application-code: 38ms)
