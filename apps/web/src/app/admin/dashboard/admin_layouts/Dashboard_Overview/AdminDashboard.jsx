@@ -26,97 +26,6 @@ import { adminSidebarItems } from "../../../../Header_Sidebar-Admin-Doc-shareUi/
 
 const tabItems = adminSidebarItems;
 
-const loginWorkflow = [
-  "Admin Login",
-  "Enter Email / Username",
-  "Enter Password",
-  "Credential Validation",
-  "MFA / OTP",
-  "RBAC Permission Check",
-  "Admin Dashboard",
-];
-
-const dashboardWorkflow = [
-  "Load KPI Widgets",
-  "Review Total Patients, Doctors, Hospitals, Revenue, and Alerts",
-  "Select Widget",
-  "Open Related Module",
-];
-
-const enterpriseNavigation = [
-  "Dashboard Overview",
-  "User Management",
-  "Doctor Management",
-  "Hospital Management",
-  "Appointment Management",
-  "Payment & Finance",
-  "Patient Management",
-  "Reviews & Ratings",
-  "CMS",
-  "Notifications",
-  "Reports & Analytics",
-  "Support Tickets",
-  "Roles & Permissions",
-  "System Settings",
-  "Audit Logs",
-];
-
-const kpiCards = [
-  {
-    key: "users",
-    label: "Total Patients",
-    value: "0000",
-    tone: "blue",
-  },
-  {
-    key: "doctors",
-    label: "Total Doctors",
-    value: "000",
-    tone: "emerald",
-  },
-  {
-    key: "hospitals",
-    label: "Hospitals",
-    value: "0000",
-    tone: "slate",
-  },
-  {
-    key: "appointments",
-    label: "Today's Appointments",
-    value: "0000",
-    tone: "amber",
-  },
-  {
-    key: "payments",
-    label: "Revenue",
-    value: formatCurrency(9650000, "BDT"),
-    tone: "emerald",
-  },
-  {
-    key: "doctors",
-    label: "Pending Verifications",
-    value: "0000",
-    tone: "amber",
-  },
-  {
-    key: "payments",
-    label: "Refund Requests",
-    value: "0000",
-    tone: "blue",
-  },
-  {
-    key: "support",
-    label: "Support Tickets",
-    value: "0000",
-    tone: "slate",
-  },
-  {
-    key: "settings",
-    label: "Update Profile",
-    value: "98%",
-    tone: "emerald",
-  },
-];
 
 const doctorsSeed = [
   {
@@ -285,6 +194,7 @@ export default function AdminDashboard() {
   const [editingDoctor, setEditingDoctor] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [summary, setSummary] = useState(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("adminToken");
@@ -316,6 +226,32 @@ export default function AdminDashboard() {
       setDoctorsLoading(false);
     }
   }, []);
+  const loadSummary = useCallback(async () => {
+    const token = getStoredToken("admin");
+    if (!token) return;
+
+    try {
+      const response = await apiFetch("/admin/dashboard", {}, token);
+      const result = await response.json();
+      if (response.ok && result?.summary) {
+        setSummary(result.summary);
+      } else {
+        setStatusMessage("Failed to load dashboard summary.");
+      }
+    } catch {
+      // Keep fallback values when the API is unreachable.
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSummary();
+
+    const interval = window.setInterval(() => {
+      void loadSummary();
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+  }, [loadSummary]);
 
   useEffect(() => {
     if (activeTab === "doctors") {
@@ -634,24 +570,31 @@ export default function AdminDashboard() {
   }
 
   const totals = useMemo(() => {
-    const pendingDoctors = doctorsSeed.filter((item) =>
-      item.status.toLowerCase().includes("pending") || item.status.toLowerCase().includes("document"),
-    ).length;
-    const pendingRefunds = paymentsSeed.filter((item) => item.status.toLowerCase().includes("refund")).length;
-    const openTickets = supportSeed.filter((item) => item.status === "Open").length;
-
-    return {
+    const fallback = {
+      pendingDoctors: doctorsSeed.filter((item) =>
+        item.status.toLowerCase().includes("pending") || item.status.toLowerCase().includes("document"),
+      ).length,
+      pendingRefunds: paymentsSeed.filter((item) => item.status.toLowerCase().includes("refund")).length,
+      openTickets: supportSeed.filter((item) => item.status === "Open").length,
       patients: 12480,
       doctors: 386,
       hospitals: hospitalsSeed.length,
       todayAppointments: appointmentsSeed.length,
       revenueCents: 9650000,
-      pendingDoctors,
-      pendingRefunds,
-      openTickets,
-      systemHealth: systemSettings.maintenanceMode ? 71 : 98,
     };
-  }, [systemSettings.maintenanceMode]);
+
+    return {
+      patients: summary?.patients ?? fallback.patients,
+      doctors: summary?.doctors ?? fallback.doctors,
+      hospitals: summary?.hospitals ?? fallback.hospitals,
+      todayAppointments: summary?.todayAppointments ?? fallback.todayAppointments,
+      revenueCents: summary?.revenueCents ?? fallback.revenueCents,
+      pendingDoctors: summary?.pendingDoctors ?? fallback.pendingDoctors,
+      pendingRefunds: summary?.pendingRefunds ?? fallback.pendingRefunds,
+      openTickets: summary?.openTickets ?? fallback.openTickets,
+      systemHealth: summary?.systemHealth ?? (systemSettings.maintenanceMode ? 71 : 98),
+    };
+  }, [summary, systemSettings.maintenanceMode]);
 
   if (!isReady) {
     return (
@@ -803,6 +746,18 @@ export default function AdminDashboard() {
 }
 
 function DashboardOverviewPanel({ admin, totals, onNavigate }) {
+  const kpiCards = [
+    { key: "users", label: "Total Patients", value: totals.patients, tone: "blue" },
+    { key: "doctors", label: "Total Doctors", value: totals.doctors, tone: "emerald" },
+    { key: "hospitals", label: "Hospitals", value: totals.hospitals, tone: "slate" },
+    { key: "appointments", label: "Today's Appointments", value: totals.todayAppointments, tone: "amber" },
+    { key: "payments", label: "Revenue", value: formatCurrency(totals.revenueCents, "BDT"), tone: "emerald" },
+    { key: "doctors", label: "Pending Verifications", value: totals.pendingDoctors, tone: "amber" },
+    { key: "payments", label: "Refund Requests", value: totals.pendingRefunds, tone: "blue" },
+    { key: "support", label: "Support Tickets", value: totals.openTickets, tone: "slate" },
+    { key: "settings", label: "Update Profile", value: "98%", tone: "emerald" },
+  ];
+
   return (
     <div className="mx-auto max-w-7xl space-y-8">
       <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
@@ -846,46 +801,7 @@ function DashboardOverviewPanel({ admin, totals, onNavigate }) {
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_0.95fr]">
-        <PanelCard eyebrow="Workflow" title="Admin Login Workflow" description="This is the intended sign-in path before the admin reaches the dashboard.">
-          <div className="mt-4 space-y-3">
-            {loginWorkflow.map((step, index) => (
-              <WorkflowStep key={step} index={index + 1} title={step} />
-            ))}
-          </div>
-        </PanelCard>
-
-        <PanelCard eyebrow="Navigation" title="Main Dashboard Navigation" description="The modules exposed from the sidebar and overview shortcuts.">
-          <div className="mt-4 flex flex-wrap gap-2">
-            {enterpriseNavigation.map((item) => (
-              <span key={item} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">
-                {item}
-              </span>
-            ))}
-          </div>
-        </PanelCard>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <PanelCard eyebrow="Overview" title="Dashboard Overview Workflow" description="Load widgets, review KPIs, then open the related module.">
-          <div className="mt-4 space-y-3">
-            {dashboardWorkflow.map((step, index) => (
-              <WorkflowStep key={step} index={index + 1} title={step} />
-            ))}
-          </div>
-        </PanelCard>
-
-        <PanelCard eyebrow="Health" title="Operational Snapshot" description="These quick status cards summarize the live admin queue.">
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <MiniMetric label="Patients" value={totals.patients} tone="blue" />
-            <MiniMetric label="Doctors" value={totals.doctors} tone="emerald" />
-            <MiniMetric label="Hospitals" value={totals.hospitals} tone="slate" />
-            <MiniMetric label="Today" value={totals.todayAppointments} tone="amber" />
-            <MiniMetric label="Pending Doctors" value={totals.pendingDoctors} tone="amber" />
-            <MiniMetric label="Open Tickets" value={totals.openTickets} tone="blue" />
-          </div>
-        </PanelCard>
-      </div>
+    
     </div>
   );
 }
@@ -938,7 +854,7 @@ function KpiCard({ label, value, detail, tone = "slate", onClick }) {
       onClick={onClick}
       className={`rounded-2xl border p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneClasses}`}
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-current/70">{label}</p>
+      <p className="text-xl font-semibold uppercase tracking-wide text-current/70">{label}</p>
       <p className="mt-2 text-3xl font-bold text-current">{value}</p>
       <p className="mt-2 text-sm text-current/80">{detail}</p>
      </button>

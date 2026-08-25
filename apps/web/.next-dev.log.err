@@ -1,1 +1,448 @@
 [browser] Encountered two children with the same key, `/images/image001.jpg`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Uncaught ReferenceError: kpiCards is not defined
+    at DashboardOverviewPanel (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:781:22)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:672:13)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  779 |       </section>
+  780 |
+> 781 |       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      |                      ^
+  782 |         {kpiCards.map((card) => (
+  783 |           <KpiCard
+  784 |             key={card.label}
+[browser] Uncaught ReferenceError: kpiCards is not defined
+    at DashboardOverviewPanel (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:810:22)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:701:13)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  808 |       </section>
+  809 |
+> 810 |       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      |                      ^
+  811 |         {kpiCards.map((card) => (
+  812 |           <KpiCard
+  813 |             key={card.label}
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Uncaught ReferenceError: kpiCards is not defined
+    at DashboardOverviewPanel (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:817:22)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:708:13)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  815 |       </section>
+  816 |
+> 817 |       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      |                      ^
+  818 |         {kpiCards.map((card) => (
+  819 |           <KpiCard
+  820 |             key={card.label}
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] ⨯ unhandledRejection: ReferenceError: setSummaryLoading is not defined
+    at AdminDashboard.useCallback[loadSummary] (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:267:5)
+    at AdminDashboard.useEffect.timer (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:285:5)
+  265 |     if (!token) return;
+  266 |
+> 267 |     try {
+      |     ^
+  268 |       const response = await apiFetch("/admin/dashboard", {}, token);
+  269 |       const result = await response.json();
+  270 |       if (response.ok && result?.summary) {
+⨯ ReferenceError: doctorsSeed is not defined
+    at eval (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:580:23)
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:578:25)
+  578 |   const totals = useMemo(() => {
+  579 |     const fallback = {
+> 580 |       pendingDoctors: doctorsSeed.filter((item) =>
+      |                       ^
+  581 |         item.status.toLowerCase().includes("pending") || item.status.toLowerCase().includes("document"),
+  582 |       ).length,
+  583 |       pendingRefunds: paymentsSeed.filter((item) => item.status.toLowerCase().includes("refund")).length, {
+  digest: '691980645'
+}
+[browser] Uncaught ReferenceError: doctorsSeed is not defined
+    at AdminDashboard.useMemo[totals] (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:598:3)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:595:64)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  596 |       systemHealth: summary?.systemHealth ?? (systemSettings.maintenanceMode ? 71 : 98),
+  597 |     };
+> 598 |   }, [summary, systemSettings.maintenanceMode]);
+      |   ^
+  599 |
+  600 |   if (!isReady) {
+  601 |     return (
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:183:70)
+  181 |   const [isReady, setIsReady] = useState(false);
+  182 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 183 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  184 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  185 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  186 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '3931002337'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:183:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  181 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  182 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+> 183 |   const [statusMessage, setStatusMessage] = useState("");
+      |                                                          ^
+  184 |   const [toast, setToast] = useState(null);
+  185 |   const [doctors, setDoctors] = useState([]);
+  186 |   const [doctorsLoading, setDoctorsLoading] = useState(false);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:179:70)
+  177 |   const [isReady, setIsReady] = useState(false);
+  178 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 179 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  180 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  181 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  182 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '3132364074'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:179:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  177 |   const [isReady, setIsReady] = useState(false);
+  178 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 179 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  180 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  181 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  182 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:175:70)
+  173 |   const [isReady, setIsReady] = useState(false);
+  174 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 175 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  176 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  177 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  178 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '1717776744'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:192:37)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  190 |     }
+  191 |
+> 192 |     queueMicrotask(() => setIsReady(true));
+      |                                     ^
+  193 |   }, []);
+  194 |
+  195 |   const loadDoctors = useCallback(async () => {
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:171:70)
+  169 |   const [isReady, setIsReady] = useState(false);
+  170 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 171 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  172 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  173 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  174 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '1094087598'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:171:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  169 |   const [isReady, setIsReady] = useState(false);
+  170 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 171 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  172 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  173 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  174 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:167:70)
+  165 |   const [isReady, setIsReady] = useState(false);
+  166 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 167 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  168 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  169 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  170 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '4167848169'
+}
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:163:70)
+  161 |   const [isReady, setIsReady] = useState(false);
+  162 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 163 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  164 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  165 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  166 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '2836391015'
+}
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:159:70)
+  157 |   const [isReady, setIsReady] = useState(false);
+  158 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 159 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  160 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  161 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  162 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '2573128361'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:159:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  157 |   const [isReady, setIsReady] = useState(false);
+  158 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 159 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  160 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  161 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  162 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:163:70)
+  161 |   const [isReady, setIsReady] = useState(false);
+  162 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 163 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  164 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  165 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  166 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '2836391015'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:163:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  161 |   const [isReady, setIsReady] = useState(false);
+  162 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 163 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  164 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  165 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  166 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:167:70)
+  165 |   const [isReady, setIsReady] = useState(false);
+  166 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 167 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  168 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  169 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  170 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '4167848169'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:167:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  165 |   const [isReady, setIsReady] = useState(false);
+  166 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 167 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  168 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  169 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  170 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:163:70)
+  161 |   const [isReady, setIsReady] = useState(false);
+  162 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 163 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  164 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  165 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  166 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '2836391015'
+}
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:159:70)
+  157 |   const [isReady, setIsReady] = useState(false);
+  158 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 159 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  160 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  161 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  162 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '2573128361'
+}
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:154:70)
+  152 |   const [isReady, setIsReady] = useState(false);
+  153 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 154 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  155 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  156 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  157 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '4087415337'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:154:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  152 |   const [isReady, setIsReady] = useState(false);
+  153 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 154 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  155 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  156 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  157 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:140:70)
+  138 |   const [isReady, setIsReady] = useState(false);
+  139 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 140 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  141 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  142 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  143 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '4087415337'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:154:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  152 |   const [isReady, setIsReady] = useState(false);
+  153 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 154 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  155 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  156 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  157 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:138:70)
+  136 |   const [isReady, setIsReady] = useState(false);
+  137 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 138 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  139 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  140 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  141 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '4087415337'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:154:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  152 |   const [isReady, setIsReady] = useState(false);
+  153 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 154 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  155 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  156 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  157 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:137:70)
+  135 |   const [isReady, setIsReady] = useState(false);
+  136 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 137 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  138 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  139 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  140 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '4087415337'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:154:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  152 |   const [isReady, setIsReady] = useState(false);
+  153 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 154 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  155 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  156 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  157 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: reportsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:137:60)
+  135 |   const [isReady, setIsReady] = useState(false);
+  136 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 137 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+      |                                                            ^
+  138 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  139 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+  140 |   const [statusMessage, setStatusMessage] = useState(""); {
+  digest: '3680867912'
+}
+[browser] Uncaught ReferenceError: reportsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:137:60)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  135 |   const [isReady, setIsReady] = useState(false);
+  136 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 137 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+      |                                                            ^
+  138 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  139 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+  140 |   const [statusMessage, setStatusMessage] = useState("");
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: reportsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:138:60)
+  136 |   const [activeTab, setActiveTab] = useState("dashboard");
+  137 |
+> 138 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+      |                                                            ^
+  139 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  140 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+  141 |   const [statusMessage, setStatusMessage] = useState(""); {
+  digest: '3680867912'
+}
+[browser] Uncaught ReferenceError: reportsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:137:60)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  135 |   const [isReady, setIsReady] = useState(false);
+  136 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 137 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+      |                                                            ^
+  138 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  139 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+  140 |   const [statusMessage, setStatusMessage] = useState("");
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:137:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  135 |   const [isReady, setIsReady] = useState(false);
+  136 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 137 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  138 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  139 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  140 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⨯ ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src\app\admin\dashboard\admin_layouts\Dashboard_Overview\AdminDashboard.jsx:137:70)
+  135 |   const [isReady, setIsReady] = useState(false);
+  136 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 137 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  138 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  139 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  140 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed); {
+  digest: '4087415337'
+}
+[browser] Uncaught ReferenceError: appointmentsSeed is not defined
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:154:70)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  152 |   const [isReady, setIsReady] = useState(false);
+  153 |   const [activeTab, setActiveTab] = useState("dashboard");
+> 154 |   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
+      |                                                                      ^
+  155 |   const [selectedReportId, setSelectedReportId] = useState(reportsSeed[0].id);
+  156 |   const [selectedTicketId, setSelectedTicketId] = useState(supportSeed[0].id);
+  157 |   const [systemSettings, setSystemSettings] = useState(systemSettingsSeed);
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Uncaught ReferenceError: dashboardWorkflow is not defined
+    at DashboardOverviewPanel (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:854:26)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:698:13)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  852 |       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+  853 |         <PanelCard eyebrow="Overview" title="Dashboard Overview Workflow" description="Load widgets, review KPIs, then open the related module.">
+> 854 |           <div className="mt-4 space-y-3">
+      |                          ^
+  855 |             {dashboardWorkflow.map((step, index) => (
+  856 |               <WorkflowStep key={step} index={index + 1} title={step} />
+  857 |             ))}
+⚠ Fast Refresh had to perform a full reload due to a runtime error.

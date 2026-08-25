@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Hospital;
+use App\Models\Patient;
 use App\Models\Payment;
 use App\Models\SupportTicket;
 use App\Models\User;
@@ -80,12 +81,28 @@ class DashboardController extends Controller
 
     private function adminSummary(): array
     {
+        $today = now()->toDateString();
+
         $pendingDoctors = Doctor::query()->where('verification_status', 'pending')->count();
         $pendingRefunds = Payment::query()->where('status', 'refund_requested')->count();
         $openTickets = SupportTicket::query()->where('status', 'open')->count();
         $systemHealth = max(80, 100 - ($pendingDoctors * 2) - $openTickets);
 
+        $revenue = Payment::query()
+            ->where('status', 'paid')
+            ->sum('paid_amount');
+
         return [
+            'patients' => Patient::query()->count(),
+            'doctors' => Doctor::query()->count(),
+            'hospitals' => Hospital::query()
+                ->where(fn ($query) => $query->whereNull('status')->orWhere('status', 'active'))
+                ->count(),
+            'todayAppointments' => Appointment::query()
+                ->whereDate('appointment_date', $today)
+                ->where('status', '!=', 'cancelled')
+                ->count(),
+            'revenueCents' => (int) round(((float) $revenue) * 100),
             'pendingDoctors' => $pendingDoctors,
             'pendingRefunds' => $pendingRefunds,
             'openTickets' => $openTickets,
