@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\DoctorController;
 use App\Http\Controllers\Api\V1\MedicalRecordController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('health', function () {
@@ -28,6 +29,11 @@ Route::post('patient/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('doctor/search', [DoctorController::class, 'search']);
 Route::get('doctor/public/{doctorId}', [DoctorController::class, 'show']);
 Route::get('doctor-images/{filename}', [DoctorController::class, 'image']);
+
+// Settings (public)
+Route::get('settings', [SettingsController::class, 'publicIndex']);
+Route::get('settings/page/{slug}', [SettingsController::class, 'page']);
+Route::get('settings/asset/{filename}', [SettingsController::class, 'asset']);
 
 // SSLCOMMERZ callbacks (public - called by the payment gateway)
 Route::post('payments/sslcommerz/success', [PaymentController::class, 'success']);
@@ -61,6 +67,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('admin/doctors', [DoctorController::class, 'adminStore']);
         Route::put('admin/doctors/{doctorId}', [DoctorController::class, 'adminUpdate']);
         Route::delete('admin/doctors/{doctorId}', [DoctorController::class, 'adminDestroy']);
+
+        // Settings (admin)
+        Route::get('admin/settings', [SettingsController::class, 'index']);
+        Route::post('admin/settings', [SettingsController::class, 'store']);
+        Route::put('admin/settings/{settingId}', [SettingsController::class, 'update']);
+        Route::put('admin/settings/{settingId}/toggle', [SettingsController::class, 'toggle']);
+        Route::delete('admin/settings/{settingId}', [SettingsController::class, 'destroy']);
     });
 
     Route::middleware('role:doctor|admin|super-admin')->group(function (): void {

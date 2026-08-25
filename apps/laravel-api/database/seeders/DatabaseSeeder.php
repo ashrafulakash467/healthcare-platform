@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AccessControlSeeder::class,
             DemoUsersSeeder::class,
+            SettingsSeeder::class,
         ]);
     }
 }

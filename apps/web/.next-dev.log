@@ -304,3 +304,56 @@ Creating turbopack project { dir: 'C:\\Akash\\healthcare-platform\\apps\\web', t
 ✓ Compiled in 382ms
  GET /login 200 in 49ms (next.js: 19ms, application-code: 30ms)
  GET /admin/dashboard 200 in 46ms (next.js: 12ms, application-code: 34ms)
+ GET /login 200 in 123ms (next.js: 67ms, application-code: 56ms)
+ GET /admin/dashboard 200 in 32ms (next.js: 5ms, application-code: 27ms)
+ GET /login 200 in 73ms (next.js: 7ms, application-code: 66ms)
+ GET /admin/dashboard 200 in 80ms (next.js: 5ms, application-code: 75ms)
+✓ Compiled in 269ms
+○ Compiling /_error ...
+ GET /login 500 in 7.5s (next.js: 6.9s, application-code: 623ms)
+✓ Compiled in 2ms
+ GET /admin/dashboard 500 in 71ms (next.js: 58ms, application-code: 14ms)
+ GET /login 200 in 103ms (next.js: 15ms, application-code: 88ms)
+ GET /admin/dashboard 200 in 178ms (next.js: 27ms, application-code: 151ms)
+✓ Compiled in 176ms
+✓ Compiled in 618ms
+ GET /login 200 in 199ms (next.js: 116ms, application-code: 84ms)
+ GET /admin/dashboard 200 in 37ms (next.js: 12ms, application-code: 25ms)
+ GET /login 200 in 50ms (next.js: 3ms, application-code: 47ms)
+ GET /login 200 in 77ms (next.js: 53ms, application-code: 24ms)
+✓ Compiled in 637ms
+ GET /admin/dashboard 200 in 46ms (next.js: 15ms, application-code: 31ms)
+✓ Compiled in 332ms
+✓ Compiled in 247ms
+ GET /login 500 in 25ms (next.js: 12ms, application-code: 13ms)
+ GET /login 500 in 17ms (next.js: 8ms, application-code: 9ms)
+✓ Compiled in 917ms
+✓ Compiled in 33.8s
+✓ Finished filesystem cache database compaction in 26.5s
+✓ Compiled in 8.5s
+ GET /admin/dashboard 200 in 69ms (next.js: 17ms, application-code: 52ms)
+ GET /login 200 in 230ms (next.js: 52ms, application-code: 178ms)
+✓ Compiled in 549ms
+ GET /admin/dashboard 200 in 268ms (next.js: 69ms, application-code: 199ms)
+ GET /login 200 in 447ms (next.js: 13ms, application-code: 435ms)
+ GET /login 200 in 65ms (next.js: 6ms, application-code: 58ms)
+ GET /doctor/dashboard 200 in 982ms (next.js: 782ms, application-code: 200ms)
+ GET /doctor/login 200 in 215ms (next.js: 77ms, application-code: 138ms)
+ GET /login 200 in 73ms (next.js: 9ms, application-code: 64ms)
+ GET /login 200 in 73ms (next.js: 38ms, application-code: 34ms)
+ GET /doctor/login 200 in 49ms (next.js: 4ms, application-code: 45ms)
+ GET /login 200 in 37ms (next.js: 6ms, application-code: 31ms)
+ GET /login 200 in 41ms (next.js: 10ms, application-code: 32ms)
+ GET /doctor/login 200 in 193ms (next.js: 15ms, application-code: 178ms)
+ GET /login 200 in 38ms (next.js: 5ms, application-code: 33ms)
+ GET /login 200 in 36ms (next.js: 6ms, application-code: 31ms)
+ GET /admin 200 in 568ms (next.js: 509ms, application-code: 59ms)
+ GET /admin/dashboard 200 in 43ms (next.js: 15ms, application-code: 29ms)
+ GET /admin/dashboard 200 in 28ms (next.js: 3ms, application-code: 24ms)
+✓ Compiled in 1253ms
+ GET /admin/dashboard 200 in 258ms (next.js: 97ms, application-code: 161ms)
+ GET /admin/dashboard 200 in 85ms (next.js: 56ms, application-code: 29ms)
+ GET /admin/dashboard 200 in 274ms (next.js: 154ms, application-code: 120ms)
+ GET /admin/dashboard 200 in 11.1s (next.js: 10.2s, application-code: 954ms)
+ GET /login 200 in 11.3s (next.js: 10.4s, application-code: 871ms)
+ GET /admin/dashboard 200 in 243ms (next.js: 181ms, application-code: 62ms)
