@@ -217,3 +217,24 @@ Creating turbopack project { dir: 'C:\\Akash\\healthcare-platform\\apps\\web', t
  GET /login 200 in 28ms (next.js: 3ms, application-code: 25ms)
 ✓ Compiled in 96ms
  GET /admin/dashboard 200 in 33ms (next.js: 9ms, application-code: 24ms)
+✓ Compiled in 257ms
+ GET /login 200 in 50ms (next.js: 17ms, application-code: 33ms)
+ GET /admin/dashboard 200 in 38ms (next.js: 12ms, application-code: 26ms)
+✓ Compiled in 618ms
+ GET /admin/dashboard 200 in 42ms (next.js: 14ms, application-code: 28ms)
+ GET /login 200 in 82ms (next.js: 7ms, application-code: 75ms)
+✓ Compiled in 356ms
+ GET /login 200 in 38ms (next.js: 9ms, application-code: 29ms)
+ GET /admin/dashboard 200 in 48ms (next.js: 22ms, application-code: 26ms)
+✓ Compiled in 176ms
+ GET /login 200 in 35ms (next.js: 6ms, application-code: 29ms)
+ GET /admin/dashboard 200 in 188ms (next.js: 38ms, application-code: 150ms)
+✓ Compiled in 183ms
+ GET /login 200 in 32ms (next.js: 5ms, application-code: 27ms)
+ GET /admin/dashboard 200 in 40ms (next.js: 9ms, application-code: 30ms)
+✓ Compiled in 166ms
+ GET /login 200 in 73ms (next.js: 5ms, application-code: 68ms)
+ GET /admin/dashboard 200 in 52ms (next.js: 10ms, application-code: 42ms)
+✓ Compiled in 105ms
+ GET /login 200 in 29ms (next.js: 4ms, application-code: 24ms)
+ GET /admin/dashboard 200 in 98ms (next.js: 11ms, application-code: 87ms)

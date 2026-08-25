@@ -26,37 +26,6 @@ import { adminSidebarItems } from "../../../../Header_Sidebar-Admin-Doc-shareUi/
 
 const tabItems = adminSidebarItems;
 
-
-const doctorsSeed = [
-  {
-    id: "doctor-1",
-    name: "Dr. Sarah Jenkins",
-    specialty: "Cardiology",
-    hospital: "Central Care Hospital",
-    license: "BMDC-112233",
-    status: "Pending Review",
-    notes: "Verify chamber availability and license authenticity.",
-  },
-  {
-    id: "doctor-2",
-    name: "Dr. Alan Grant",
-    specialty: "Internal Medicine",
-    hospital: "City Medical Center",
-    license: "BMDC-998811",
-    status: "Approved",
-    notes: "Fully verified and active on the platform.",
-  },
-  {
-    id: "doctor-3",
-    name: "Dr. Meher Afroz",
-    specialty: "Dermatology",
-    hospital: "Metro Hospital",
-    license: "BMDC-775544",
-    status: "Needs Documents",
-    notes: "Missing one uploaded credential document.",
-  },
-];
-
 const hospitalsSeed = [
   { id: "hospital-1", name: "Central Care Hospital", city: "Dhaka", status: "Onboarded", doctors: 72, beds: 240 },
   { id: "hospital-2", name: "City Medical Center", city: "Chattogram", status: "Under Review", doctors: 48, beds: 180 },
@@ -195,6 +164,15 @@ export default function AdminDashboard() {
   const [editForm, setEditForm] = useState({});
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [summary, setSummary] = useState(null);
+  const [hospitals, setHospitals] = useState(hospitalsSeed);
+  const [appointments, setAppointments] = useState(appointmentsSeed);
+  const [payments, setPayments] = useState(paymentsSeed);
+  const [content, setContent] = useState(contentSeed);
+  const [reports, setReports] = useState(reportsSeed);
+  const [notifications, setNotifications] = useState(notificationsSeed);
+  const [tickets, setTickets] = useState(supportSeed);
+  const [roles, setRoles] = useState(rolesSeed);
+  const [logs, setLogs] = useState(auditSeed);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("adminToken");
@@ -243,15 +221,84 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  const loadAdminData = useCallback(async () => {
+    const token = getStoredToken("admin");
+    if (!token) return;
+
+    try {
+      const response = await apiFetch("/admin/data", {}, token);
+      const result = await response.json();
+
+      if (!response.ok) {
+        setStatusMessage("Failed to load admin data.");
+        return;
+      }
+
+      if (Array.isArray(result.hospitals)) {
+        setHospitals(result.hospitals);
+      }
+
+      if (Array.isArray(result.appointments) && result.appointments.length > 0) {
+        setAppointments(result.appointments);
+        setSelectedAppointmentId((current) =>
+          result.appointments.some((appointment) => appointment.id === current)
+            ? current
+            : result.appointments[0].id,
+        );
+      }
+
+      if (Array.isArray(result.payments)) {
+        setPayments(result.payments);
+      }
+
+      if (Array.isArray(result.content)) {
+        setContent(result.content);
+      }
+
+      if (Array.isArray(result.reports) && result.reports.length > 0) {
+        setReports(result.reports);
+        setSelectedReportId((current) =>
+          result.reports.some((report) => report.id === current)
+            ? current
+            : result.reports[0].id,
+        );
+      }
+
+      if (Array.isArray(result.notifications)) {
+        setNotifications(result.notifications);
+      }
+
+      if (Array.isArray(result.tickets) && result.tickets.length > 0) {
+        setTickets(result.tickets);
+        setSelectedTicketId((current) =>
+          result.tickets.some((ticket) => ticket.id === current)
+            ? current
+            : result.tickets[0].id,
+        );
+      }
+
+      if (Array.isArray(result.roles)) {
+        setRoles(result.roles);
+      }
+
+      if (Array.isArray(result.logs)) {
+        setLogs(result.logs);
+      }
+    } catch {
+      // Keep the seed data as fallback when the API is unreachable.
+    }
+  }, []);
+
   useEffect(() => {
     void loadSummary();
+    void loadAdminData();
 
     const interval = window.setInterval(() => {
       void loadSummary();
     }, 30000);
 
     return () => window.clearInterval(interval);
-  }, [loadSummary]);
+  }, [loadSummary, loadAdminData]);
 
   useEffect(() => {
     if (activeTab === "doctors") {
@@ -570,16 +617,21 @@ export default function AdminDashboard() {
   }
 
   const totals = useMemo(() => {
+    const isPendingDoctor = (item) => {
+      const value = String(item?.verification_status ?? item?.status ?? "").toLowerCase();
+      return value.includes("pending") || value.includes("document") || value.includes("review");
+    };
+
     const fallback = {
-      pendingDoctors: doctorsSeed.filter((item) =>
-        item.status.toLowerCase().includes("pending") || item.status.toLowerCase().includes("document"),
+      pendingDoctors: doctors.filter(isPendingDoctor).length,
+      pendingRefunds: payments.filter((item) =>
+        String(item?.status ?? "").toLowerCase().includes("refund"),
       ).length,
-      pendingRefunds: paymentsSeed.filter((item) => item.status.toLowerCase().includes("refund")).length,
-      openTickets: supportSeed.filter((item) => item.status === "Open").length,
+      openTickets: tickets.filter((item) => item?.status === "Open").length,
       patients: 12480,
-      doctors: 386,
-      hospitals: hospitalsSeed.length,
-      todayAppointments: appointmentsSeed.length,
+      doctors: doctors.length || 386,
+      hospitals: hospitals.length,
+      todayAppointments: appointments.length,
       revenueCents: 9650000,
     };
 
@@ -594,7 +646,7 @@ export default function AdminDashboard() {
       openTickets: summary?.openTickets ?? fallback.openTickets,
       systemHealth: summary?.systemHealth ?? (systemSettings.maintenanceMode ? 71 : 98),
     };
-  }, [summary, systemSettings.maintenanceMode]);
+  }, [summary, systemSettings.maintenanceMode, doctors, payments, tickets, hospitals, appointments]);
 
   if (!isReady) {
     return (
@@ -691,38 +743,38 @@ export default function AdminDashboard() {
               onMessage={setStatusMessage}
             />
           )}
-          {activeTab === "hospitals" && <HospitalsPage hospitals={hospitalsSeed} />}
+          {activeTab === "hospitals" && <HospitalsPage hospitals={hospitals} />}
           {activeTab === "appointments" && (
             <AppointmentsPage
-              appointments={appointmentsSeed}
+              appointments={appointments}
               selectedAppointmentId={selectedAppointmentId}
               onSelectAppointment={setSelectedAppointmentId}
               onMessage={setStatusMessage}
             />
           )}
-          {activeTab === "payments" && <PaymentsPage payments={paymentsSeed} />}
-          {activeTab === "content" && <ContentPage content={contentSeed} />}
+          {activeTab === "payments" && <PaymentsPage payments={payments} />}
+          {activeTab === "content" && <ContentPage content={content} />}
           {activeTab === "reports" && (
             <ReportsPage
-              reports={reportsSeed}
+              reports={reports}
               selectedReportId={selectedReportId}
               onSelectReport={setSelectedReportId}
             />
           )}
-          {activeTab === "notifications" && <NotificationsPage notifications={notificationsSeed} />}
+          {activeTab === "notifications" && <NotificationsPage notifications={notifications} />}
           {activeTab === "support" && (
             <SupportPage
-              tickets={supportSeed}
+              tickets={tickets}
               selectedTicketId={selectedTicketId}
               onSelectTicket={setSelectedTicketId}
               onMessage={setStatusMessage}
             />
           )}
-          {activeTab === "roles" && <RolesPage roles={rolesSeed} />}
+          {activeTab === "roles" && <RolesPage roles={roles} />}
           {activeTab === "settings" && (
             <SettingsPage settings={systemSettings} onToggleSetting={toggleSetting} />
           )}
-          {activeTab === "audit" && <AuditPage logs={auditSeed} />}
+          {activeTab === "audit" && <AuditPage logs={logs} />}
         </main>
       </div>
 

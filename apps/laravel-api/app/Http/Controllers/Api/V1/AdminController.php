@@ -3,14 +3,21 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
+use App\Models\AuditLog;
+use App\Models\CmsPage;
 use App\Models\Doctor;
 use App\Models\Hospital;
+use App\Models\Payment;
+use App\Models\Report;
+use App\Models\SupportTicket;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
@@ -85,6 +92,228 @@ class AdminController extends Controller
             'total' => $hospitals->count(),
         ]);
     }
+
+    public function data(): JsonResponse
+    {
+        $hospitals = Hospital::query()
+            ->where(fn ($query) => $query->whereNull('status')->orWhere('status', 'active'))
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Hospital $hospital): array => [
+                'id' => (string) $hospital->id,
+                'name' => $hospital->name,
+                'city' => $hospital->city ?? '',
+                'status' => $this->adminDisplayLabel($hospital->status, 'Onboarded'),
+                // 'doctors' and 'beds' mirror the admin UI cards.
+                'doctors' => (int) $hospital->doctors()->count(),
+                'beds' => 0, // schema has no beds column
+            ])
+            ->values();
+
+        $appointments = Appointment::query()
+            ->with(['patient.user', 'doctor.user'])
+            ->latest('appointment_date')
+            ->limit(100)
+            ->get()
+            ->map(fn (Appointment $appointment): array => [
+                'id' => (string) $appointment->id,
+                'patient' => $appointment->patient?->name
+                    ?? $appointment->patient?->user?->name
+                    ?? ('Patient #'.$appointment->patient_id),
+                'doctor' => $appointment->doctor?->user?->name
+                    ?? $appointment->doctor?->name
+                    ?? ('Doctor #'.$appointment->doctor_id),
+                'time' => $this->formatAppointmentTime($appointment),
+                'type' => $this->adminDisplayLabel($appointment->consultation_type, 'Consultation'),
+                'status' => $this->adminDisplayLabel($appointment->status, 'Pending'),
+                'payment' => $this->adminDisplayLabel($appointment->payment_status, 'Pending'),
+            ])
+            ->values();
+
+        $payments = Payment::query()
+            ->latest()
+            ->limit(100)
+            ->get()
+            ->map(fn (Payment $payment): array => [
+                'id' => (string) $payment->id,
+                'reference' => $payment->transaction_no ?? ('PAY-'.$payment->id),
+                'amountCents' => (int) round(((float) ($payment->paid_amount ?? $payment->amount ?? 0)) * 100),
+                'status' => $this->adminDisplayLabel($payment->status, 'Pending'),
+                'note' => $payment->method
+                    ? ('Payment via '.$this->adminDisplayLabel($payment->method))
+                    : 'Payment record',
+            ])
+            ->values();
+
+        $content = CmsPage::query()
+            ->latest()
+            ->get()
+            ->map(fn (CmsPage $page): array => [
+                'id' => (string) $page->id,
+                'title' => $page->title,
+                'owner' => $page->createdBy?->name ?? 'CMS',
+                'status' => $this->adminDisplayLabel($page->status, 'Draft'),
+            ])
+            ->values();
+
+        $reports = Report::query()
+            ->latest()
+            ->get()
+            ->map(fn (Report $report): array => [
+                'id' => (string) $report->id,
+                'title' => $report->title,
+                'owner' => $report->generatedBy?->name ?? 'Analytics',
+                'status' => $this->adminDisplayLabel($report->status, 'Ready'),
+            ])
+            ->values();
+
+        $tickets = SupportTicket::query()
+            ->with(['user', 'patient', 'doctor.user'])
+            ->latest()
+            ->get()
+            ->map(fn (SupportTicket $ticket): array => [
+                'id' => (string) $ticket->id,
+                'subject' => $ticket->subject,
+                'requester' => $ticket->user?->name
+                    ?? $ticket->patient?->name
+                    ?? $ticket->doctor?->user?->name
+                    ?? ('User #'.$ticket->user_id),
+                'priority' => $this->adminDisplayLabel($ticket->priority, 'Medium'),
+                'status' => $this->adminDisplayLabel($ticket->status, 'Open'),
+            ])
+            ->values();
+
+        $logs = AuditLog::query()
+            ->with('user')
+            ->latest()
+            ->limit(100)
+            ->get()
+            ->map(fn (AuditLog $log): array => [
+                'id' => (string) $log->id,
+                'action' => $log->action,
+                'actor' => $log->user?->name ?? 'System',
+                'time' => $log->created_at?->diffForHumans() ?? '—',
+            ])
+            ->values();
+
+        $roles = Role::query()
+            ->with('permissions')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Role $role): array => [
+                'role' => $this->adminDisplayLabel($role->name, $role->name),
+                'permissions' => $role->permissions->pluck('name')
+                    ->map(fn (string $permission) => $this->adminDisplayLabel($permission, $permission))
+                    ->values(),
+            ])
+            ->values();
+
+        return response()->json([
+            'hospitals' => $hospitals,
+            'appointments' => $appointments,
+            'payments' => $payments,
+            'content' => $content,
+            'reports' => $reports,
+            'tickets' => $tickets,
+            'logs' => $logs,
+            'roles' => $roles,
+            'notifications' => $this->adminNotifications(),
+        ]);
+    }
+
+    private function adminNotifications(): array
+    {
+        $pendingDoctors = Doctor::query()->where('verification_status', 'pending')->count();
+        $pendingRefunds = Payment::query()->where('status', 'refund_requested')->count();
+        $openTickets = SupportTicket::query()->where('status', 'open')->count();
+        $systemHealth = max(80, 100 - ($pendingDoctors * 2) - $openTickets);
+
+        $notifications = [];
+
+        if ($pendingDoctors > 0) {
+            $notifications[] = [
+                'id' => 'notify-pending-doctors',
+                'title' => 'Pending doctor verification',
+                'message' => "{$pendingDoctors} onboarding application(s) need manual review.",
+            ];
+        }
+
+        if ($pendingRefunds > 0) {
+            $notifications[] = [
+                'id' => 'notify-refund-queue',
+                'title' => 'Refund queue update',
+                'message' => "{$pendingRefunds} refund request(s) are waiting for finance approval.",
+            ];
+        }
+
+        if ($openTickets > 0) {
+            $notifications[] = [
+                'id' => 'notify-open-tickets',
+                'title' => 'Open support tickets',
+                'message' => "{$openTickets} open ticket(s) require attention.",
+            ];
+        }
+
+        $notifications[] = [
+            'id' => 'notify-system-health',
+            'title' => 'System health',
+            'message' => $systemHealth >= 95
+                ? 'All services are green. No incident is currently open.'
+                : "System stability score is {$systemHealth}%.",
+        ];
+
+        return $notifications;
+    }
+
+    private function adminDisplayLabel(?string $value, string $default = ''): string
+    {
+        $raw = trim((string) $value);
+
+        if ($raw === '') {
+            return $default;
+        }
+
+        $lookup = [
+            'active' => 'Active',
+            'inactive' => 'Inactive',
+            'pending' => 'Pending',
+            'pending_verification' => 'Pending Review',
+            'under_review' => 'Under Review',
+            'onboarded' => 'Onboarded',
+            'paid' => 'Paid',
+            'settled' => 'Settled',
+            'refund_requested' => 'Refund Requested',
+            'published' => 'Published',
+            'draft' => 'Draft',
+            'open' => 'Open',
+            'in_progress' => 'In Progress',
+            'waiting_on_user' => 'Waiting on User',
+            'confirmed' => 'Confirmed',
+            'completed' => 'Completed',
+            'cancelled' => 'Cancelled',
+            'super_admin' => 'Super Admin',
+        ];
+
+        $key = strtolower(str_replace('-', '_', $raw));
+
+        return $lookup[$key] ?? ucwords(str_replace(['-', '_'], ' ', $key));
+    }
+
+    private function formatAppointmentTime(Appointment $appointment): string
+    {
+        if ($appointment->start_time) {
+            try {
+                return \Illuminate\Support\Carbon::parse($appointment->start_time)->format('g:i A');
+            } catch (\Throwable) {
+                // fall through to the raw value
+            }
+
+            return $appointment->start_time;
+        }
+
+        return $appointment->appointment_date?->format('M d') ?? '';
+    }
+
 
     public function destroy(string $userId): JsonResponse
     {

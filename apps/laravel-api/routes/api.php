@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::middleware('role:admin|super-admin')->group(function (): void {
         Route::get('admin/dashboard', [DashboardController::class, 'admin']);
+        Route::get('admin/data', [AdminController::class, 'data']);
         Route::get('admin/doctor-verifications', [AdminController::class, 'index']);
         Route::get('admin/users', [AdminController::class, 'users']);
         Route::get('admin/hospitals', [AdminController::class, 'hospitals']);
