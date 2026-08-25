@@ -10940,3 +10940,15 @@ https://react.dev/link/hydration-mismatch
   62 |       const name = setting.group || "general";
   63 |       if (!groups[name]) {
   64 |         groups[name] = [];
+[browser] Uncaught TypeError: settings is not iterable
+    at SettingsPage.useMemo[byGroup] (src/app/admin/dashboard/admin_layouts/All_Settings/settings-page.jsx:61:14)
+    at SettingsPage (src/app/admin/dashboard/admin_layouts/All_Settings/settings-page.jsx:59:30)
+    at AdminDashboard (src/app/admin/dashboard/admin_layouts/Dashboard_Overview/AdminDashboard.jsx:759:24)
+    at AdminDashboardPage (src\app\admin\dashboard\page.jsx:13:7)
+  59 |   const normalizedSettings = useMemo(() => {
+  60 |     if (Array.isArray(settings)) {
+> 61 |       return settings;
+     |              ^
+  62 |     }
+  63 |
+  64 |     if (!settings || typeof settings !== "object") {

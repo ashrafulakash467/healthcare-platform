@@ -357,3 +357,7 @@ Creating turbopack project { dir: 'C:\\Akash\\healthcare-platform\\apps\\web', t
  GET /admin/dashboard 200 in 11.1s (next.js: 10.2s, application-code: 954ms)
  GET /login 200 in 11.3s (next.js: 10.4s, application-code: 871ms)
  GET /admin/dashboard 200 in 243ms (next.js: 181ms, application-code: 62ms)
+ GET /admin/dashboard 200 in 432ms (next.js: 265ms, application-code: 168ms)
+ GET /login 200 in 450ms (next.js: 345ms, application-code: 105ms)
+ GET /admin/dashboard 200 in 72ms (next.js: 4ms, application-code: 68ms)
+ GET /admin/dashboard 200 in 499ms (next.js: 439ms, application-code: 59ms)
