@@ -6,10 +6,10 @@ use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DoctorController;
 use App\Http\Controllers\Api\V1\MedicalRecordController;
-use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SettingsController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\SslCommerzPaymentController;
 
 Route::get('health', function () {
     return response()->json([
@@ -35,11 +35,6 @@ Route::get('settings', [SettingsController::class, 'publicIndex']);
 Route::get('settings/page/{slug}', [SettingsController::class, 'page']);
 Route::get('settings/asset/{filename}', [SettingsController::class, 'asset']);
 
-// SSLCOMMERZ callbacks (public - called by the payment gateway)
-Route::post('payments/sslcommerz/success', [PaymentController::class, 'success']);
-Route::post('payments/sslcommerz/fail', [PaymentController::class, 'fail']);
-Route::post('payments/sslcommerz/cancel', [PaymentController::class, 'cancel']);
-Route::post('payments/sslcommerz/ipn', [PaymentController::class, 'ipn']);
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -96,9 +91,20 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('appointment/reschedule-slots', [AppointmentController::class, 'rescheduleSlots']);
         Route::post('appointment/reschedule', [AppointmentController::class, 'reschedule']);
 
-        // Payment routes
-        Route::get('appointments/{appointmentId}/payment-details', [PaymentController::class, 'paymentDetails']);
-        Route::post('payments/initialize', [PaymentController::class, 'initialize']);
+
+        // SSLCOMMERZ Start
+        Route::get('appointments/{appointmentId}/payment-details', [SslCommerzPaymentController::class, 'paymentDetails']);
+        Route::get('appointments/{appointmentId}/example-hosted-checkout', [SslCommerzPaymentController::class, 'exampleHostedCheckout']);
+
+        Route::post('/pay', [SslCommerzPaymentController::class, 'index']);
+        Route::post('/pay-via-ajax', [SslCommerzPaymentController::class, 'payViaAjax']);
+
+        Route::post('/success', [SslCommerzPaymentController::class, 'success']);
+        Route::post('/fail', [SslCommerzPaymentController::class, 'fail']);
+        Route::post('/cancel', [SslCommerzPaymentController::class, 'cancel']);
+
+        Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
+        //SSLCOMMERZ END
     });
 
     Route::middleware('role:hospital|admin|super-admin')->group(function (): void {
