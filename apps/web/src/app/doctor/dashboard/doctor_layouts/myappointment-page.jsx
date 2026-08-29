@@ -375,34 +375,7 @@ export default function MyAppointmentPage({
                 />
               </div>
 
-              <div className="mt-5 space-y-4">
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setWorkflowMessage(`Reviewing patient details for ${appointmentName}.`);
-                      setWorkflowError("");
-                    }}
-                    className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Review Patient Details
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateDecision("accepted")}
-                    className="rounded-md border border-emerald-200 bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                  >
-                    Accept
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateDecision("rejected")}
-                    className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-                  >
-                    Reject
-                  </button>
-                </div>
-
+              <div className="mt-5 space-y-4">            
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                   <input
                     value={followUpValue}
