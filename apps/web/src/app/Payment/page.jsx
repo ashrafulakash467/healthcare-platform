@@ -92,7 +92,7 @@ export default function PaymentPage() {
 
     try {
       const response = await apiFetch(
-        "/payments/initialize",
+        "/pay",
         {
           method: "POST",
           body: JSON.stringify({ appointment_id: appointmentId }),

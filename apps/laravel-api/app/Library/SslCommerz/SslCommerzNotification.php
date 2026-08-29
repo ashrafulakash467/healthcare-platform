@@ -209,7 +209,7 @@ class SslCommerzNotification extends AbstractSslCommerz
             if (!empty($formattedResponse['GatewayPageURL'])) {
                 $this->redirect($formattedResponse['GatewayPageURL']);
             } else {
-                if (strpos($formattedResponse['failedreason'], 'Store Credential') === false) {
+             dd($this->config);   if (strpos($formattedResponse['failedreason'], 'Store Credential') === false) {
                     $message = $formattedResponse['failedreason'];
                 } else {
                     $message = "Check the SSLCZ_TESTMODE and SSLCZ_STORE_PASSWORD value in your .env; DO NOT USE MERCHANT PANEL PASSWORD HERE.";
