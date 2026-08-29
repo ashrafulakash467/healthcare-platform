@@ -290,7 +290,8 @@ class SslCommerzPaymentController extends Controller
     public function paymentDetails($appointmentId)
     {
         $appointment = \App\Models\Appointment::with(['patient', 'doctor', 'payment'])
-            ->find($appointmentId);
+            ->where('appointment_no', $appointmentId)
+            ->first();
 
         if (!$appointment) {
             return response()->json([
