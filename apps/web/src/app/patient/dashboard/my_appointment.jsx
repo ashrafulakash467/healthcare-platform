@@ -20,6 +20,7 @@ export default function MyAppointmentPage({
   setCancellationReasons,
   handleCancelAppointment,
   handlePayAppointment,
+  handleDeleteAppointment,
   isCancellingId,
   isPayingId,
   isDeletingId,

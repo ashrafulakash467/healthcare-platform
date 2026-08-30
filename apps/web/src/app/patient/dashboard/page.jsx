@@ -194,14 +194,12 @@ export default function PatientDashboardPage() {
       setActionError("");
       setActionMessage("");
 
-      const response = await fetch(
-        `http://localhost:3001/appointments/${appointmentId}`,
+      const response = await apiFetch(
+        `/appointments/${appointmentId}`,
         {
           method: "DELETE",
-          headers: {
-            Accept: "application/json",
-          },
-        }
+        },
+        authToken
       );
 
       const data = await response.json();
