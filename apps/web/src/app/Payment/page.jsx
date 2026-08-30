@@ -57,7 +57,7 @@ export default function PaymentPage() {
       } catch {
         if (!cancelled) {
           setError(
-            "Could not load payment details. Make sure the backend is running on port 3001.",
+            "Could not load payment details. Make sure the backend is running on port 3001.page.jsx",
           );
         }
       } finally {

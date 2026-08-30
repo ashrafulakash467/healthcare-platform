@@ -1,18 +1,16 @@
 ﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { apiFetch, getStoredToken } from "@/lib/api";
 import PaymentSummary from "../components/PaymentSummary";
 
 /**
- * EasyCheckout (Popup) payment page.
+ * Legacy payment entry page.
  *
- * Based on the SSLCommerz EasyCheckout (Popup) integration.
- * Calls POST /pay-via-ajax which returns JSON containing the gateway URL.
- * The popup is then opened via the SSLCommerz embed script.
+ * Compatibility screen that starts the SSLCommerz hosted checkout flow.
  */
-export default function EasyCheckoutPage() {
+function EasyCheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get("appointmentId") ?? "";
@@ -63,7 +61,7 @@ export default function EasyCheckoutPage() {
       } catch {
         if (!cancelled) {
           setError(
-            "Could not load payment details. Make sure the backend is running on port 3001.",
+            "Could not load payment details. Make sure the backend is running on port 3001._easyCheakout",
           );
         }
       } finally {
@@ -98,7 +96,7 @@ export default function EasyCheckoutPage() {
 
     try {
       const response = await apiFetch(
-        "/pay-via-ajax",
+        "/payments/sslcommerz/initiate",
         {
           method: "POST",
           body: JSON.stringify({ appointment_id: appointmentId }),
@@ -114,8 +112,6 @@ export default function EasyCheckoutPage() {
 
       if (result.gateway_url) {
         window.location.href = result.gateway_url;
-      } else if (typeof window !== "undefined" && window.sslcommerz) {
-        window.sslcommerz.init(result);
       } else {
         setError("Payment gateway did not return a valid response.");
       }
@@ -185,9 +181,9 @@ export default function EasyCheckoutPage() {
     <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-8 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-600">EasyCheckout (Popup)</p>
-          <h1 className="mt-2 text-3xl font-extrabold text-slate-900">Pay via EasyCheckout</h1>
-          <p className="mt-2 text-sm text-slate-500">You will be shown a secure popup to complete your payment through SSLCOMERZ.</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-600">Secure Checkout</p>
+          <h1 className="mt-2 text-3xl font-extrabold text-slate-900">Continue to Payment</h1>
+          <p className="mt-2 text-sm text-slate-500">You will be redirected to SSLCommerz to complete your payment securely.</p>
         </div>
 
         {error ? (
@@ -202,8 +198,8 @@ export default function EasyCheckoutPage() {
               <span className="text-sm">🔒</span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">Secure SSLCOMERZ EasyCheckout</p>
-              <p className="mt-0.5 text-xs text-slate-500">A secure popup will appear for you to enter your payment details. We never store your card information.</p>
+              <p className="text-sm font-semibold text-slate-900">Secure SSLCommerz Hosted Checkout</p>
+              <p className="mt-0.5 text-xs text-slate-500">SSLCommerz handles your payment details on its secure hosted page. We never store your card information.</p>
             </div>
           </div>
 
@@ -213,7 +209,7 @@ export default function EasyCheckoutPage() {
             disabled={isPaying || appointment?.paymentStatus === "paid"}
             className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-lg bg-emerald-600 px-5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isPaying ? "Processing..." : appointment?.paymentStatus === "paid" ? "Already Paid" : "Pay Now (Popup)"}
+            {isPaying ? "Redirecting..." : appointment?.paymentStatus === "paid" ? "Already Paid" : "Continue to SSLCommerz"}
           </button>
 
           <button
@@ -225,6 +221,22 @@ export default function EasyCheckoutPage() {
           </button>
         </div>
       </div>
+    </main>
+  );
+}
+
+export default function EasyCheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutFallback />}>
+      <EasyCheckoutContent />
+    </Suspense>
+  );
+}
+
+function CheckoutFallback() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" />
     </main>
   );
 }

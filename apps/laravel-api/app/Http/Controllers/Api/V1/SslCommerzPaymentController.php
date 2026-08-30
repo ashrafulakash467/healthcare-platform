@@ -5,407 +5,162 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Payment;
-use App\Library\SslCommerz\SslCommerzNotification;
+use App\Services\SSLCommerzService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SslCommerzPaymentController extends Controller
 {
+    public function __construct(private readonly SSLCommerzService $gateway) {}
+
     /**
-     * Hosted Checkout - Redirect to SSLCOMMERZ gateway.
-     *
-     * POST /pay
-     * Body: { appointment_id: string }
+     * Create an SSLCommerz session and return its hosted checkout URL.
      */
-    public function index(Request $request)
+    public function initiate(Request $request): JsonResponse
     {
-        $request->validate([
-            'appointment_id' => 'required|string',
+        $validated = $request->validate([
+            'appointment_id' => ['required', 'string', 'max:100'],
         ]);
 
-        $appointment = Appointment::with(['patient', 'patient.user', 'doctor', 'payment'])
-            ->where('appointment_no', $request->appointment_id)
-            ->first();
+        $appointment = $this->appointmentForUser($request, $validated['appointment_id']);
 
-        if (!$appointment) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Appointment not found.',
-            ], 404);
-        }
-
-        // Check if already paid
-        if ($appointment->payment_status === 'paid') {
+        if (
+            $appointment->payment_status === 'paid'
+            || strtolower((string) $appointment->payment?->status) === 'completed'
+        ) {
             return response()->json([
                 'success' => false,
                 'message' => 'This appointment has already been paid.',
             ], 422);
         }
 
-        // Get or create payment record
-        $payment = $appointment->payment;
-        if (!$payment) {
-            $payment = Payment::create([
-                'transaction_no' => $this->generateTransactionNo(),
-                'appointment_id' => $appointment->id,
-                'patient_id' => $appointment->patient_id,
-                'doctor_id' => $appointment->doctor_id,
-                'hospital_id' => $appointment->hospital_id,
-                'payer_user_id' => $appointment->patient?->user_id,
-                'provider' => 'sslcommerz',
-                'method' => 'hosted',
-                'currency' => 'BDT',
-                'amount' => $appointment->doctor?->consultation_fee ?? 0,
-                'total_amount' => $appointment->doctor?->consultation_fee ?? 0,
-                'paid_amount' => 0,
-                'due_amount' => $appointment->doctor?->consultation_fee ?? 0,
-                'status' => 'Pending',
-                'gateway' => 'sslcommerz',
-            ]);
-        }
+        $amount = (float) ($appointment->doctor?->consultation_fee ?? 0);
 
-        // Prepare SSLCommerz payment data
-        $post_data = $this->prepareSslCommerzData($appointment, $payment);
-
-        // Initiate payment
-        $sslc = new SslCommerzNotification();
-        $payment_options = $sslc->makePayment($post_data, 'hosted');
-
-        if (!is_array($payment_options)) {
+        if ($amount < 10) {
             return response()->json([
                 'success' => false,
-                'message' => 'Could not initialize payment gateway.',
-            ], 500);
-        }
-
-        // Update payment with gateway response
-        $payment->update([
-            'gateway_response' => $payment_options,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'gateway_url' => $payment_options['gateway_url'] ?? null,
-            'payment' => $payment,
-        ]);
-    }
-
-    /**
-     * Pay via AJAX (EasyCheckout Popup).
-     *
-     * POST /pay-via-ajax
-     * Body: { appointment_id: string }
-     */
-    public function payViaAjax(Request $request)
-    {
-        $request->validate([
-            'appointment_id' => 'required|string',
-        ]);
-
-        $appointment = Appointment::with(['patient', 'patient.user', 'doctor', 'payment'])
-            ->where('appointment_no', $request->appointment_id)
-            ->first();
-
-        if (!$appointment) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Appointment not found.',
-            ], 404);
-        }
-
-        // Check if already paid
-        if ($appointment->payment_status === 'paid') {
-            return response()->json([
-                'success' => false,
-                'message' => 'This appointment has already been paid.',
+                'message' => 'The consultation fee must be at least BDT 10.00 for SSLCommerz.',
             ], 422);
         }
 
-        // Get or create payment record
-        $payment = $appointment->payment;
-        if (!$payment) {
-            $payment = Payment::create([
-                'transaction_no' => $this->generateTransactionNo(),
-                'appointment_id' => $appointment->id,
-                'patient_id' => $appointment->patient_id,
-                'doctor_id' => $appointment->doctor_id,
-                'hospital_id' => $appointment->hospital_id,
-                'payer_user_id' => $appointment->patient?->user_id,
-                'provider' => 'sslcommerz',
-                'method' => 'ajax',
-                'currency' => 'BDT',
-                'amount' => $appointment->doctor?->consultation_fee ?? 0,
-                'total_amount' => $appointment->doctor?->consultation_fee ?? 0,
-                'paid_amount' => 0,
-                'due_amount' => $appointment->doctor?->consultation_fee ?? 0,
-                'status' => 'Pending',
-                'gateway' => 'sslcommerz',
+        $payment = $this->preparePayment($appointment, $amount);
+        $result = $this->gateway->initialize($this->gatewayPayload($appointment, $payment));
+
+        if (! $result['success']) {
+            $payment->update([
+                'status' => 'failed',
+                'gateway_response' => $result['data'] ?? ['message' => $result['message']],
             ]);
-        }
 
-        // Prepare SSLCommerz payment data
-        $post_data = $this->prepareSslCommerzData($appointment, $payment);
-
-        // Initiate payment
-        $sslc = new SslCommerzNotification();
-        $payment_options = $sslc->makePayment($post_data, 'checkout');
-
-        if (!is_array($payment_options)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Could not initialize payment gateway.',
-            ], 500);
+                'message' => $result['message'] ?? 'Could not initialize SSLCommerz.',
+            ], 502);
         }
 
-        // Update payment with gateway response
         $payment->update([
-            'gateway_response' => $payment_options,
+            'status' => 'pending',
+            'gateway_response' => $result['data'] ?? [],
         ]);
 
         return response()->json([
             'success' => true,
-            'gateway_url' => $payment_options['gateway_url'] ?? null,
-            'payment' => $payment,
+            'gateway_url' => $result['gateway_url'],
+            'payment' => $payment->fresh(),
         ]);
     }
 
-    public function payViaAjax(Request $request)
+    /**
+     * Compatibility alias for existing clients using POST /pay.
+     */
+    public function index(Request $request): JsonResponse
     {
-
-        # Here you have to receive all the order data to initate the payment.
-        # Lets your oder trnsaction informations are saving in a table called "orders"
-        # In orders table order uniq identity is "transaction_id","status" field contain status of the transaction, "amount" is the order amount to be paid and "currency" is for storing Site Currency which will be checked with paid currency.
-
-        $post_data = array();
-        $post_data['total_amount'] = '10'; # You cant not pay less than 10
-        $post_data['currency'] = "BDT";
-        $post_data['tran_id'] = uniqid(); // tran_id must be unique
-
-        # CUSTOMER INFORMATION
-        $post_data['cus_name'] = 'Customer Name';
-        $post_data['cus_email'] = 'customer@mail.com';
-        $post_data['cus_add1'] = 'Customer Address';
-        $post_data['cus_add2'] = "";
-        $post_data['cus_city'] = "";
-        $post_data['cus_state'] = "";
-        $post_data['cus_postcode'] = "";
-        $post_data['cus_country'] = "Bangladesh";
-        $post_data['cus_phone'] = '8801XXXXXXXXX';
-        $post_data['cus_fax'] = "";
-
-        # SHIPMENT INFORMATION
-        $post_data['ship_name'] = "Store Test";
-        $post_data['ship_add1'] = "Dhaka";
-        $post_data['ship_add2'] = "Dhaka";
-        $post_data['ship_city'] = "Dhaka";
-        $post_data['ship_state'] = "Dhaka";
-        $post_data['ship_postcode'] = "1000";
-        $post_data['ship_phone'] = "";
-        $post_data['ship_country'] = "Bangladesh";
-
-        $post_data['shipping_method'] = "NO";
-        $post_data['product_name'] = "Computer";
-        $post_data['product_category'] = "Goods";
-        $post_data['product_profile'] = "physical-goods";
-
-        # OPTIONAL PARAMETERS
-        $post_data['value_a'] = "ref001";
-        $post_data['value_b'] = "ref002";
-        $post_data['value_c'] = "ref003";
-        $post_data['value_d'] = "ref004";
-
-
-        #Before  going to initiate the payment order status need to update as Pending.
-        $update_product = DB::table('orders')
-            ->where('transaction_id', $post_data['tran_id'])
-            ->updateOrInsert([
-                'name' => $post_data['cus_name'],
-                'email' => $post_data['cus_email'],
-                'phone' => $post_data['cus_phone'],
-                'amount' => $post_data['total_amount'],
-                'status' => 'Pending',
-                'address' => $post_data['cus_add1'],
-                'transaction_id' => $post_data['tran_id'],
-                'currency' => $post_data['currency']
-            ]);
-
-        $sslc = new SslCommerzNotification();
-        # initiate(Transaction Data , false: Redirect to SSLCOMMERZ gateway/ true: Show all the Payement gateway here )
-        $payment_options = $sslc->makePayment($post_data, 'checkout', 'json');
-
-        if (!is_array($payment_options)) {
-            print_r($payment_options);
-            $payment_options = array();
-        }
-
+        return $this->initiate($request);
     }
 
     /**
-     * Payment Success Callback.
-     *
-     * POST /success
+     * Compatibility alias for existing clients using POST /pay-via-ajax.
      */
-    public function success(Request $request)
+    public function payViaAjax(Request $request): JsonResponse
     {
-        $tran_id = $request->input('tran_id');
+        return $this->initiate($request);
+    }
 
-        if (!$tran_id) {
-            return response()->json(['success' => false, 'message' => 'Transaction ID missing.'], 400);
-        }
+    public function success(Request $request): RedirectResponse
+    {
+        $result = $this->processSuccessfulNotification($request);
 
-        $payment = Payment::where('gateway_transaction_id', $tran_id)
-            ->orWhere('transaction_no', $tran_id)
-            ->first();
+        return $this->redirectToFrontend(
+            $result['status'],
+            $result['payment'] ?? null,
+            $request->string('tran_id')->toString()
+        );
+    }
 
-        if (!$payment) {
-            return response()->json(['success' => false, 'message' => 'Payment record not found.'], 404);
-        }
+    public function fail(Request $request): RedirectResponse
+    {
+        $payment = $this->recordUnsuccessfulPayment($request, 'failed');
 
-        if ($payment->status === 'Pending' || $payment->status === 'Processing') {
-            $sslc = new SslCommerzNotification();
-            $validation = $sslc->orderValidate(
-                $request->all(),
-                $tran_id,
-                $payment->total_amount,
-                $payment->currency
-            );
+        return $this->redirectToFrontend('fail', $payment, $request->string('tran_id')->toString());
+    }
 
-            if ($validation == TRUE) {
-                $this->markPaymentAsPaid($payment, $request->all());
-                return response()->json(['success' => true, 'message' => 'Payment completed successfully.']);
+    public function cancel(Request $request): RedirectResponse
+    {
+        $payment = $this->recordUnsuccessfulPayment($request, 'cancelled');
+
+        return $this->redirectToFrontend('cancel', $payment, $request->string('tran_id')->toString());
+    }
+
+    /**
+     * Receive server-to-server payment notifications from SSLCommerz.
+     */
+    public function ipn(Request $request): JsonResponse
+    {
+        $status = strtoupper($request->string('status')->toString());
+
+        if (in_array($status, ['VALID', 'VALIDATED'], true)) {
+            $result = $this->processSuccessfulNotification($request);
+            $httpStatus = $result['status'] === 'success' ? 200 : 422;
+
+            if ($result['status'] === 'pending') {
+                $httpStatus = 202;
             }
 
-            return response()->json(['success' => false, 'message' => 'Payment validation failed.'], 422);
+            return response()->json([
+                'success' => $result['status'] === 'success',
+                'status' => $result['status'],
+                'message' => $result['message'],
+            ], $httpStatus);
         }
 
-        if ($payment->status === 'Completed' || $payment->status === 'Paid') {
-            return response()->json(['success' => true, 'message' => 'Payment already completed.']);
-        }
+        $mappedStatus = match ($status) {
+            'CANCELLED' => 'cancelled',
+            'FAILED', 'EXPIRED', 'UNATTEMPTED' => 'failed',
+            default => null,
+        };
 
-        return response()->json(['success' => false, 'message' => 'Invalid payment status.'], 422);
-    }
-
-    /**
-     * Payment Failed Callback.
-     *
-     * POST /fail
-     */
-    public function fail(Request $request)
-    {
-        $tran_id = $request->input('tran_id');
-
-        if (!$tran_id) {
-            return response()->json(['success' => false, 'message' => 'Transaction ID missing.'], 400);
-        }
-
-        $payment = Payment::where('gateway_transaction_id', $tran_id)
-            ->orWhere('transaction_no', $tran_id)
-            ->first();
-
-        if (!$payment) {
-            return response()->json(['success' => false, 'message' => 'Payment record not found.'], 404);
-        }
-
-        if ($payment->status === 'Pending' || $payment->status === 'Processing') {
-            $payment->update([
-                'status' => 'Failed',
-                'gateway_response' => $request->all(),
-            ]);
-            return response()->json(['success' => false, 'message' => 'Payment failed.']);
-        }
-
-        return response()->json(['success' => false, 'message' => 'Payment status cannot be updated.'], 422);
-    }
-
-    /**
-     * Payment Cancelled Callback.
-     *
-     * POST /cancel
-     */
-    public function cancel(Request $request)
-    {
-        $tran_id = $request->input('tran_id');
-
-        if (!$tran_id) {
-            return response()->json(['success' => false, 'message' => 'Transaction ID missing.'], 400);
-        }
-
-        $payment = Payment::where('gateway_transaction_id', $tran_id)
-            ->orWhere('transaction_no', $tran_id)
-            ->first();
-
-        if (!$payment) {
-            return response()->json(['success' => false, 'message' => 'Payment record not found.'], 404);
-        }
-
-        if ($payment->status === 'Pending') {
-            $payment->update([
-                'status' => 'Cancelled',
-                'gateway_response' => $request->all(),
-            ]);
-            return response()->json(['success' => false, 'message' => 'Payment cancelled.']);
-        }
-
-        return response()->json(['success' => false, 'message' => 'Payment cannot be cancelled.'], 422);
-    }
-
-    /**
-     * IPN (Instant Payment Notification) Handler.
-     *
-     * POST /ipn
-     */
-    public function ipn(Request $request)
-    {
-        $tran_id = $request->input('tran_id');
-
-        if (!$tran_id) {
-            return response()->json(['success' => false, 'message' => 'Transaction ID missing.'], 400);
-        }
-
-        $payment = Payment::where('gateway_transaction_id', $tran_id)
-            ->orWhere('transaction_no', $tran_id)
-            ->first();
-
-        if (!$payment) {
-            return response()->json(['success' => false, 'message' => 'Payment record not found.'], 404);
-        }
-
-        if ($payment->status === 'Pending') {
-            $sslc = new SslCommerzNotification();
-            $validation = $sslc->orderValidate(
-                $request->all(),
-                $tran_id,
-                $payment->total_amount,
-                $payment->currency
-            );
-
-            if ($validation == TRUE) {
-                $this->markPaymentAsPaid($payment, $request->all());
-                return response()->json(['success' => true, 'message' => 'Payment completed via IPN.']);
-            }
-        } elseif (in_array($payment->status, ['Completed', 'Paid'])) {
-            return response()->json(['success' => true, 'message' => 'Payment already completed.']);
-        }
-
-        return response()->json(['success' => false, 'message' => 'Invalid payment status.'], 422);
-    }
-    /**
-     * Get Payment Details for an Appointment.
-     *
-     * GET /appointments/{appointmentId}/payment-details
-     */
-    public function paymentDetails($appointmentId)
-    {
-        $appointment = Appointment::with(['patient', 'patient.user', 'doctor', 'payment'])
-            ->where('appointment_no', $appointmentId)
-            ->first();
-
-        if (!$appointment) {
+        if (! $mappedStatus) {
             return response()->json([
                 'success' => false,
-                'message' => 'Appointment not found.',
-            ], 404);
+                'message' => 'Unsupported SSLCommerz notification status.',
+            ], 422);
         }
+
+        $payment = $this->recordUnsuccessfulPayment($request, $mappedStatus);
+
+        return response()->json([
+            'success' => (bool) $payment,
+            'status' => $mappedStatus,
+            'message' => $payment ? 'Payment status updated.' : 'Payment record not found.',
+        ], $payment ? 200 : 404);
+    }
+
+    public function paymentDetails(Request $request, string $appointmentId): JsonResponse
+    {
+        $appointment = $this->appointmentForUser($request, $appointmentId);
 
         return response()->json([
             'success' => true,
@@ -414,84 +169,214 @@ class SslCommerzPaymentController extends Controller
         ]);
     }
 
-    /**
-     * Generate a unique transaction number.
-     */
-    private function generateTransactionNo(): string
+    public function exampleHostedCheckout(Request $request, string $appointmentId): JsonResponse
     {
-        return 'TXN-' . strtoupper(Str::random(12));
+        return $this->paymentDetails($request, $appointmentId);
+    }
+
+    private function appointmentForUser(Request $request, string $appointmentNumber): Appointment
+    {
+        $query = Appointment::with(['patient', 'patient.user', 'doctor', 'payment'])
+            ->where('appointment_no', $appointmentNumber);
+
+        if (! $request->user()->hasAnyRole(['admin', 'super-admin'])) {
+            $query->whereHas('patient', fn ($patientQuery) => $patientQuery
+                ->where('user_id', $request->user()->id));
+        }
+
+        return $query->firstOrFail();
+    }
+
+    private function preparePayment(Appointment $appointment, float $amount): Payment
+    {
+        $attributes = [
+            'transaction_no' => $this->generateTransactionNo(),
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'hospital_id' => $appointment->hospital_id,
+            'payer_user_id' => $appointment->patient?->user_id,
+            'provider' => 'sslcommerz',
+            'gateway' => 'sslcommerz',
+            'method' => 'hosted',
+            'currency' => 'BDT',
+            'amount' => $amount,
+            'total_amount' => $amount,
+            'paid_amount' => 0,
+            'due_amount' => $amount,
+            'paid_at' => null,
+            'gateway_transaction_id' => null,
+            'gateway_response' => null,
+            'status' => 'pending',
+        ];
+
+        if ($appointment->payment) {
+            $appointment->payment->update($attributes);
+
+            return $appointment->payment->fresh();
+        }
+
+        return Payment::create($attributes);
     }
 
     /**
-     * Prepare data for SSLCommerz payment gateway.
+     * @return array<string, mixed>
      */
-    private function prepareSslCommerzData(Appointment $appointment, Payment $payment): array
+    private function gatewayPayload(Appointment $appointment, Payment $payment): array
     {
         $patient = $appointment->patient;
-        $doctor = $appointment->doctor;
+        $callbackBase = rtrim((string) config('app.url'), '/');
+        $callbackPaths = config('sslcommerz.callback_paths');
 
         return [
             'total_amount' => $payment->total_amount,
             'currency' => $payment->currency,
             'tran_id' => $payment->transaction_no,
-            'gateway_transaction_id' => $payment->transaction_no,
-
-            // Customer Information
-            'cus_name' => $patient?->name ?? 'Customer',
-            'cus_email' => $patient?->user?->email ?? $patient?->email ?? 'customer@mail.com',
-            'cus_add1' => $patient?->address_line1 ?? 'Address',
-            'cus_add2' => $patient?->address_line2 ?? '',
-            'cus_city' => $patient?->city ?? '',
-            'cus_state' => $patient?->state ?? '',
-            'cus_postcode' => $patient?->postal_code ?? '',
-            'cus_country' => $patient?->country ?? 'Bangladesh',
-            'cus_phone' => $patient?->phone ?? '8801XXXXXXXXX',
-            'cus_fax' => '',
-
-            // Shipment Information
-            'ship_name' => $doctor?->name ?? 'Doctor',
-            'ship_add1' => $doctor?->chamber_address ?? 'Address',
-            'ship_add2' => '',
-            'ship_city' => $doctor?->city ?? '',
-            'ship_state' => $doctor?->state ?? '',
-            'ship_postcode' => '',
-            'ship_phone' => '',
-            'ship_country' => $doctor?->country ?? 'Bangladesh',
-
-            // Product Information
+            'success_url' => $callbackBase.$callbackPaths['success'],
+            'fail_url' => $callbackBase.$callbackPaths['fail'],
+            'cancel_url' => $callbackBase.$callbackPaths['cancel'],
+            'ipn_url' => $callbackBase.$callbackPaths['ipn'],
+            'cus_name' => $patient?->name ?: 'Patient',
+            'cus_email' => $patient?->user?->email ?: ($patient?->email ?: 'patient@example.com'),
+            'cus_add1' => $patient?->address_line1 ?: 'Dhaka',
+            'cus_add2' => $patient?->address_line2 ?: '',
+            'cus_city' => $patient?->city ?: 'Dhaka',
+            'cus_state' => $patient?->state ?: 'Dhaka',
+            'cus_postcode' => $patient?->postal_code ?: '1000',
+            'cus_country' => $patient?->country ?: 'Bangladesh',
+            'cus_phone' => $patient?->phone ?: '01700000000',
             'shipping_method' => 'NO',
-            'product_name' => 'Consultation Fee',
+            'num_of_item' => 1,
+            'product_name' => 'Doctor consultation',
             'product_category' => 'Healthcare',
-            'product_profile' => 'healthcare-services',
-
-            // Optional Parameters
+            'product_profile' => 'non-physical-goods',
             'value_a' => $appointment->appointment_no,
             'value_b' => (string) $payment->id,
-            'value_c' => $patient?->id ?? '',
-            'value_d' => $doctor?->id ?? '',
         ];
     }
 
     /**
-     * Mark payment as paid and update appointment status.
+     * @return array{status: string, message: string, payment?: Payment}
      */
-    private function markPaymentAsPaid(Payment $payment, array $gatewayResponse = []): void
+    private function processSuccessfulNotification(Request $request): array
     {
-        $payment->update([
-            'status' => 'Completed',
-            'paid_amount' => $payment->total_amount,
-            'due_amount' => 0,
-            'paid_at' => now(),
-            'gateway_transaction_id' => $gatewayResponse['tran_id'] ?? $gatewayResponse['bank_txn_id'] ?? $payment->transaction_no,
-            'gateway_response' => $gatewayResponse,
-        ]);
+        $transactionNumber = $request->string('tran_id')->toString();
+        $validationId = $request->string('val_id')->toString();
+        $payment = Payment::with('appointment')->where('transaction_no', $transactionNumber)->first();
 
-        // Update appointment payment status
-        $appointment = $payment->appointment;
-        if ($appointment) {
-            $appointment->update([
-                'payment_status' => 'paid',
+        if (! $payment || ! $validationId) {
+            return [
+                'status' => 'fail',
+                'message' => $payment ? 'Validation ID is missing.' : 'Payment record not found.',
+            ];
+        }
+
+        if (strtolower($payment->status) === 'completed') {
+            return [
+                'status' => 'success',
+                'message' => 'Payment was already completed.',
+                'payment' => $payment,
+            ];
+        }
+
+        $validation = $this->gateway->validateTransaction(
+            $validationId,
+            $payment->transaction_no,
+            (float) $payment->total_amount,
+            $payment->currency
+        );
+        $gatewayData = array_merge(
+            $request->all(),
+            ['validation' => $validation['data'] ?? []]
+        );
+
+        if (! $validation['valid']) {
+            $payment->update(['gateway_response' => $gatewayData]);
+
+            return [
+                'status' => 'fail',
+                'message' => $validation['message'] ?? 'Payment validation failed.',
+                'payment' => $payment,
+            ];
+        }
+
+        if ($validation['risky'] ?? false) {
+            $payment->update([
+                'status' => 'reviewing',
+                'gateway_response' => $gatewayData,
+            ]);
+
+            return [
+                'status' => 'pending',
+                'message' => 'Payment is awaiting manual risk review.',
+                'payment' => $payment,
+            ];
+        }
+
+        $this->markPaymentAsPaid($payment, $validation['data'] ?? $request->all());
+
+        return [
+            'status' => 'success',
+            'message' => 'Payment completed successfully.',
+            'payment' => $payment->fresh(),
+        ];
+    }
+
+    private function recordUnsuccessfulPayment(Request $request, string $status): ?Payment
+    {
+        $payment = Payment::where('transaction_no', $request->string('tran_id')->toString())->first();
+
+        if ($payment && strtolower($payment->status) !== 'completed') {
+            $payment->update([
+                'status' => $status,
+                'gateway_response' => $request->all(),
             ]);
         }
+
+        return $payment;
+    }
+
+    private function redirectToFrontend(
+        string $status,
+        ?Payment $payment,
+        string $transactionNumber
+    ): RedirectResponse {
+        $query = http_build_query(array_filter([
+            'status' => $status,
+            'tran_id' => $transactionNumber,
+            'appointmentId' => $payment?->appointment?->appointment_no,
+        ]));
+
+        $url = rtrim((string) config('app.frontend_url'), '/')
+            .'/Payment/payment-return?'.$query;
+
+        return redirect()->away($url);
+    }
+
+    private function markPaymentAsPaid(Payment $payment, array $gatewayResponse): void
+    {
+        DB::transaction(function () use ($payment, $gatewayResponse): void {
+            $lockedPayment = Payment::with('appointment')->lockForUpdate()->findOrFail($payment->id);
+
+            if (strtolower($lockedPayment->status) === 'completed') {
+                return;
+            }
+
+            $lockedPayment->update([
+                'status' => 'completed',
+                'paid_amount' => $lockedPayment->total_amount,
+                'due_amount' => 0,
+                'paid_at' => now(),
+                'gateway_transaction_id' => $gatewayResponse['bank_tran_id'] ?? null,
+                'gateway_response' => $gatewayResponse,
+            ]);
+
+            $lockedPayment->appointment?->update(['payment_status' => 'paid']);
+        });
+    }
+
+    private function generateTransactionNo(): string
+    {
+        return 'TXN-'.strtoupper(Str::random(20));
     }
 }

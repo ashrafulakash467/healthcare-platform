@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { apiFetch, getStoredToken } from "@/lib/api";
 import PaymentSummary from "../components/PaymentSummary";
 
@@ -9,9 +9,9 @@ import PaymentSummary from "../components/PaymentSummary";
  * Hosted Checkout payment page.
  *
  * Based on the SSLCommerz Hosted Checkout integration.
- * Submits a form via POST to /pay which redirects to the SSLCOMERZ gateway.
+ * Creates a payment session and navigates to the SSLCommerz hosted gateway.
  */
-export default function HostedCheckoutPage() {
+function HostedCheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get("appointmentId") ?? "";
@@ -62,7 +62,7 @@ export default function HostedCheckoutPage() {
       } catch {
         if (!cancelled) {
           setError(
-            "Could not load payment details. Make sure the backend is running on port 3001.",
+            "Could not load payment details. Make sure the backend is running on port 3001.hostedcheakout",
           );
         }
       } finally {
@@ -97,7 +97,7 @@ export default function HostedCheckoutPage() {
 
     try {
       const response = await apiFetch(
-        "/pay",
+        "/payments/sslcommerz/initiate",
         {
           method: "POST",
           body: JSON.stringify({ appointment_id: appointmentId }),
@@ -185,7 +185,7 @@ export default function HostedCheckoutPage() {
         <div className="mb-8 text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-600">Hosted Checkout</p>
           <h1 className="mt-2 text-3xl font-extrabold text-slate-900">Continue to Hosted Checkout</h1>
-          <p className="mt-2 text-sm text-slate-500">You will be redirected to the secure SSLCOMERZ payment gateway to complete your payment.</p>
+          <p className="mt-2 text-sm text-slate-500">You will be redirected to the secure SSLCommerz payment gateway to complete your payment.</p>
         </div>
 
         {error ? (
@@ -200,8 +200,8 @@ export default function HostedCheckoutPage() {
               <span className="text-sm">🔒</span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">Secure SSLCOMERZ Hosted Payment</p>
-              <p className="mt-0.5 text-xs text-slate-500">You will be redirected to the SSLCOMERZ payment gateway where you can pay using your preferred method. We never store your card details.</p>
+              <p className="text-sm font-semibold text-slate-900">Secure SSLCommerz Hosted Payment</p>
+              <p className="mt-0.5 text-xs text-slate-500">You will be redirected to the SSLCommerz payment gateway where you can pay using your preferred method. We never store your card details.</p>
             </div>
           </div>
 
@@ -223,6 +223,22 @@ export default function HostedCheckoutPage() {
           </button>
         </div>
       </div>
+    </main>
+  );
+}
+
+export default function HostedCheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutFallback />}>
+      <HostedCheckoutContent />
+    </Suspense>
+  );
+}
+
+function CheckoutFallback() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" />
     </main>
   );
 }

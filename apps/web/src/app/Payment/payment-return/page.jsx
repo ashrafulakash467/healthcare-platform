@@ -32,6 +32,12 @@ const STATUS_CONFIG = {
     message: "Your payment was cancelled. You can try again from your appointments page.",
     tone: "amber",
   },
+  pending: {
+    icon: "...",
+    title: "Payment Under Review",
+    message: "Your payment was received and is awaiting a security review. Your appointment will update after approval.",
+    tone: "amber",
+  },
 };
 
 function PaymentReturnContent() {
@@ -95,7 +101,7 @@ function PaymentReturnContent() {
         ) : null}
 
         <div className="mt-6 space-y-2">
-          {appointmentId ? (
+          {appointmentId && ["fail", "cancel"].includes(status) ? (
             <Link
               href={`/Payment/easy-checkout?appointmentId=${encodeURIComponent(appointmentId)}`}
               className={`inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition ${tones.button}`}

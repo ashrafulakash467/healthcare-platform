@@ -57,6 +57,13 @@ class SSLCommerzService
      */
     public function initialize(array $data): array
     {
+        if (! $this->isConfigured()) {
+            return [
+                'success' => false,
+                'message' => 'SSLCOMMERZ credentials are not configured.',
+            ];
+        }
+
         $payload = array_merge([
             'store_id' => $this->storeId,
             'store_passwd' => $this->storePassword,
@@ -86,7 +93,7 @@ class SSLCommerzService
             $response = Http::asForm()
                 ->timeout(30)
                 ->withOptions(['verify' => $this->caBundle()])
-                ->post($this->baseUrl.'/gwprocess/v4/api.php', $payload);
+                ->post($this->baseUrl.config('sslcommerz.session_path'), $payload);
 
             if (! $response->successful()) {
                 Log::error('SSLCOMMERZ init failed', [
@@ -132,19 +139,30 @@ class SSLCommerzService
     /**
      * Validate a transaction with SSLCOMMERZ.
      *
-     * @param  string  $transactionId
-     * @param  int  $amount  Amount in BDT (decimal, e.g. 1000.00)
-     * @param  string  $currency
-     * @return array{valid: bool, message?: string, data?: array<string, mixed>}
+     * @param  string  $validationId  Validation ID supplied by SSLCOMMERZ.
+     * @param  string  $expectedTransactionId  Merchant transaction ID created during initiation.
+     * @param  float  $amount  Expected amount in BDT (decimal, e.g. 1000.00).
+     * @return array{valid: bool, risky?: bool, message?: string, data?: array<string, mixed>}
      */
-    public function validateTransaction(string $transactionId, float $amount, string $currency = 'BDT'): array
-    {
+    public function validateTransaction(
+        string $validationId,
+        string $expectedTransactionId,
+        float $amount,
+        string $currency = 'BDT'
+    ): array {
+        if (! $this->isConfigured()) {
+            return [
+                'valid' => false,
+                'message' => 'SSLCOMMERZ credentials are not configured.',
+            ];
+        }
+
         try {
-            $response = Http::asForm()
+            $response = Http::acceptJson()
                 ->timeout(30)
                 ->withOptions(['verify' => $this->caBundle()])
-                ->post($this->baseUrl.'/validator/api/validationserverAPI.php', [
-                    'val_id' => $transactionId,
+                ->get($this->baseUrl.config('sslcommerz.validation_path'), [
+                    'val_id' => $validationId,
                     'store_id' => $this->storeId,
                     'store_passwd' => $this->storePassword,
                     'format' => 'json',
@@ -164,12 +182,27 @@ class SSLCommerzService
 
             $result = $response->json();
 
-            if (($result['status'] ?? '') !== 'VALID' && ($result['status'] ?? '') !== 'VALIDATED') {
-                Log::warning('SSLCOMMERZ validation returned invalid', $result);
+            if (! is_array($result) || ! in_array($result['status'] ?? '', ['VALID', 'VALIDATED'], true)) {
+                Log::warning('SSLCOMMERZ validation returned invalid', [
+                    'response' => $result,
+                ]);
 
                 return [
                     'valid' => false,
                     'message' => $result['error'] ?? 'Transaction could not be validated.',
+                    'data' => $result,
+                ];
+            }
+
+            if (! hash_equals($expectedTransactionId, (string) ($result['tran_id'] ?? ''))) {
+                Log::warning('SSLCOMMERZ transaction ID mismatch', [
+                    'expected' => $expectedTransactionId,
+                    'received' => $result['tran_id'] ?? null,
+                ]);
+
+                return [
+                    'valid' => false,
+                    'message' => 'Transaction ID does not match the initiated payment.',
                     'data' => $result,
                 ];
             }
@@ -206,6 +239,7 @@ class SSLCommerzService
 
             return [
                 'valid' => true,
+                'risky' => (int) ($result['risk_level'] ?? 0) === 1,
                 'data' => $result,
             ];
         } catch (ConnectionException $exception) {
