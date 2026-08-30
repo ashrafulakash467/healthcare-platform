@@ -256,8 +256,7 @@ export default function MyAppointmentPage({
                           </span>
                         </div>
                         <p className="text-xs text-slate-500">
-                          {appointment.doctor?.specialty || "Clinical review"} -{" "}
-                          {appointment.clinic?.name || "Assigned clinic"}
+                          {appointment.doctor?.specialty || "Clinical review"}
                         </p>
                         <p className="text-xs text-slate-500">
                           {appointment.appointmentDate} at {appointment.slotTime}
@@ -304,11 +303,7 @@ export default function MyAppointmentPage({
                   </span>
                 </div>
                 <p className="text-sm text-slate-500">
-                  {selectedAppointment.doctor?.specialty || "Consultation"} -{" "}
-                  {selectedAppointment.clinic?.name || "Clinic"}
-                </p>
-                <p className="text-sm text-slate-500">
-                  {selectedAppointment.clinic?.location || "Location unavailable"}
+                  {selectedAppointment.doctor?.specialty || "Consultation"}
                 </p>
               </div>
 

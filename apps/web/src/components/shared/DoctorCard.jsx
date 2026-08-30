@@ -76,7 +76,6 @@ export function resolveDoctorImageSrc(doctorOrUrl) {
 
   return DOCTOR_IMAGE_FALLBACK;
 }
-
 export function formatConsultationFee(value) {
   if (value === null || value === undefined || value === "") {
     return "Consultation fee not available";
@@ -147,9 +146,7 @@ export default function DoctorCard({ doctor, showAction = true }) {
 
           <div className="mt-2 space-y-1 text-[11px] leading-4 text-slate-500">
             <p className="truncate font-medium text-slate-600">
-              {formatDoctorClinics(doctor?.clinics) ||
-                doctor?.hospitalClinic ||
-                "Clinics & Hospitals not available"}
+              {doctor?.chamberAddress || "Chamber address not available"}
             </p>
             <p className="truncate">
               {doctor?.location ?? "Location not available"}
@@ -174,15 +171,4 @@ export default function DoctorCard({ doctor, showAction = true }) {
       </div>
     </article>
   );
-}
-
-function formatDoctorClinics(clinics) {
-  if (!Array.isArray(clinics) || clinics.length === 0) {
-    return "";
-  }
-
-  return clinics
-    .map((clinic) => clinic?.name ?? clinic?.location ?? "")
-    .filter(Boolean)
-    .join(", ");
 }

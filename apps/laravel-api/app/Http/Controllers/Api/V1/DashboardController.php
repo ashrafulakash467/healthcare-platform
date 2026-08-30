@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Doctor;
-use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\Payment;
 use App\Models\SupportTicket;
@@ -60,21 +59,11 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function hospital(Request $request): JsonResponse
-    {
-        return response()->json([
-            'role' => 'hospital',
-            'modules' => $this->modulesFor('hospital'),
-            'summary' => $this->summaryFor($request->user(), 'hospital'),
-        ]);
-    }
-
     private function summaryFor(?User $user, ?string $role): array
     {
         return match ($role) {
             'admin' => $this->adminSummary(),
             'doctor' => $this->doctorSummary($user),
-            'hospital' => $this->hospitalSummary($user),
             default => $this->patientSummary($user),
         };
     }
@@ -95,9 +84,6 @@ class DashboardController extends Controller
         return [
             'patients' => Patient::query()->count(),
             'doctors' => Doctor::query()->count(),
-            'hospitals' => Hospital::query()
-                ->where(fn ($query) => $query->whereNull('status')->orWhere('status', 'active'))
-                ->count(),
             'todayAppointments' => Appointment::query()
                 ->whereDate('appointment_date', $today)
                 ->where('status', '!=', 'cancelled')
@@ -175,31 +161,18 @@ class DashboardController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->count(),
             'pendingPayments' => Appointment::query()
-            ->where('patient_id', $patient->id)
+                ->where('patient_id', $patient->id)
                 ->where('payment_status', '!=', 'paid')
                 ->where('status', '!=', 'cancelled')
                 ->count(),
         ];
     }
 
-    private function hospitalSummary(?User $user): array
-    {
-        $hospital = $user?->createdHospitals()->latest()->first();
-
-        return [
-            'onboardedDoctors' => $hospital
-                ? $hospital->doctors()->where('status', 'active')->count()
-                : Doctor::query()->where('status', 'active')->count(),
-            'activeClinics' => Hospital::query()->where('status', 'active')->count(),
-        ];
-    }
-
     private function modulesFor(?string $role): array
     {
         return match ($role) {
-            'admin' => ['dashboard', 'users', 'doctors', 'hospitals', 'appointments', 'payments', 'content', 'reports', 'notifications', 'support', 'roles', 'settings', 'audit'],
+            'admin' => ['dashboard', 'users', 'doctors', 'appointments', 'payments', 'content', 'reports', 'notifications', 'support', 'roles', 'settings', 'audit'],
             'doctor' => ['dashboard', 'today', 'upcoming', 'pending', 'records', 'prescriptions', 'schedule', 'earnings', 'notifications'],
-            'hospital' => ['dashboard', 'doctors', 'appointments', 'payments', 'reports'],
             default => ['dashboard', 'appointments', 'records'],
         };
     }

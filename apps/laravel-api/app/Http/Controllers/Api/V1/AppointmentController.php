@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\AppointmentSlot;
 use App\Models\Doctor;
-use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\Payment;
+use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -33,7 +34,7 @@ class AppointmentController extends Controller
     public function adminIndex(Request $request): JsonResponse
     {
         $appointments = Appointment::query()
-            ->with(['patient.user', 'doctor.user', 'doctor.primaryHospital', 'payment'])
+            ->with(['patient.user', 'doctor.user', 'payment'])
             ->orderByDesc('appointment_date')
             ->orderByDesc('start_time')
             ->limit(300)
@@ -55,7 +56,6 @@ class AppointmentController extends Controller
                     'name' => $doctor?->user?->name ?? ('Doctor #'.$appointment?->doctor_id),
                     'email' => $doctor?->user?->email ?? '',
                     'phone' => $doctor?->user?->phone ?? '',
-                    'hospital' => $doctor?->primaryHospital?->name ?? '',
                     'specialty' => $this->displayLabel($doctor?->specialty),
                     'imagePath' => $doctor?->image_path ?? '',
                     'imageUrl' => $this->doctorImageUrl($doctor?->image_path),
@@ -77,15 +77,12 @@ class AppointmentController extends Controller
     {
         $doctorId = (string) $request->query('doctorId', '');
         $doctor = $doctorId !== ''
-            ? Doctor::query()->with(['user', 'primaryHospital', 'hospitals', 'schedules'])->findOrFail($doctorId)
-            : Doctor::query()->with(['user', 'primaryHospital', 'hospitals', 'schedules'])->where('status', 'active')->firstOrFail();
-
-        $clinics = $this->clinicsForDoctor($doctor);
+            ? Doctor::query()->with(['user', 'schedules'])->findOrFail($doctorId)
+            : Doctor::query()->with(['user', 'schedules'])->where('status', 'active')->firstOrFail();
         $schedule = $doctor->schedules->firstWhere('is_active', true) ?? $doctor->schedules->first();
 
         return response()->json([
-            'doctor' => $this->formatDoctor($doctor, $clinics),
-            'clinics' => $clinics,
+            'doctor' => $this->formatDoctor($doctor),
             'schedule' => [
                 'consultationType' => $schedule?->consultation_type ?? 'in_person',
                 'slotDurationMinutes' => $schedule?->slot_duration_minutes ?? 15,
@@ -97,16 +94,13 @@ class AppointmentController extends Controller
     public function availableDates(Request $request): JsonResponse
     {
         $doctorId = (string) $request->query('doctorId', '');
-        $clinicId = (string) $request->query('clinicId', '');
-
-        $slots = $this->slotQuery($doctorId, $clinicId)
+        $slots = $this->slotQuery($doctorId)
             ->whereDate('slot_date', '>=', now()->toDateString())
             ->orderBy('slot_date')
             ->get();
 
         return response()->json([
             'doctorId' => $doctorId,
-            'clinicId' => $clinicId,
             'dates' => $slots->pluck('slot_date')->map(fn ($date) => Carbon::parse($date)->toDateString())->unique()->values(),
         ]);
     }
@@ -114,10 +108,9 @@ class AppointmentController extends Controller
     public function availableSlots(Request $request): JsonResponse
     {
         $doctorId = (string) $request->query('doctorId', '');
-        $clinicId = (string) $request->query('clinicId', '');
         $date = (string) $request->query('date', now()->toDateString());
 
-        $slots = $this->slotQuery($doctorId, $clinicId)
+        $slots = $this->slotQuery($doctorId)
             ->whereDate('slot_date', $date)
             ->orderBy('start_time')
             ->get()
@@ -139,18 +132,13 @@ class AppointmentController extends Controller
     {
         $data = $request->validate([
             'doctorId' => ['required', 'integer'],
-            'clinicId' => ['nullable'],
             'appointmentDate' => ['required', 'date'],
             'slotTime' => ['required', 'string'],
         ]);
 
-        $doctor = Doctor::query()->with(['user', 'primaryHospital', 'hospitals', 'schedules'])->findOrFail($data['doctorId']);
-        $clinicId = trim((string) ($data['clinicId'] ?? ''));
-        $clinic = is_numeric($clinicId)
-            ? Hospital::query()->findOrFail((int) $clinicId)
-            : null;
+        $doctor = Doctor::query()->with(['user', 'schedules'])->findOrFail($data['doctorId']);
         $patient = $this->resolvePatient($request->user());
-        $slot = $this->slotForBooking($doctor->id, $clinicId, $data['appointmentDate'], $data['slotTime']);
+        $slot = $this->slotForBooking($doctor->id, $data['appointmentDate'], $data['slotTime']);
 
         if (! $slot) {
             throw ValidationException::withMessages([
@@ -168,7 +156,7 @@ class AppointmentController extends Controller
             'appointment_no' => $this->newAppointmentNumber(),
             'patient_id' => $patient->id,
             'doctor_id' => $doctor->id,
-            'hospital_id' => $clinic?->id,
+
             'appointment_slot_id' => $slot->id,
             'consultation_type' => $slot->schedule?->consultation_type ?? 'in_person',
             'appointment_date' => $data['appointmentDate'],
@@ -181,7 +169,7 @@ class AppointmentController extends Controller
             'symptoms' => null,
             'meta' => [
                 'source' => 'web',
-                'clinic_address' => $clinicId !== '' ? $clinicId : ($doctor->chamber_address ?? null),
+                'chamber_address' => $doctor->chamber_address,
             ],
         ]);
 
@@ -190,7 +178,7 @@ class AppointmentController extends Controller
             'status' => $slot->booked_count + 1 >= $slot->capacity ? 'booked' : $slot->status,
         ])->save();
 
-        $appointment->loadMissing(['patient.user', 'doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital']);
+        $appointment->loadMissing(['patient.user', 'doctor.user']);
 
         return response()->json([
             'message' => 'Appointment booked successfully.',
@@ -237,7 +225,7 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $appointment->loadMissing(['doctor', 'patient', 'hospital', 'payment']);
+        $appointment->loadMissing(['doctor', 'patient', 'payment']);
         $amount = $this->appointmentAmount($appointment);
 
         $payment = Payment::updateOrCreate(
@@ -246,7 +234,7 @@ class AppointmentController extends Controller
                 'transaction_no' => $this->newTransactionNumber($appointment->appointment_no),
                 'patient_id' => $appointment->patient_id,
                 'doctor_id' => $appointment->doctor_id,
-                'hospital_id' => $appointment->hospital_id,
+
                 'payer_user_id' => $request->user()?->id,
                 'provider' => 'manual',
                 'method' => 'cash',
@@ -277,6 +265,7 @@ class AppointmentController extends Controller
             ],
         ]);
     }
+
     public function destroy(string $appointmentId, Request $request): JsonResponse
     {
         $appointment = $this->findAppointmentForCurrentUser(
@@ -317,9 +306,9 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $appointment->loadMissing(['doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital', 'patient.user']);
-        $clinicId = $appointment->hospital_id ? (string) $appointment->hospital_id : null;
-        $slots = $this->slotQuery((string) $appointment->doctor_id, $clinicId)
+        $appointment->loadMissing(['doctor.user', 'patient.user']);
+
+        $slots = $this->slotQuery((string) $appointment->doctor_id)
             ->whereDate('slot_date', '>=', now()->toDateString())
             ->orderBy('slot_date')
             ->get();
@@ -342,8 +331,7 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $clinicId = $appointment->hospital_id ? (string) $appointment->hospital_id : null;
-        $slots = $this->slotQuery((string) $appointment->doctor_id, $clinicId)
+        $slots = $this->slotQuery((string) $appointment->doctor_id)
             ->whereDate('slot_date', $date)
             ->orderBy('start_time')
             ->get()
@@ -376,9 +364,8 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $appointment->loadMissing(['doctor.schedules', 'hospital']);
-        $clinicId = $appointment->hospital_id ? (string) $appointment->hospital_id : null;
-        $slot = $this->slotForBooking((int) $appointment->doctor_id, $clinicId, $data['appointmentDate'], $data['slotTime']);
+        $appointment->loadMissing('doctor.schedules');
+        $slot = $this->slotForBooking((int) $appointment->doctor_id, $data['appointmentDate'], $data['slotTime']);
 
         if (! $slot) {
             throw ValidationException::withMessages([
@@ -408,7 +395,7 @@ class AppointmentController extends Controller
             'status' => $slot->booked_count + 1 >= $slot->capacity ? 'booked' : $slot->status,
         ])->save();
 
-        $appointment->loadMissing(['patient.user', 'doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital']);
+        $appointment->loadMissing(['patient.user', 'doctor.user']);
 
         return response()->json([
             'message' => 'Appointment rescheduled successfully.',
@@ -463,7 +450,7 @@ class AppointmentController extends Controller
         }
 
         $appointment->forceFill($updates)->save();
-        $appointment->loadMissing(['patient.user', 'doctor.user', 'doctor.primaryHospital', 'doctor.hospitals', 'hospital']);
+        $appointment->loadMissing(['patient.user', 'doctor.user']);
 
         return response()->json([
             'message' => match ($decision) {
@@ -475,31 +462,21 @@ class AppointmentController extends Controller
         ]);
     }
 
-    private function appointmentsForUser(?\Illuminate\Contracts\Auth\Authenticatable $user): Collection
+    private function appointmentsForUser(?Authenticatable $user): Collection
     {
-        if (! $user instanceof \App\Models\User) {
+        if (! $user instanceof User) {
             return collect();
         }
 
         $query = Appointment::query()->with([
             'patient.user',
             'doctor.user',
-            'doctor.primaryHospital',
-            'doctor.hospitals',
-            'hospital',
             'slot',
             'payment',
         ])->latest();
 
         if ($user->hasRole('doctor') && $user->doctor) {
             $query->where('doctor_id', $user->doctor->id);
-        } elseif ($user->hasRole('hospital')) {
-            $hospital = $user->createdHospitals()->latest()->first();
-            if ($hospital) {
-                $query->where('hospital_id', $hospital->id);
-            } else {
-                return collect();
-            }
         } else {
             $patient = $user->patient;
             if ($patient) {
@@ -512,9 +489,9 @@ class AppointmentController extends Controller
         return $query->get();
     }
 
-    private function resolvePatient(?\Illuminate\Contracts\Auth\Authenticatable $user): Patient
+    private function resolvePatient(?Authenticatable $user): Patient
     {
-        if (! $user instanceof \App\Models\User) {
+        if (! $user instanceof User) {
             throw ValidationException::withMessages([
                 'patient' => ['Unable to resolve the current patient.'],
             ]);
@@ -530,29 +507,21 @@ class AppointmentController extends Controller
         ]);
     }
 
-    private function findAppointmentForCurrentUser(?\Illuminate\Contracts\Auth\Authenticatable $user, string $appointmentId): ?Appointment
+    private function findAppointmentForCurrentUser(?Authenticatable $user, string $appointmentId): ?Appointment
     {
-        if (! $user instanceof \App\Models\User) {
+        if (! $user instanceof User) {
             return null;
         }
 
         $query = Appointment::query()->with([
             'patient.user',
             'doctor.user',
-            'doctor.primaryHospital',
-            'doctor.hospitals',
-            'hospital',
             'slot',
             'payment',
         ])->where('appointment_no', $appointmentId);
 
         if ($user->hasRole('doctor') && $user->doctor) {
             $query->where('doctor_id', $user->doctor->id);
-        } elseif ($user->hasRole('hospital')) {
-            $hospital = $user->createdHospitals()->latest()->first();
-            if ($hospital) {
-                $query->where('hospital_id', $hospital->id);
-            }
         } else {
             $patient = $user->patient;
             if ($patient) {
@@ -563,24 +532,20 @@ class AppointmentController extends Controller
         return $query->first();
     }
 
-    private function slotQuery(string $doctorId, ?string $clinicId = null)
+    private function slotQuery(string $doctorId)
     {
         $query = AppointmentSlot::query()
-            ->with(['schedule', 'doctor.user', 'hospital'])
+            ->with(['schedule', 'doctor.user'])
             ->where('doctor_id', $doctorId);
-
-        if ($clinicId !== null && $clinicId !== '' && ctype_digit($clinicId)) {
-            $query->where('hospital_id', (int) $clinicId);
-        }
 
         return $query;
     }
 
-    private function slotForBooking(int $doctorId, ?string $clinicId, string $appointmentDate, string $slotTime): ?AppointmentSlot
+    private function slotForBooking(int $doctorId, string $appointmentDate, string $slotTime): ?AppointmentSlot
     {
         $normalizedTime = $this->normalizeSlotTime($slotTime);
 
-        return $this->slotQuery((string) $doctorId, $clinicId)
+        return $this->slotQuery((string) $doctorId)
             ->whereDate('slot_date', $appointmentDate)
             ->where('start_time', $normalizedTime)
             ->first();
@@ -589,10 +554,8 @@ class AppointmentController extends Controller
     private function formatAppointment(Appointment $appointment, array $overrides = []): array
     {
         $doctor = $appointment->doctor;
-        $hospital = $appointment->hospital;
         $patient = $appointment->patient;
         $payment = $appointment->payment;
-        $clinicAddress = $appointment->meta['clinic_address'] ?? $doctor?->chamber_address ?? null;
 
         $appointmentDate = $overrides['appointmentDate'] ?? $appointment->appointment_date?->toDateString() ?? (string) $appointment->appointment_date;
         $slotTime = $overrides['slotTime'] ?? $this->displayTime($appointment->start_time);
@@ -606,16 +569,7 @@ class AppointmentController extends Controller
                 'phone' => $patient->user?->phone ?? '',
             ] : null,
             'patientName' => $patient?->user?->name ?? '',
-            'doctor' => $this->formatDoctor($doctor, $this->clinicsForDoctor($doctor)),
-            'clinic' => $hospital ? [
-                'id' => (string) $hospital->id,
-                'name' => $hospital->name,
-                'location' => $hospital->city ?? '',
-            ] : ($clinicAddress ? [
-                'id' => '',
-                'name' => $clinicAddress,
-                'location' => '',
-            ] : null),
+            'doctor' => $this->formatDoctor($doctor),
             'appointmentDate' => $appointmentDate,
             'slotTime' => $slotTime,
             'status' => $appointment->status,
@@ -628,7 +582,7 @@ class AppointmentController extends Controller
         ], $overrides);
     }
 
-    private function formatDoctor(?Doctor $doctor, array $clinics = []): array
+    private function formatDoctor(?Doctor $doctor): array
     {
         if (! $doctor) {
             return [
@@ -641,7 +595,6 @@ class AppointmentController extends Controller
                 'gender' => 'Unspecified',
                 'isAvailable' => false,
                 'imageUrl' => '/globe.svg',
-                'clinics' => [],
             ];
         }
 
@@ -652,14 +605,13 @@ class AppointmentController extends Controller
             'phone' => $doctor->user?->phone ?? '',
             'specialty' => $doctor->specialty ?? 'General Medicine',
             'consultationFee' => $doctor->consultation_fee,
-            'location' => $doctor->city ?: $doctor->primaryHospital?->city ?: 'Unavailable',
+            'location' => $doctor->city ?: 'Unavailable',
             'gender' => $doctor->gender ?? 'Unspecified',
             'isAvailable' => $doctor->status === 'active' && $doctor->verification_status === 'approved',
             'imageUrl' => $this->doctorImageUrl($doctor->image_path),
             'chamberAddress' => $doctor->chamber_address,
             'availableDates' => $this->normalizeListField($doctor->available_dates),
             'availableTimeSlots' => $this->normalizeListField($doctor->available_time_slots),
-            'clinics' => $clinics,
         ];
     }
 
@@ -685,31 +637,6 @@ class AppointmentController extends Controller
         }
 
         return Storage::disk('public')->url($imagePath);
-    }
-
-    private function clinicsForDoctor(?Doctor $doctor): array
-    {
-        if (! $doctor) {
-            return [];
-        }
-
-        $clinics = $doctor->hospitals->map(function (Hospital $hospital): array {
-            return [
-                'id' => (string) $hospital->id,
-                'name' => $hospital->name,
-                'location' => $hospital->city ?? '',
-            ];
-        })->values()->all();
-
-        if (empty($clinics) && $doctor->primaryHospital) {
-            $clinics[] = [
-                'id' => (string) $doctor->primaryHospital->id,
-                'name' => $doctor->primaryHospital->name,
-                'location' => $doctor->primaryHospital->city ?? '',
-            ];
-        }
-
-        return $clinics;
     }
 
     private function appointmentAmount(Appointment $appointment): int

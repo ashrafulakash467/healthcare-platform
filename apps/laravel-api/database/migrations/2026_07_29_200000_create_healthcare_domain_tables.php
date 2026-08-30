@@ -8,32 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('hospitals', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->string('code')->nullable()->unique();
-            $table->string('type')->nullable()->index();
-            $table->string('phone')->nullable()->index();
-            $table->string('email')->nullable()->index();
-            $table->string('address_line1')->nullable();
-            $table->string('address_line2')->nullable();
-            $table->string('city')->nullable()->index();
-            $table->string('state')->nullable()->index();
-            $table->string('postal_code')->nullable();
-            $table->string('country')->nullable()->index();
-            $table->decimal('latitude', 10, 7)->nullable();
-            $table->decimal('longitude', 10, 7)->nullable();
-            $table->string('status')->default('active')->index();
-            $table->timestamps();
-            $table->softDeletes();
-        });
-
         Schema::create('patients', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete()->unique();
-            $table->foreignId('hospital_id')->nullable()->constrained()->nullOnDelete();
             $table->string('mrn')->nullable()->unique();
             $table->date('date_of_birth')->nullable()->index();
             $table->string('gender')->nullable()->index();
@@ -55,7 +32,6 @@ return new class extends Migration
         Schema::create('doctors', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete()->unique();
-            $table->foreignId('primary_hospital_id')->nullable()->constrained('hospitals')->nullOnDelete();
             $table->string('license_no')->nullable()->unique();
             $table->string('specialty')->index();
             $table->string('sub_specialty')->nullable()->index();
@@ -76,22 +52,9 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('hospital_doctors', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('hospital_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
-            $table->string('designation')->nullable();
-            $table->string('status')->default('active')->index();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->timestamps();
-            $table->unique(['hospital_id', 'doctor_id']);
-        });
-
         Schema::create('doctor_schedules', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('hospital_id')->nullable()->constrained()->nullOnDelete();
             $table->string('consultation_type')->default('in_person')->index();
             $table->string('timezone')->default('Asia/Dhaka');
             $table->json('working_days');
@@ -124,7 +87,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('doctor_schedule_id')->constrained()->cascadeOnDelete();
             $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('hospital_id')->nullable()->constrained()->nullOnDelete();
             $table->date('slot_date')->index();
             $table->time('start_time');
             $table->time('end_time');
@@ -142,7 +104,6 @@ return new class extends Migration
             $table->string('appointment_no')->unique();
             $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
             $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('hospital_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('appointment_slot_id')->nullable()->constrained()->nullOnDelete();
             $table->string('consultation_type')->default('in_person')->index();
             $table->date('appointment_date')->index();
@@ -221,7 +182,6 @@ return new class extends Migration
             $table->foreignId('appointment_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
             $table->foreignId('doctor_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('hospital_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('payer_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('provider')->nullable()->index();
             $table->string('method')->nullable()->index();
@@ -255,7 +215,6 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('patient_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('doctor_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('hospital_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('assigned_to_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('subject');
             $table->string('category')->nullable()->index();
@@ -343,9 +302,7 @@ return new class extends Migration
         Schema::dropIfExists('appointment_slots');
         Schema::dropIfExists('doctor_schedule_exceptions');
         Schema::dropIfExists('doctor_schedules');
-        Schema::dropIfExists('hospital_doctors');
         Schema::dropIfExists('doctors');
         Schema::dropIfExists('patients');
-        Schema::dropIfExists('hospitals');
     }
 };

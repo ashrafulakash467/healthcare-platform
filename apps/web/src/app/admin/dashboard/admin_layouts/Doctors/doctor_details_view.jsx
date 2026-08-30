@@ -14,7 +14,6 @@ export default function DoctorDetailsView({ doctor, onBack, onEdit, onDelete }) 
   const statusLabel = doctor?.verificationStatus ?? doctor?.status ?? "Pending";
   const statusTone = badgeTone(statusLabel);
   const specialties = [doctor?.specialty, doctor?.subSpecialty].filter(Boolean);
-  const clinics = Array.isArray(doctor?.clinics) ? doctor.clinics : [];
   const availableDates = normalizeList(doctor?.availableDates ?? doctor?.available_dates);
   const availableTimeSlots = normalizeList(doctor?.availableTimeSlots ?? doctor?.available_time_slots);
   const qualifications = normalizeQualifications(doctor?.qualification);
@@ -140,23 +139,6 @@ export default function DoctorDetailsView({ doctor, onBack, onEdit, onDelete }) 
           </section>
         </div>
 
-        <section className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Clinics & Hospitals</p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {clinics.length ? (
-              clinics.map((clinic) => (
-                <div key={clinic.id ?? `${clinic.name}-${clinic.location}`} className="rounded-xl border border-slate-200 bg-white p-4">
-                  <p className="text-sm font-semibold text-slate-900">{clinic.name ?? "Unnamed Clinic"}</p>
-                  <p className="mt-1 text-xs text-slate-500">{clinic.location ?? "Location not available"}</p>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500 md:col-span-2 xl:col-span-3">
-                No clinic or hospital information available.
-              </div>
-            )}
-          </div>
-        </section>
       </div>
 
       {showDeleteConfirm ? (

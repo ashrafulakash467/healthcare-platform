@@ -16,7 +16,6 @@ class Appointment extends Model
         'appointment_no',
         'patient_id',
         'doctor_id',
-        'hospital_id',
         'appointment_slot_id',
         'consultation_type',
         'appointment_date',
@@ -60,11 +59,6 @@ class Appointment extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
-    }
-
-    public function hospital(): BelongsTo
-    {
-        return $this->belongsTo(Hospital::class);
     }
 
     public function slot(): BelongsTo

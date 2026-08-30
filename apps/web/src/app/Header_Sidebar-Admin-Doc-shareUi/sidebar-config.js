@@ -17,7 +17,6 @@ export const adminSidebarItems = [
   { key: "dashboard", label: "Dashboard Overview", icon: "dashboard" },
   { key: "users", label: "All Users", icon: "users" },
   { key: "doctors", label: "Doctors", icon: "doctors" },
-  { key: "hospitals", label: "Hospitals", icon: "hospitals" },
   { key: "appointments", label: "Appointments", icon: "appointments" },
   { key: "payments", label: "Payments", icon: "payments" },
   { key: "content", label: "Content", icon: "content" },

@@ -8,8 +8,6 @@ import {
 
 export default function DoctorCardDetails({ doctor }) {
   const imageSrc = resolveDoctorImageSrc(doctor);
-  // const availableDates = formatDoctorList(doctor?.availableDates ?? doctor?.available_dates);
-  // const availableTimeSlots = formatDoctorList(doctor?.availableTimeSlots ?? doctor?.available_time_slots);
   const verificationStatus = resolveVerificationStatus(doctor);
 
   return (
@@ -59,10 +57,8 @@ export default function DoctorCardDetails({ doctor }) {
         </div>
 
         <div className="grid gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-2">
-          <InfoRow label="Clinics & Hospitals" value={formatDoctorClinics(doctor?.clinics) || doctor?.hospitalClinic || "Not available"} />
+          <InfoRow label="Chamber" value={doctor?.chamberAddress || "Not available"} />
           <InfoRow label="Location" value={doctor?.location ?? "Location not available"} />
-          {/* <InfoRow label="Available dates" value={availableDates || "Not available"} /> */}
-          {/* <InfoRow label="Available time slots" value={availableTimeSlots || "Not available"} /> */}
           <InfoRow label="Consultation fee" value={formatConsultationFee(doctor?.consultationFee ?? doctor?.consultation_fee)} />
           <InfoRow
             label="Verification Status"
@@ -101,29 +97,6 @@ function InfoRow({ label, value, tone = "slate" }) {
       </p>
     </div>
   );
-}
-
-function formatDoctorList(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean).join(", ");
-  }
-
-  if (typeof value === "string") {
-    return value;
-  }
-
-  return "";
-}
-
-function formatDoctorClinics(clinics) {
-  if (!Array.isArray(clinics) || clinics.length === 0) {
-    return "";
-  }
-
-  return clinics
-    .map((clinic) => clinic?.name ?? clinic?.location ?? "")
-    .filter(Boolean)
-    .join(", ");
 }
 
 function resolveVerificationStatus(doctor) {

@@ -35,7 +35,7 @@ import { Icon } from "./doctor_layouts/dashboard-shared";
   {
     id: "note-3",
     title: "Earnings update",
-    message: "Your clinic summary is ready for review.",
+    message: "Your earnings summary is ready for review.",
   },
   ];
 
@@ -200,7 +200,7 @@ export default function DoctorDashboardClient() {
     },
     {
       title: "Review Patient Details",
-      detail: "Check the booking info, clinic details, and supporting records.",
+      detail: "Check the booking information and supporting records.",
     },
     {
       title: "Accept / Reject / Reschedule",

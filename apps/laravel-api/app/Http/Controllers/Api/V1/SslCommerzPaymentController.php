@@ -194,7 +194,6 @@ class SslCommerzPaymentController extends Controller
             'appointment_id' => $appointment->id,
             'patient_id' => $appointment->patient_id,
             'doctor_id' => $appointment->doctor_id,
-            'hospital_id' => $appointment->hospital_id,
             'payer_user_id' => $appointment->patient?->user_id,
             'provider' => 'sslcommerz',
             'gateway' => 'sslcommerz',

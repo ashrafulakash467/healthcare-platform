@@ -164,8 +164,6 @@ export default function MyAppointmentPage({
                 : "Unavailable";
               const doctorName = appointment.doctor?.name ?? "Unnamed Doctor";
               const doctorSpecialty = appointment.doctor?.specialty ?? "General Practice";
-              const clinicName = appointment.clinic?.name ?? "Clinic";
-              const clinicLocation = appointment.clinic?.location ?? "";
 
               return (
                 <article
@@ -211,7 +209,7 @@ export default function MyAppointmentPage({
                             isSelected ? "text-slate-700" : "text-slate-500"
                           }`}
                         >
-                          {doctorSpecialty} - {clinicName}
+                          {doctorSpecialty}
                         </p>
 
                         <p
@@ -220,7 +218,6 @@ export default function MyAppointmentPage({
                           }`}
                         >
                           {appointment.appointmentDate} at {appointment.slotTime}
-                          {clinicLocation ? ` - ${clinicLocation}` : ""}
                         </p>
                       </div>
                     </div>
@@ -349,10 +346,7 @@ export default function MyAppointmentPage({
                           </span>
                         </div>
                         <p className="text-sm text-slate-500">
-                          {doctorSpecialty} - {clinicName}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {clinicLocation || "Clinic location not available"}
+                          {doctorSpecialty}
                         </p>
                       </div>
 

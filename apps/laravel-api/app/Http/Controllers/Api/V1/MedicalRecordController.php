@@ -27,7 +27,6 @@ class MedicalRecordController extends Controller
         $query = Prescription::query()->with([
             'doctor.user',
             'patient.user',
-            'appointment.hospital',
             'medicalRecord',
             'items',
         ])->latest('issued_at')->latest();
@@ -55,7 +54,6 @@ class MedicalRecordController extends Controller
         $medicalRecordsQuery = MedicalRecord::query()->with([
             'doctor.user',
             'patient.user',
-            'appointment.hospital',
         ])->latest('recorded_at')->latest();
 
         if ($user->hasRole('doctor')) {
@@ -145,7 +143,7 @@ class MedicalRecordController extends Controller
 
         return response()->json([
             'message' => 'Clinical memo saved successfully.',
-            'record' => $this->formatMedicalNote($medicalRecord->loadMissing(['doctor.user', 'patient.user', 'appointment.hospital'])),
+            'record' => $this->formatMedicalNote($medicalRecord->loadMissing(['doctor.user', 'patient.user', 'appointment'])),
         ], 201);
     }
 
@@ -209,7 +207,6 @@ class MedicalRecordController extends Controller
             return $prescription->loadMissing([
                 'doctor.user',
                 'patient.user',
-                'appointment.hospital',
                 'medicalRecord',
                 'items',
             ]);
@@ -224,7 +221,7 @@ class MedicalRecordController extends Controller
     private function appointmentForDoctor(int $doctorId, string $appointmentId): ?Appointment
     {
         return Appointment::query()
-            ->with(['patient.user', 'doctor.user', 'hospital'])
+            ->with(['patient.user', 'doctor.user'])
             ->where('appointment_no', $appointmentId)
             ->where('doctor_id', $doctorId)
             ->first();
@@ -232,7 +229,7 @@ class MedicalRecordController extends Controller
 
     private function newPrescriptionNumber(): string
     {
-        return 'RX-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(4));
+        return 'RX-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
     }
 
     private function emptyRecordsPayload(): array
@@ -278,7 +275,7 @@ class MedicalRecordController extends Controller
             'id' => (string) $record->id,
             'title' => $record->chief_complaint ?: 'Clinical Memo',
             'doctor' => $record->doctor?->user?->name ?? 'Doctor',
-            'facility' => $record->appointment?->hospital?->name ?? 'Consultation',
+            'facility' => 'Consultation',
             'date' => $record->recorded_at?->toDateString() ?? $record->created_at->toDateString(),
             'summary' => $record->clinical_notes ?: $record->treatment_plan,
             'diagnosis' => $record->diagnosis,
@@ -300,7 +297,7 @@ class MedicalRecordController extends Controller
                     : '#';
 
                 return [
-                    'id' => $record->id . '-attachment-' . $index,
+                    'id' => $record->id.'-attachment-'.$index,
                     'title' => $title,
                     'doctor' => $record->doctor?->user?->name ?? 'Doctor',
                     'date' => $record->recorded_at?->toDateString() ?? $record->created_at->toDateString(),

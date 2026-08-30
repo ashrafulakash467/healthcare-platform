@@ -5,7 +5,6 @@ import { Icon, formatCurrency } from "./dashboard-shared";
 import UsersPage from "../Users/users-page";
 import DoctorsPage from "../Doctors/doctors-page";
 import ReportsPage from "../Doctors/reports-page";
-import HospitalsPage from "../Hospitals/hospitals-page";
 import AppointmentsPage from "../Appointments/appointments-page";
 import PaymentsPage from "../Payments/payments-page";
 import ContentPage from "../Content/content-page";
@@ -26,11 +25,6 @@ import { adminSidebarItems } from "../../../../Header_Sidebar-Admin-Doc-shareUi/
 
 const tabItems = adminSidebarItems;
 
-const hospitalsSeed = [
-  { id: "hospital-1", name: "Central Care Hospital", city: "Dhaka", status: "Onboarded", doctors: 72, beds: 240 },
-  { id: "hospital-2", name: "City Medical Center", city: "Chattogram", status: "Under Review", doctors: 48, beds: 180 },
-  { id: "hospital-3", name: "Metro Hospital", city: "Sylhet", status: "Onboarded", doctors: 36, beds: 120 },
-];
 
 const appointmentsSeed = [
   { id: "apt-1", patient: "Nusrat Jahan", doctor: "Dr. Sarah Jenkins", time: "09:30 AM", type: "Initial Consultation", status: "Pending", payment: "Paid" },
@@ -47,7 +41,6 @@ const paymentsSeed = [
 const contentSeed = [
   { id: "cms-1", title: "Homepage Banner", status: "Published", owner: "Marketing" },
   { id: "cms-2", title: "Doctor FAQ", status: "Draft", owner: "Support" },
-  { id: "cms-3", title: "Hospital Onboarding Guide", status: "Review", owner: "Operations" },
 ];
 
 const reportsSeed = [
@@ -70,13 +63,12 @@ const supportSeed = [
 
 const auditSeed = [
   { id: "audit-1", action: "Doctor approved", actor: "Admin", time: "2 minutes ago" },
-  { id: "audit-2", action: "Hospital profile updated", actor: "Operations", time: "14 minutes ago" },
   { id: "audit-3", action: "Role permissions changed", actor: "Super Admin", time: "32 minutes ago" },
 ];
 
 const rolesSeed = [
   { role: "Super Admin", permissions: ["All access", "Manage roles", "View audit logs", "Change settings"] },
-  { role: "Operations Admin", permissions: ["Doctors", "Hospitals", "Appointments", "Reports"] },
+  { role: "Operations Admin", permissions: ["Doctors", "Appointments", "Reports"] },
   { role: "Finance Admin", permissions: ["Payments", "Refunds", "Reports"] },
   { role: "Support Admin", permissions: ["Tickets", "Notifications", "CMS updates"] },
 ];
@@ -164,7 +156,6 @@ export default function AdminDashboard() {
   const [editForm, setEditForm] = useState({});
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [summary, setSummary] = useState(null);
-  const [hospitals, setHospitals] = useState(hospitalsSeed);
   const [appointments, setAppointments] = useState(appointmentsSeed);
   const [payments, setPayments] = useState(paymentsSeed);
   const [content, setContent] = useState(contentSeed);
@@ -234,9 +225,6 @@ export default function AdminDashboard() {
         return;
       }
 
-      if (Array.isArray(result.hospitals)) {
-        setHospitals(result.hospitals);
-      }
 
       if (Array.isArray(result.appointments) && result.appointments.length > 0) {
         setAppointments(result.appointments);
@@ -404,7 +392,6 @@ export default function AdminDashboard() {
           ? ""
           : formData.followUpFee,
       );
-      appendValue("hospital_ids", JSON.stringify(Array.isArray(formData.hospitalIds) ? formData.hospitalIds : []));
       appendValue("available_dates", formData.availableDates ?? "");
       appendValue("available_time_slots", formData.availableTimeSlots ?? "");
       appendValue("city", formData.city ?? "");
@@ -470,7 +457,6 @@ export default function AdminDashboard() {
         formData.followUpFee === "" || formData.followUpFee === null || formData.followUpFee === undefined
           ? null
           : formData.followUpFee,
-      hospital_ids: Array.isArray(formData.hospitalIds) ? formData.hospitalIds : [],
       available_dates: formData.availableDates ?? null,
       available_time_slots: formData.availableTimeSlots ?? null,
       city: formData.city ?? null,
@@ -551,7 +537,6 @@ export default function AdminDashboard() {
       gender: doctor.gender ?? "",
       consultationFee: doctor.consultationFee ?? "",
       followUpFee: doctor.followUpFee ?? "",
-      hospitalIds: doctor.hospitalIds ?? doctor.hospital_ids ?? [],
       availableDates: normalizeDoctorDateList(doctor.availableDates ?? doctor.available_dates),
       availableTimeSlots: formatDoctorListValue(doctor.availableTimeSlots ?? doctor.available_time_slots),
       city: doctor.city ?? "",
@@ -578,7 +563,6 @@ export default function AdminDashboard() {
       gender: "",
       consultationFee: "",
       followUpFee: "",
-      hospitalIds: [],
       availableDates: [],
       availableTimeSlots: "",
       city: "",
@@ -600,7 +584,6 @@ export default function AdminDashboard() {
       gender: "",
       consultationFee: "",
       followUpFee: "",
-      hospitalIds: [],
       availableDates: [],
       availableTimeSlots: "",
       city: "",
@@ -630,7 +613,6 @@ export default function AdminDashboard() {
       openTickets: tickets.filter((item) => item?.status === "Open").length,
       patients: 12480,
       doctors: doctors.length || 386,
-      hospitals: hospitals.length,
       todayAppointments: appointments.length,
       revenueCents: 9650000,
     };
@@ -638,7 +620,6 @@ export default function AdminDashboard() {
     return {
       patients: summary?.patients ?? fallback.patients,
       doctors: summary?.doctors ?? fallback.doctors,
-      hospitals: summary?.hospitals ?? fallback.hospitals,
       todayAppointments: summary?.todayAppointments ?? fallback.todayAppointments,
       revenueCents: summary?.revenueCents ?? fallback.revenueCents,
       pendingDoctors: summary?.pendingDoctors ?? fallback.pendingDoctors,
@@ -646,7 +627,7 @@ export default function AdminDashboard() {
       openTickets: summary?.openTickets ?? fallback.openTickets,
       systemHealth: summary?.systemHealth ?? (systemSettings.maintenanceMode ? 71 : 98),
     };
-  }, [summary, systemSettings.maintenanceMode, doctors, payments, tickets, hospitals, appointments]);
+  }, [summary, systemSettings.maintenanceMode, doctors, payments, tickets, appointments]);
 
   if (!isReady) {
     return (
@@ -692,7 +673,7 @@ export default function AdminDashboard() {
       <DashboardHeader
         user={admin}
         title="Admin Dashboard"
-        subtitle="Manage users, doctors, hospitals, and system operations."
+        subtitle="Manage users, doctors, and system operations."
         roleLabel="Admin"
         disableMobileSidebarToggle
         onLogout={handleLogout}
@@ -701,7 +682,7 @@ export default function AdminDashboard() {
       <div className="flex h-[calc(100vh-5rem)] w-full overflow-hidden bg-slate-50 text-slate-900">
         <SidebarShell
           title="Admin Dashboard"
-          subtitle="Manage users, doctors, hospitals, and system operations."
+          subtitle="Manage users, doctors, and system operations."
           roleLabel="Admin"
           items={tabItems}
           activeKey={activeTab}
@@ -743,7 +724,6 @@ export default function AdminDashboard() {
               onMessage={setStatusMessage}
             />
           )}
-          {activeTab === "hospitals" && <HospitalsPage hospitals={hospitals} />}
           {activeTab === "appointments" && (
             <AppointmentsPage
               appointments={appointments}
@@ -801,7 +781,6 @@ function DashboardOverviewPanel({ admin, totals, onNavigate }) {
   const kpiCards = [
     { key: "users", label: "Total Patients", value: totals.patients, tone: "blue" },
     { key: "doctors", label: "Total Doctors", value: totals.doctors, tone: "emerald" },
-    { key: "hospitals", label: "Hospitals", value: totals.hospitals, tone: "slate" },
     { key: "appointments", label: "Today's Appointments", value: totals.todayAppointments, tone: "amber" },
     { key: "payments", label: "Revenue", value: formatCurrency(totals.revenueCents, "BDT"), tone: "emerald" },
     { key: "doctors", label: "Pending Verifications", value: totals.pendingDoctors, tone: "amber" },
@@ -825,7 +804,6 @@ function DashboardOverviewPanel({ admin, totals, onNavigate }) {
             <div className="flex flex-wrap gap-2">
               <ActionChip label="Users" onClick={() => onNavigate("users")} />
               <ActionChip label="Doctors" onClick={() => onNavigate("doctors")} />
-              <ActionChip label="Hospitals" onClick={() => onNavigate("hospitals")} />
               <ActionChip label="Appointments" onClick={() => onNavigate("appointments")} />
               <ActionChip label="Payments" onClick={() => onNavigate("payments")} />
               <ActionChip label="Reports" onClick={() => onNavigate("reports")} />
@@ -910,26 +888,6 @@ function KpiCard({ label, value, detail, tone = "slate", onClick }) {
       <p className="mt-2 text-3xl font-bold text-current">{value}</p>
       <p className="mt-2 text-sm text-current/80">{detail}</p>
      </button>
-  );
-}
-
-function MiniMetric({ label, value, tone = "slate" }) {
-  const toneClasses =
-    tone === "emerald"
-      ? "bg-emerald-50 text-emerald-800"
-      : tone === "amber"
-        ? "bg-amber-50 text-amber-800"
-        : tone === "blue"
-          ? "bg-blue-50 text-blue-800"
-          : "bg-slate-50 text-slate-800";
-
-  return (
-    <div className={`rounded-2xl px-4 py-3 ${toneClasses}`}>
-      <p className="text-xs font-semibold uppercase tracking-wide opacity-70">
-        {label}
-      </p>
-      <p className="mt-1 text-base font-bold">{value}</p>
-    </div>
   );
 }
 

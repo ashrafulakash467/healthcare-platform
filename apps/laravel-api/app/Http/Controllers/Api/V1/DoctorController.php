@@ -4,18 +4,16 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
-use App\Models\Hospital;
 use App\Models\User;
 use App\Services\DoctorSlotSyncService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class DoctorController extends Controller
 {
@@ -107,7 +105,7 @@ class DoctorController extends Controller
     public function show(string $doctorId): JsonResponse
     {
         $doctor = Doctor::query()
-            ->with(['user', 'primaryHospital', 'hospitals'])
+            ->with('user')
             ->findOrFail($doctorId);
 
         return response()->json([
@@ -118,7 +116,7 @@ class DoctorController extends Controller
     public function adminIndex(Request $request): JsonResponse
     {
         $query = Doctor::query()
-            ->with(['user', 'primaryHospital', 'hospitals'])
+            ->with('user')
             ->latest();
 
         if ($request->filled('search')) {
@@ -128,9 +126,9 @@ class DoctorController extends Controller
                     $userQuery->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                 })
-                ->orWhere('specialty', 'like', "%{$search}%")
-                ->orWhere('license_no', 'like', "%{$search}%")
-                ->orWhere('city', 'like', "%{$search}%");
+                    ->orWhere('specialty', 'like', "%{$search}%")
+                    ->orWhere('license_no', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%");
             });
         }
 
@@ -165,7 +163,6 @@ class DoctorController extends Controller
             'consultation_fee' => ['nullable', 'numeric', 'min:0'],
             'follow_up_fee' => ['nullable', 'numeric', 'min:0'],
             'chamber_address' => ['nullable', 'string', 'max:500'],
-            'hospital_ids' => ['nullable'],
             'available_dates' => ['nullable'],
             'available_time_slots' => ['nullable'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -177,9 +174,7 @@ class DoctorController extends Controller
 
         $availableDates = $this->normalizeListField($data['available_dates'] ?? null);
         $availableTimeSlots = $this->normalizeListField($data['available_time_slots'] ?? null);
-        $hospitalIds = $this->normalizeHospitalIds($data['hospital_ids'] ?? null);
-
-        $doctor = DB::transaction(function () use ($data, $request, $availableDates, $availableTimeSlots, $hospitalIds): Doctor {
+        $doctor = DB::transaction(function () use ($data, $request, $availableDates, $availableTimeSlots): Doctor {
             $user = User::create([
                 'name' => $data['name'],
                 'role' => 'doctor',
@@ -218,10 +213,9 @@ class DoctorController extends Controller
                 ])->save();
             }
 
-            $this->syncDoctorHospitals($doctor, $hospitalIds);
-            app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
+            app(DoctorSlotSyncService::class)->sync($doctor->fresh('schedules'));
 
-            return $doctor->fresh(['user', 'primaryHospital', 'hospitals']);
+            return $doctor->fresh('user');
         });
 
         return response()->json([
@@ -245,7 +239,6 @@ class DoctorController extends Controller
             'consultation_fee' => ['sometimes', 'numeric', 'min:0'],
             'follow_up_fee' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'chamber_address' => ['sometimes', 'nullable', 'string', 'max:500'],
-            'hospital_ids' => ['sometimes', 'nullable'],
             'available_dates' => ['sometimes', 'nullable'],
             'available_time_slots' => ['sometimes', 'nullable'],
             'city' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -267,10 +260,6 @@ class DoctorController extends Controller
         } else {
             unset($data['available_time_slots']);
         }
-
-        $hospitalIds = array_key_exists('hospital_ids', $data)
-            ? $this->normalizeHospitalIds($data['hospital_ids'])
-            : null;
 
         $doctor = Doctor::query()->with('user')->findOrFail($doctorId);
 
@@ -322,15 +311,11 @@ class DoctorController extends Controller
         ])));
         $doctor->save();
 
-        if ($hospitalIds !== null) {
-            $this->syncDoctorHospitals($doctor, $hospitalIds);
-        }
-
-        app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
+        app(DoctorSlotSyncService::class)->sync($doctor->fresh('schedules'));
 
         return response()->json([
             'message' => 'Doctor updated successfully.',
-            'doctor' => $this->formatAdminDoctor($doctor->fresh(['user', 'primaryHospital', 'hospitals'])),
+            'doctor' => $this->formatAdminDoctor($doctor->fresh('user')),
         ]);
     }
 
@@ -352,7 +337,7 @@ class DoctorController extends Controller
     private function publicDoctorCollection(): Collection
     {
         return Doctor::query()
-            ->with(['user', 'primaryHospital', 'hospitals'])
+            ->with('user')
             ->whereHas('user', function ($query): void {
                 $query->where('status', '!=', 'deleted');
             })
@@ -361,8 +346,6 @@ class DoctorController extends Controller
 
     private function formatPublicDoctor(Doctor $doctor): array
     {
-        $clinics = $this->clinicsForDoctor($doctor);
-
         return [
             'id' => (string) $doctor->id,
             'name' => $doctor->user?->name ?? 'Unknown Doctor',
@@ -378,15 +361,12 @@ class DoctorController extends Controller
             'chamberAddress' => $doctor->chamber_address,
             'availableDates' => $this->normalizeListField($doctor->available_dates),
             'availableTimeSlots' => $this->normalizeListField($doctor->available_time_slots),
-            'hospitalIds' => $doctor->hospitals->pluck('id')->map(fn ($id): string => (string) $id)->values()->all(),
-            'clinics' => $clinics,
         ];
     }
 
     private function formatAdminDoctor(Doctor $doctor): array
     {
         $user = $doctor->user;
-        $hospital = $doctor->primaryHospital;
 
         return [
             'id' => (string) $doctor->id,
@@ -413,87 +393,14 @@ class DoctorController extends Controller
             'verificationStatus' => $doctor->verification_status,
             'verifiedAt' => $doctor->verified_at?->toISOString(),
             'status' => $doctor->status,
-            'hospitalIds' => $doctor->hospitals->pluck('id')->map(fn ($id): string => (string) $id)->values()->all(),
-            'hospital' => $hospital ? [
-                'id' => (string) $hospital->id,
-                'name' => $hospital->name,
-                'city' => $hospital->city,
-            ] : null,
-            'clinics' => $this->clinicsForDoctor($doctor),
             'createdAt' => $doctor->created_at?->toISOString(),
             'updatedAt' => $doctor->updated_at?->toISOString(),
         ];
     }
 
-    private function clinicsForDoctor(Doctor $doctor): array
-    {
-        $clinics = $doctor->hospitals->map(function ($hospital): array {
-            return [
-                'id' => (string) $hospital->id,
-                'name' => $hospital->name,
-                'location' => $hospital->city ?? $hospital->state ?? $hospital->country ?? '',
-            ];
-        })->values()->all();
-
-        if (empty($clinics) && $doctor->primaryHospital) {
-            $clinics[] = [
-                'id' => (string) $doctor->primaryHospital->id,
-                'name' => $doctor->primaryHospital->name,
-                'location' => $doctor->primaryHospital->city ?? '',
-            ];
-        }
-
-        return $clinics;
-    }
-
-    private function normalizeHospitalIds(mixed $value): array
-    {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $value = $decoded;
-            } else {
-                $value = [$value];
-            }
-        }
-
-        if (! is_array($value)) {
-            return [];
-        }
-
-        $ids = collect($value)
-            ->map(fn ($item): int => (int) trim((string) $item))
-            ->filter(fn ($item): bool => $item > 0)
-            ->unique()
-            ->values()
-            ->all();
-
-        if (! $ids) {
-            return [];
-        }
-
-        return Hospital::query()
-            ->whereIn('id', $ids)
-            ->pluck('id')
-            ->map(fn ($id): string => (string) $id)
-            ->values()
-            ->all();
-    }
-
-    private function syncDoctorHospitals(Doctor $doctor, array $hospitalIds): void
-    {
-        $doctor->hospitals()->sync($hospitalIds);
-
-        $doctor->forceFill([
-            'primary_hospital_id' => $hospitalIds[0] ?? null,
-        ])->save();
-    }
-
     private function doctorLocation(Doctor $doctor): string
     {
         return $doctor->city
-            ?: $doctor->primaryHospital?->city
             ?: $doctor->state
             ?: $doctor->country
             ?: 'Unavailable';

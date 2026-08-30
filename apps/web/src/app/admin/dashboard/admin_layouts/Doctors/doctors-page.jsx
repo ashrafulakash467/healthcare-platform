@@ -46,10 +46,6 @@ export default function DoctorsPage({
         doctor.email,
         doctor.specialty,
         doctor.speciality,
-        doctor.clinics
-          ?.map((clinic) => [clinic?.name, clinic?.location].filter(Boolean).join(" "))
-          .filter(Boolean)
-          .join(" "),
         doctor.phone,
         doctor.city,
         doctor.licenseNo,

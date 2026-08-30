@@ -177,8 +177,7 @@ export default function PendingRequestPage({
                               isSelected ? "text-slate-200" : "text-slate-500"
                             }`}
                           >
-                            {appointment.doctor?.specialty || "Consultation"} -{" "}
-                            {appointment.clinic?.name || "Assigned clinic"}
+                            {appointment.doctor?.specialty || "Consultation"}
                           </p>
                           <p
                             className={`text-xs ${
@@ -267,11 +266,7 @@ export default function PendingRequestPage({
                   </span>
                 </div>
                 <p className="text-sm text-slate-500">
-                  {selectedAppointment.doctor?.specialty || "Consultation"} -{" "}
-                  {selectedAppointment.clinic?.name || "Clinic"}
-                </p>
-                <p className="text-sm text-slate-500">
-                  {selectedAppointment.clinic?.location || "Location unavailable"}
+                  {selectedAppointment.doctor?.specialty || "Consultation"}
                 </p>
               </div>
 

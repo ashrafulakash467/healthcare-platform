@@ -61,7 +61,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('admin/data', [AdminController::class, 'data']);
         Route::get('admin/doctor-verifications', [AdminController::class, 'index']);
         Route::get('admin/users', [AdminController::class, 'users']);
-        Route::get('admin/hospitals', [AdminController::class, 'hospitals']);
         Route::delete('admin/users/{userId}', [AdminController::class, 'destroy']);
         Route::patch('admin/doctor-verifications/{doctorId}/decision', [AdminController::class, 'decision']);
         Route::get('admin/doctors', [DoctorController::class, 'adminIndex']);
@@ -115,7 +114,4 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('pay-via-ajax', [SslCommerzPaymentController::class, 'payViaAjax']);
     });
 
-    Route::middleware('role:hospital|admin|super-admin')->group(function (): void {
-        Route::get('hospital/dashboard', [DashboardController::class, 'hospital']);
-    });
 });

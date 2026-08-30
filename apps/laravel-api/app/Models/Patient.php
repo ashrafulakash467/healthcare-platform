@@ -14,7 +14,6 @@ class Patient extends Model
 
     protected $fillable = [
         'user_id',
-        'hospital_id',
         'name',
         'email',
         'phone',
@@ -44,11 +43,6 @@ class Patient extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function hospital(): BelongsTo
-    {
-        return $this->belongsTo(Hospital::class);
     }
 
     public function appointments(): HasMany

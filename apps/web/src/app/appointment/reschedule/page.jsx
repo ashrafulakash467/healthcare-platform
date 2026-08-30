@@ -143,7 +143,6 @@ export default function RescheduleAppointmentPage() {
         appointmentDate: result.appointment?.appointmentDate ?? appointmentDate,
         slotTime: result.appointment?.slotTime ?? slotTime,
         doctorName: result.appointment?.doctor?.name ?? "Doctor",
-        clinicName: result.appointment?.clinic?.name ?? "Clinic",
       });
       setSlotTime("");
     } catch {
@@ -163,7 +162,7 @@ export default function RescheduleAppointmentPage() {
                 {rescheduleToast.message}
               </p>
               <p className="mt-1 text-sm text-slate-700">
-                {rescheduleToast.doctorName} at {rescheduleToast.clinicName} on{" "}
+                {rescheduleToast.doctorName} on{" "}
                 {rescheduleToast.appointmentDate} at {rescheduleToast.slotTime}.
               </p>
             </div>
@@ -208,7 +207,7 @@ export default function RescheduleAppointmentPage() {
                 {appointment.doctor.name}
               </p>
               <p className="mt-1">
-                {appointment.doctor.specialty} · {appointment.clinic.name}
+                {appointment.doctor.specialty}
               </p>
               <p className="mt-1">
                 Current: {appointment.appointmentDate} at {appointment.slotTime}

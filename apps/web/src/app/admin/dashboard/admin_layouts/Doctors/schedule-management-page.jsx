@@ -37,7 +37,7 @@ export default function ScheduleManagementPage({ doctor, onNavigateSection }) {
     breakStart: "13:00",
     breakEnd: "13:30",
     capacity: "24",
-    exceptions: "Friday half-day clinic closure on 2026-08-07",
+    exceptions: "Friday half-day closure on 2026-08-07",
   });
   const [savedMessage, setSavedMessage] = useState("");
   const [generatedSlots, setGeneratedSlots] = useState([]);

@@ -533,14 +533,6 @@ export default function UsersPage() {
                                   value={formatStatusLabel(user.doctor.verificationStatus ?? "N/A")}
                                 />
                               </div>
-                              {user.doctor.hospital ? (
-                                <InfoPair
-                                  label="Primary Hospital"
-                                  value={[user.doctor.hospital.name, user.doctor.hospital.city]
-                                    .filter(Boolean)
-                                    .join(" - ")}
-                                />
-                              ) : null}
                             </DetailSection>
                           ) : null}
 
@@ -553,31 +545,9 @@ export default function UsersPage() {
                                 <InfoPair label="Date of Birth" value={user.patient.dateOfBirth ?? "N/A"} />
                               </div>
                               <InfoPair label="City" value={user.patient.city ?? "N/A"} />
-                              {user.patient.hospital ? (
-                                <InfoPair
-                                  label="Hospital"
-                                  value={[user.patient.hospital.name, user.patient.hospital.city]
-                                    .filter(Boolean)
-                                    .join(" - ")}
-                                />
-                              ) : null}
                             </DetailSection>
                           ) : null}
 
-                          {Array.isArray(user.createdHospitals) && user.createdHospitals.length ? (
-                            <DetailSection title="Created Hospitals">
-                              <div className="space-y-2">
-                                {user.createdHospitals.map((hospital) => (
-                                  <div key={hospital.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                                    <p className="text-sm font-semibold text-slate-900">{hospital.name}</p>
-                                    <p className="mt-1 text-xs text-slate-500">
-                                      {[hospital.city, hospital.status].filter(Boolean).join(" - ") || "Hospital record"}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            </DetailSection>
-                          ) : null}
                         </div>
                       ) : null}
                     </div>
@@ -748,10 +718,6 @@ function matchesCategory(user, category) {
     return true;
   }
 
-  if (category === "hospital admin") {
-    return roleSet.has("hospital") || roleSet.has("hospital admin");
-  }
-
   return roleSet.has(category);
 }
 
@@ -808,8 +774,6 @@ function formatRoleLabel(role) {
       admin: "Admin",
       doctor: "Doctor",
       patient: "Patient",
-      hospital: "Hospital Admin",
-      "hospital admin": "Hospital Admin",
       support: "Support",
       user: "User",
     }[text] ?? text.replace(/(^|\s)\w/g, (match) => match.toUpperCase())

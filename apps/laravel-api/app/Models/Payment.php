@@ -15,7 +15,6 @@ class Payment extends Model
         'appointment_id',
         'patient_id',
         'doctor_id',
-        'hospital_id',
         'payer_user_id',
         'provider',
         'method',
@@ -62,11 +61,6 @@ class Payment extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
-    }
-
-    public function hospital(): BelongsTo
-    {
-        return $this->belongsTo(Hospital::class);
     }
 
     public function payer(): BelongsTo

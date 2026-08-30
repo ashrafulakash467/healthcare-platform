@@ -63,7 +63,6 @@ export default function AppointmentViewDoctor({ doctors, onSelectDoctor }) {
               <div className="grid flex-1 grid-cols-1 gap-2 border-slate-100 text-sm text-slate-600 sm:grid-cols-3 md:border-l md:pl-5">
                 <ContactDetail label="Email" value={doctor.email || "—"} />
                 <ContactDetail label="Phone" value={doctor.phone || "—"} />
-                <ContactDetail label="Hospital" value={doctor.hospital || "—"} />
               </div>
 
               <div className="flex items-center justify-between gap-4 md:flex-col md:items-end">

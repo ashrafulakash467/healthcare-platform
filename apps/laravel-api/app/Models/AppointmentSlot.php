@@ -14,7 +14,6 @@ class AppointmentSlot extends Model
     protected $fillable = [
         'doctor_schedule_id',
         'doctor_id',
-        'hospital_id',
         'slot_date',
         'start_time',
         'end_time',
@@ -42,11 +41,6 @@ class AppointmentSlot extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
-    }
-
-    public function hospital(): BelongsTo
-    {
-        return $this->belongsTo(Hospital::class);
     }
 
     public function appointments(): HasMany

@@ -37,11 +37,6 @@ class UserResource extends JsonResource
                     'state' => $this->patient->state,
                     'country' => $this->patient->country,
                     'status' => $this->patient->status,
-                    'hospital' => $this->patient->hospital ? [
-                        'id' => (string) $this->patient->hospital->id,
-                        'name' => $this->patient->hospital->name,
-                        'city' => $this->patient->hospital->city,
-                    ] : null,
                 ];
             }),
             'doctor' => $this->whenLoaded('doctor', function (): array {
@@ -50,7 +45,6 @@ class UserResource extends JsonResource
                 return [
                     'id' => (string) $doctor->id,
                     'userId' => (string) $doctor->user_id,
-                    'primaryHospitalId' => $doctor->primary_hospital_id ? (string) $doctor->primary_hospital_id : null,
                     'specialty' => $doctor->specialty,
                     'subSpecialty' => $doctor->sub_specialty,
                     'qualification' => $doctor->qualification,
@@ -69,23 +63,6 @@ class UserResource extends JsonResource
                     'verifiedAt' => $doctor->verified_at?->toISOString(),
                     'status' => $doctor->status,
                     'imagePath' => $doctor->image_path,
-                    'hospitalIds' => $doctor->relationLoaded('hospitals')
-                        ? $doctor->hospitals->pluck('id')->map(fn ($id): string => (string) $id)->values()->all()
-                        : [],
-                    'clinics' => $doctor->relationLoaded('hospitals')
-                        ? $doctor->hospitals->map(function ($hospital): array {
-                            return [
-                                'id' => (string) $hospital->id,
-                                'name' => $hospital->name,
-                                'location' => $hospital->city ?? $hospital->state ?? $hospital->country ?? '',
-                            ];
-                        })->values()->all()
-                        : [],
-                    'primaryHospital' => $doctor->relationLoaded('primaryHospital') && $doctor->primaryHospital ? [
-                        'id' => (string) $doctor->primaryHospital->id,
-                        'name' => $doctor->primaryHospital->name,
-                        'city' => $doctor->primaryHospital->city,
-                    ] : null,
                 ];
             }),
             'roles' => $this->getRoleNames()->values(),

@@ -7,25 +7,25 @@ use App\Models\Appointment;
 use App\Models\AuditLog;
 use App\Models\CmsPage;
 use App\Models\Doctor;
-use App\Models\Hospital;
 use App\Models\Payment;
 use App\Models\Report;
 use App\Models\SupportTicket;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Permission\Models\Role;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 class AdminController extends Controller
 {
     public function index(): JsonResponse
     {
         $pendingDoctors = Doctor::query()
-            ->with(['user', 'primaryHospital'])
+            ->with('user')
             ->where('verification_status', 'pending')
             ->latest()
             ->get()
@@ -50,9 +50,8 @@ class AdminController extends Controller
         $users = User::query()
             ->with([
                 'roles',
-                'doctor.primaryHospital',
-                'patient.hospital',
-                'createdHospitals',
+                'doctor',
+                'patient',
             ])
             ->where(function ($query): void {
                 $query->whereNull('status')
@@ -69,47 +68,8 @@ class AdminController extends Controller
         ]);
     }
 
-    public function hospitals(): JsonResponse
-    {
-        $hospitals = Hospital::query()
-            ->select(['id', 'name', 'city', 'status'])
-            ->where(function ($query): void {
-                $query->whereNull('status')
-                    ->orWhere('status', 'active');
-            })
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Hospital $hospital): array => [
-                'id' => (string) $hospital->id,
-                'name' => $hospital->name,
-                'city' => $hospital->city,
-                'status' => $hospital->status,
-            ])
-            ->values();
-
-        return response()->json([
-            'hospitals' => $hospitals,
-            'total' => $hospitals->count(),
-        ]);
-    }
-
     public function data(): JsonResponse
     {
-        $hospitals = Hospital::query()
-            ->where(fn ($query) => $query->whereNull('status')->orWhere('status', 'active'))
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Hospital $hospital): array => [
-                'id' => (string) $hospital->id,
-                'name' => $hospital->name,
-                'city' => $hospital->city ?? '',
-                'status' => $this->adminDisplayLabel($hospital->status, 'Onboarded'),
-                // 'doctors' and 'beds' mirror the admin UI cards.
-                'doctors' => (int) $hospital->doctors()->count(),
-                'beds' => 0, // schema has no beds column
-            ])
-            ->values();
-
         $appointments = Appointment::query()
             ->with(['patient.user', 'doctor.user'])
             ->latest('appointment_date')
@@ -209,7 +169,6 @@ class AdminController extends Controller
             ->values();
 
         return response()->json([
-            'hospitals' => $hospitals,
             'appointments' => $appointments,
             'payments' => $payments,
             'content' => $content,
@@ -303,7 +262,7 @@ class AdminController extends Controller
     {
         if ($appointment->start_time) {
             try {
-                return \Illuminate\Support\Carbon::parse($appointment->start_time)->format('g:i A');
+                return Carbon::parse($appointment->start_time)->format('g:i A');
             } catch (\Throwable) {
                 // fall through to the raw value
             }
@@ -314,11 +273,10 @@ class AdminController extends Controller
         return $appointment->appointment_date?->format('M d') ?? '';
     }
 
-
     public function destroy(string $userId): JsonResponse
     {
         $user = User::query()
-            ->with(['doctor', 'patient', 'createdHospitals'])
+            ->with(['doctor', 'patient'])
             ->findOrFail($userId);
 
         Gate::authorize('delete', $user);
@@ -373,14 +331,13 @@ class AdminController extends Controller
             'message' => $data['decision'] === 'approve'
                 ? 'Doctor approved successfully.'
                 : 'Doctor rejected successfully.',
-            'doctor' => $this->formatDoctorVerification($doctor->fresh(['user', 'primaryHospital'])),
+            'doctor' => $this->formatDoctorVerification($doctor->fresh('user')),
         ]);
     }
 
     private function formatDoctorVerification(Doctor $doctor): array
     {
         $user = $doctor->user;
-        $hospital = $doctor->primaryHospital;
         $isActive = $doctor->verification_status === 'approved' && $doctor->status === 'active';
 
         return [
@@ -394,7 +351,7 @@ class AdminController extends Controller
             'licenseNumber' => $doctor->license_no,
             'licenseIssuedBy' => $doctor->license_no ? 'Bangladesh Medical and Dental Council' : null,
             'profileSummary' => $doctor->bio ?: 'Verification profile available in the database.',
-            'location' => $doctor->city ?: $hospital?->city ?: 'Unavailable',
+            'location' => $doctor->city ?: 'Unavailable',
             'gender' => $doctor->gender ?? 'Unspecified',
             'verificationStatus' => $doctor->verification_status,
             'rejectionReason' => $doctor->verification_status === 'rejected'
@@ -415,13 +372,6 @@ class AdminController extends Controller
         $roles = $user->getRoleNames()->values()->all();
         $doctor = $user->doctor;
         $patient = $user->patient;
-        $createdHospitals = $user->createdHospitals->map(fn ($hospital): array => [
-            'id' => (string) $hospital->id,
-            'name' => $hospital->name,
-            'city' => $hospital->city,
-            'status' => $hospital->status,
-        ])->values()->all();
-
         $primaryRole = $roles[0] ?? $this->inferUserRole($user);
 
         return [
@@ -443,11 +393,6 @@ class AdminController extends Controller
                 'gender' => $doctor->gender,
                 'verificationStatus' => $doctor->verification_status,
                 'status' => $doctor->status,
-                'hospital' => $doctor->primaryHospital ? [
-                    'id' => (string) $doctor->primaryHospital->id,
-                    'name' => $doctor->primaryHospital->name,
-                    'city' => $doctor->primaryHospital->city,
-                ] : null,
             ] : null,
             'patient' => $patient ? [
                 'id' => (string) $patient->id,
@@ -457,13 +402,7 @@ class AdminController extends Controller
                 'dateOfBirth' => $patient->date_of_birth?->toDateString(),
                 'city' => $patient->city,
                 'status' => $patient->status,
-                'hospital' => $patient->hospital ? [
-                    'id' => (string) $patient->hospital->id,
-                    'name' => $patient->hospital->name,
-                    'city' => $patient->hospital->city,
-                ] : null,
             ] : null,
-            'createdHospitals' => $createdHospitals,
         ];
     }
 
@@ -477,10 +416,6 @@ class AdminController extends Controller
             return 'patient';
         }
 
-        if ($user->createdHospitals->isNotEmpty()) {
-            return 'hospital';
-        }
-
         return 'user';
     }
 
@@ -491,7 +426,6 @@ class AdminController extends Controller
             'admin' => 'Admin',
             'doctor' => 'Doctor',
             'patient' => 'Patient',
-            'hospital' => 'Hospital Admin',
             default => 'User',
         };
     }

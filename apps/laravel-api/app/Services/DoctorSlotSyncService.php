@@ -6,13 +6,12 @@ use App\Models\AppointmentSlot;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 
 class DoctorSlotSyncService
 {
     public function sync(Doctor $doctor): void
     {
-        $doctor->loadMissing(['schedules', 'primaryHospital', 'hospitals']);
+        $doctor->loadMissing('schedules');
 
         $availableDates = $this->normalizeList($doctor->available_dates);
         $availableTimeSlots = $this->normalizeList($doctor->available_time_slots);
@@ -25,7 +24,6 @@ class DoctorSlotSyncService
 
         $desiredKeys = [];
         $slotDurationMinutes = max((int) ($schedule->slot_duration_minutes ?? 15), 1);
-        $hospitalId = $schedule->hospital_id;
         $capacity = 1;
 
         foreach ($availableDates as $slotDate) {
@@ -45,7 +43,6 @@ class DoctorSlotSyncService
 
                 $slot->fill([
                     'doctor_id' => $doctor->id,
-                    'hospital_id' => $hospitalId,
                     'end_time' => $endTime,
                     'capacity' => $slot->exists ? $slot->capacity : $capacity,
                     'generated_at' => now(),
@@ -101,9 +98,6 @@ class DoctorSlotSyncService
             return $schedule;
         }
 
-        $hospitalId = $doctor->primary_hospital_id
-            ?? $doctor->hospitals()->orderBy('hospitals.id')->value('hospitals.id');
-
         $startTime = null;
         $endTime = null;
 
@@ -123,7 +117,6 @@ class DoctorSlotSyncService
 
         return DoctorSchedule::create([
             'doctor_id' => $doctor->id,
-            'hospital_id' => $hospitalId,
             'consultation_type' => 'in_person',
             'timezone' => 'Asia/Dhaka',
             'working_days' => $workingDays,

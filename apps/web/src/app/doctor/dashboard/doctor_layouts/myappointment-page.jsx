@@ -127,7 +127,7 @@ export default function MyAppointmentPage({
       await onMedicalRecordsChanged?.();
     } catch (error) {
       setWorkflowError(
-        error instanceof Error ? error.message : "Could not save notes.",
+        error instanceof Error ? error.message : "Could not Provide notes.",
       );
     }
   }
@@ -153,7 +153,7 @@ export default function MyAppointmentPage({
       await onMedicalRecordsChanged?.();
     } catch (error) {
       setWorkflowError(
-        error instanceof Error ? error.message : "Could not save prescription.",
+        error instanceof Error ? error.message : "Could not Provide prescription.",
       );
     }
   }
@@ -282,8 +282,7 @@ export default function MyAppointmentPage({
                           </span>
                         </div>
                         <p className={`text-xs ${isSelected ? "text-slate-200" : "text-slate-500"}`}>
-                          {appointment.doctor?.specialty || "Clinical review"} -{" "}
-                          {appointment.clinic?.name || "Assigned clinic"}
+                          {appointment.doctor?.specialty || "Clinical review"}
                         </p>
                         <p className={`text-xs ${isSelected ? "text-slate-200" : "text-slate-500"}`}>
                           {appointment.appointmentDate} at {appointment.slotTime}
@@ -332,11 +331,7 @@ export default function MyAppointmentPage({
                   </span>
                 </div>
                 <p className="text-sm text-slate-500">
-                  {selectedAppointment.doctor?.specialty || "Consultation"} -{" "}
-                  {selectedAppointment.clinic?.name || "Clinic"}
-                </p>
-                <p className="text-sm text-slate-500">
-                  {selectedAppointment.clinic?.location || "Location unavailable"}
+                  {selectedAppointment.doctor?.specialty || "Consultation"}
                 </p>
               </div>
 
@@ -397,6 +392,7 @@ export default function MyAppointmentPage({
                   </button>
                 </div>
 
+                    <div className="flex width-full gap-4 justify-center">
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
                   <label className="block text-sm font-semibold text-slate-700">
                     Add Clinical Notes
@@ -416,9 +412,9 @@ export default function MyAppointmentPage({
                   <button
                     type="button"
                     onClick={saveNotes}
-                    className="mt-3 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="mt-3 inline-flex items-center justify-center bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:bg-brand-hover"
                   >
-                    Save Notes
+                    Provide Notes
                   </button>
                 </div>
 
@@ -441,12 +437,12 @@ export default function MyAppointmentPage({
                   <button
                     type="button"
                     onClick={issuePrescription}
-                    className="mt-3 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="mt-3 inline-flex items-center justify-center bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:bg-brand-hover"
                   >
-                    Save Prescription
+                    Provide Prescription
                   </button>
                 </div>
-
+                      </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -458,16 +454,16 @@ export default function MyAppointmentPage({
                   <button
                     type="button"
                     onClick={() => updateDecision("consulting")}
-                    className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-md border border-amber-400 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-200"
                   >
                     Conduct Consultation
                   </button>
                   <button
                     type="button"
                     onClick={completeAppointment}
-                    className="rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="rounded-md border border-amber-600 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-200"
                   >
-                    Mark Appointment Complete
+                    Open For Messageing
                   </button>
                 </div>
               </div>

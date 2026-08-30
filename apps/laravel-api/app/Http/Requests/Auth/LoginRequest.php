@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['nullable', 'string', 'in:admin,doctor,patient,hospital'],
+            'role' => ['nullable', 'string', 'in:admin,doctor,patient'],
         ];
     }
 }

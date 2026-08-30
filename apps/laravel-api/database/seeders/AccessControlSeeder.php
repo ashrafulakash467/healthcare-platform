@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
-use Illuminate\Database\Seeder;
 
 class AccessControlSeeder extends Seeder
 {
@@ -21,10 +21,8 @@ class AccessControlSeeder extends Seeder
             'access-admin-panel',
             'access-doctor-panel',
             'access-patient-panel',
-            'access-hospital-panel',
             'manage-users',
             'manage-doctors',
-            'manage-hospitals',
             'manage-appointments',
             'manage-payments',
             'manage-content',
@@ -60,14 +58,12 @@ class AccessControlSeeder extends Seeder
                 'access-patient-panel',
                 'manage-appointments',
             ],
-            'hospital' => [
-                'access-hospital-panel',
-                'manage-doctors',
-                'manage-appointments',
-                'manage-payments',
-                'manage-reports',
-            ],
         ];
+
+        Role::query()->where('name', 'hospital')->delete();
+        Permission::query()
+            ->whereIn('name', ['access-hospital-panel', 'manage-hospitals'])
+            ->delete();
 
         foreach ($roles as $roleName => $rolePermissions) {
             $role = Role::firstOrCreate([

@@ -16,7 +16,6 @@ class SupportTicket extends Model
         'user_id',
         'patient_id',
         'doctor_id',
-        'hospital_id',
         'assigned_to_user_id',
         'subject',
         'category',
@@ -49,11 +48,6 @@ class SupportTicket extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
-    }
-
-    public function hospital(): BelongsTo
-    {
-        return $this->belongsTo(Hospital::class);
     }
 
     public function messages(): HasMany

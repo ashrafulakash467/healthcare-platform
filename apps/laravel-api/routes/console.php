@@ -10,7 +10,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Artisan::command('doctor:sync-slots {doctorId?}', function (?string $doctorId = null) {
-    $query = Doctor::query()->with(['schedules', 'primaryHospital', 'hospitals']);
+    $query = Doctor::query()->with('schedules');
 
     if ($doctorId) {
         $doctors = $query->whereKey($doctorId)->get();

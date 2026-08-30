@@ -349,29 +349,6 @@ export default function SettingsPage() {
               />
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Clinics & Hospitals
-              </p>
-              <div className="mt-3 space-y-2">
-                {Array.isArray(doctor?.clinics) && doctor.clinics.length ? (
-                  doctor.clinics.map((clinic) => (
-                    <div key={clinic.id ?? `${clinic.name}-${clinic.location}`} className="rounded-xl border border-slate-200 bg-white p-3">
-                      <p className="text-sm font-semibold text-slate-900">
-                        {clinic.name ?? "Unnamed Clinic"}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        {clinic.location ?? "Location not available"}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="rounded-xl border border-dashed border-slate-200 bg-white p-3 text-sm text-slate-500">
-                    No clinic or hospital available.
-                  </p>
-                )}
-              </div>
-            </div>
           </aside>
 
           <section className="rounded-[28px] p-2">

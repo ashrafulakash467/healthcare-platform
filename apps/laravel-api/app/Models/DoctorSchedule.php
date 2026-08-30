@@ -13,7 +13,6 @@ class DoctorSchedule extends Model
 
     protected $fillable = [
         'doctor_id',
-        'hospital_id',
         'consultation_type',
         'timezone',
         'working_days',
@@ -39,11 +38,6 @@ class DoctorSchedule extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
-    }
-
-    public function hospital(): BelongsTo
-    {
-        return $this->belongsTo(Hospital::class);
     }
 
     public function exceptions(): HasMany

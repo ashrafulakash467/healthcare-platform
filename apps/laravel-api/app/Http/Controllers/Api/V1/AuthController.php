@@ -7,7 +7,6 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Doctor;
-use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\User;
 use App\Notifications\PasswordResetLinkNotification;
@@ -73,10 +72,7 @@ class AuthController extends Controller
                 'roles',
                 'permissions',
                 'patient',
-                'patient.hospital',
                 'doctor',
-                'doctor.primaryHospital',
-                'doctor.hospitals',
             ])),
         ]);
     }
@@ -124,7 +120,7 @@ class AuthController extends Controller
                 ],
             );
 
-            app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
+            app(DoctorSlotSyncService::class)->sync($doctor->fresh('schedules'));
         } elseif ($role === 'patient') {
             Patient::updateOrCreate(
                 ['user_id' => $user->id],
@@ -136,27 +132,13 @@ class AuthController extends Controller
                     'status' => 'active',
                 ],
             );
-        } elseif ($role === 'hospital') {
-            Hospital::updateOrCreate(
-                ['created_by_user_id' => $user->id],
-                [
-                    'name' => $data['name'] . ' Hospital',
-                    'slug' => Str::slug($data['name'] . '-' . $user->id),
-                    'code' => 'HSP-' . $user->id,
-                    'type' => 'clinic',
-                    'status' => 'active',
-                ],
-            );
         }
 
         $user->refresh()->load([
             'roles',
             'permissions',
             'patient',
-            'patient.hospital',
             'doctor',
-            'doctor.primaryHospital',
-            'doctor.hospitals',
         ]);
 
         $token = $user->createToken('healthcare-api', [$role])->plainTextToken;
@@ -169,10 +151,7 @@ class AuthController extends Controller
                 'roles',
                 'permissions',
                 'patient',
-                'patient.hospital',
                 'doctor',
-                'doctor.primaryHospital',
-                'doctor.hospitals',
             ])),
         ], 201);
     }
@@ -195,10 +174,7 @@ class AuthController extends Controller
                 'roles',
                 'permissions',
                 'patient',
-                'patient.hospital',
                 'doctor',
-                'doctor.primaryHospital',
-                'doctor.hospitals',
             ])),
         ]);
     }
@@ -292,16 +268,13 @@ class AuthController extends Controller
             ])->save();
         });
 
-        app(DoctorSlotSyncService::class)->sync($doctor->fresh(['schedules', 'primaryHospital', 'hospitals']));
+        app(DoctorSlotSyncService::class)->sync($doctor->fresh('schedules'));
 
         $freshUser = $user->fresh([
             'roles',
             'permissions',
             'patient',
-            'patient.hospital',
             'doctor',
-            'doctor.primaryHospital',
-            'doctor.hospitals',
         ]);
 
         return response()->json([
@@ -385,7 +358,7 @@ class AuthController extends Controller
             $patientRecord->save();
         });
 
-        $freshUser = $user->fresh(['roles', 'permissions', 'patient', 'patient.hospital']);
+        $freshUser = $user->fresh(['roles', 'permissions', 'patient']);
 
         return response()->json([
             'message' => 'Profile updated successfully.',

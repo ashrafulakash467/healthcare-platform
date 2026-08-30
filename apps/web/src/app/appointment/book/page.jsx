@@ -13,7 +13,6 @@ export default function BookAppointmentPage() {
   const [doctors, setDoctors] = useState([]);
   const [doctorId, setDoctorId] = useState(() => searchParams.get("doctorId") ?? "");
   const [bookingOptions, setBookingOptions] = useState(null);
-  const [clinicId, setClinicId] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
   const [slots, setSlots] = useState([]);
   const [slotRefreshTick, setSlotRefreshTick] = useState(0);
@@ -22,7 +21,6 @@ export default function BookAppointmentPage() {
   const [slotTime, setSlotTime] = useState("");
   const [error, setError] = useState("");
   const [bookingToast, setBookingToast] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // NOTE: initialize SSR-safe deterministic values (false / 0) so the server
   // and the first client render produce identical HTML, then sync real values
@@ -98,13 +96,11 @@ export default function BookAppointmentPage() {
     }
 
     async function loadOptions() {
-      setIsLoading(true);
       setError("");
       setBookingOptions(null);
       setAppointmentDate("");
       setSlots([]);
       setSlotTime("");
-      setClinicId("");
       setBookedOutDates(new Set());
 
       try {
@@ -122,27 +118,8 @@ export default function BookAppointmentPage() {
 
         setBookingOptions(result);
 
-        const clinics = Array.isArray(result.clinics)
-          ? result.clinics
-          : Array.isArray(result.doctor?.clinics)
-            ? result.doctor.clinics
-            : [];
-
-        const chamberAddress =
-          result.doctor?.chamberAddress ??
-          result.doctor?.chamber_address ??
-          "";
-
-        // Prefer a concrete clinic/hospital id so the clinic dropdown and the
-        // "Confirm appointment" button stay usable even when the doctor has no
-        // chamber address. Keep the chamber address (which the backend treats
-        // as "any clinic") as the default when present, and only fall back to a
-        // clinic id so doctors with an address keep their existing behaviour.
-        setClinicId(chamberAddress || clinics[0]?.id || "");
       } catch {
         setError("Could not load booking options. Make sure the backend is running on port 3001.");
-      } finally {
-        setIsLoading(false);
       }
     }
 
@@ -150,7 +127,7 @@ export default function BookAppointmentPage() {
   }, [doctorId]);
 
   useEffect(() => {
-    if (!doctorId || !clinicId || !appointmentDate) {
+    if (!doctorId || !appointmentDate) {
       return;
     }
 
@@ -160,7 +137,7 @@ export default function BookAppointmentPage() {
 
       try {
         const response = await apiFetch(
-          `/appointment/available-slots?doctorId=${doctorId}&clinicId=${clinicId}&date=${appointmentDate}`,
+          `/appointment/available-slots?doctorId=${doctorId}&date=${appointmentDate}`,
           {},
           getStoredToken("admin") || getStoredToken("doctor") || getStoredToken("patient"),
         );
@@ -195,10 +172,10 @@ export default function BookAppointmentPage() {
     }
 
     loadSlots();
-  }, [doctorId, clinicId, appointmentDate, slotRefreshTick]);
+  }, [doctorId, appointmentDate, slotRefreshTick]);
 
   useEffect(() => {
-    if (!doctorId || !clinicId || !appointmentDate) {
+    if (!doctorId || !appointmentDate) {
       return undefined;
     }
 
@@ -224,7 +201,7 @@ export default function BookAppointmentPage() {
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [doctorId, clinicId, appointmentDate]);
+  }, [doctorId, appointmentDate]);
 
   useEffect(() => {
     if (!bookingToast) {
@@ -242,16 +219,6 @@ export default function BookAppointmentPage() {
     bookingOptions?.doctor ??
     doctors.find((doctor) => String(doctor.id) === String(doctorId)) ??
     null;
-  const selectedDoctorClinicAddress =
-    selectedDoctor?.chamberAddress ?? selectedDoctor?.chamber_address ?? "";
-  const selectedDoctorClinics = Array.isArray(bookingOptions?.clinics)
-    ? bookingOptions.clinics
-    : Array.isArray(selectedDoctor?.clinics)
-      ? selectedDoctor.clinics
-      : [];
-  const primaryClinicId = selectedDoctorClinics[0]?.id ?? "";
-  const effectiveClinicId =
-    clinicId || selectedDoctorClinicAddress || primaryClinicId;
   const selectedDoctorAvailableDates =
     selectedDoctor?.availableDates ?? selectedDoctor?.available_dates ?? [];
   const availableTimeSlots = formatDoctorList(
@@ -317,9 +284,9 @@ const visibleSlots = activeAppointmentDate
       return;
     }
 
-    if (!doctorId || !effectiveClinicId || !activeAppointmentDate || !activeSlotTime) {
+    if (!doctorId || !activeAppointmentDate || !activeSlotTime) {
       setError(
-        "Please select a doctor, clinic, appointment date, and time slot before booking.",
+        "Please select a doctor, appointment date, and time slot before booking.",
       );
       return;
     }
@@ -332,7 +299,6 @@ const visibleSlots = activeAppointmentDate
           method: "POST",
           body: JSON.stringify({
             doctorId: Number(doctorId),
-            clinicId: effectiveClinicId,
             appointmentDate: activeAppointmentDate,
             slotTime: activeSlotTime,
           }),
@@ -348,7 +314,6 @@ const visibleSlots = activeAppointmentDate
 
       setBookingToast({
         doctorName: result.appointment?.doctor?.name ?? "Doctor",
-        clinicName: result.appointment?.clinic?.name ?? "Clinic",
         appointmentDate: result.appointment?.appointmentDate ?? activeAppointmentDate,
         slotTime: result.appointment?.slotTime ?? activeSlotTime,
         id: result.appointment?.id ?? "",
@@ -378,7 +343,7 @@ const visibleSlots = activeAppointmentDate
             <div>
               <p className="text-sm font-semibold text-green-700">Booking confirmed</p>
               <p className="mt-1 text-sm text-slate-700">
-                {bookingToast.doctorName} at {bookingToast.clinicName} on{" "}
+                {bookingToast.doctorName} on{" "}
                 {bookingToast.appointmentDate} at {bookingToast.slotTime}.
               </p>
               <p className="mt-1 text-xs text-slate-500">Appointment ID: {bookingToast.id}</p>
@@ -449,44 +414,6 @@ const visibleSlots = activeAppointmentDate
               </select>
             </label>
 
-            <label className="block">
-              <span className="text-sm font-semibold text-slate-700">
-                Hospital / Clinic
-              </span>
-              <select
-                value={effectiveClinicId}
-                onChange={(event) => setClinicId(event.target.value)}
-                disabled={isLoading || !effectiveClinicId}
-                className="mt-2 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand disabled:opacity-60"
-              >
-                {selectedDoctorClinics.length > 0 ? (
-                  <>
-                    {selectedDoctorClinics.map((clinic) => (
-                      <option key={clinic.id} value={clinic.id}>
-                        {clinic.name} - {clinic.location}
-                      </option>
-                    ))}
-                    {selectedDoctorClinicAddress &&
-                    !selectedDoctorClinics.some(
-                      (clinic) => String(clinic.id) === selectedDoctorClinicAddress,
-                    ) ? (
-                      <option value={selectedDoctorClinicAddress}>
-                        {selectedDoctorClinicAddress}
-                      </option>
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    <option value="">{selectedDoctorClinicAddress || "Select clinic"}</option>
-                    {selectedDoctorClinicAddress ? (
-                      <option value={selectedDoctorClinicAddress}>
-                        {selectedDoctorClinicAddress}
-                      </option>
-                    ) : null}
-                  </>
-                )}
-              </select>
-            </label>
           </div>
 
                
@@ -602,7 +529,6 @@ const visibleSlots = activeAppointmentDate
             disabled={
               !isPatientLoggedIn ||
               !doctorId ||
-              !effectiveClinicId ||
               !activeAppointmentDate ||
               !activeSlotTime ||
               isSubmitting

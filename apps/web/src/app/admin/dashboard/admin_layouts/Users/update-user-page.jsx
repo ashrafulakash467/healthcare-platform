@@ -11,7 +11,6 @@ const roleOptions = [
   { value: "user", label: "User" },
   { value: "patient", label: "Patient" },
   { value: "doctor", label: "Doctor" },
-  { value: "hospital admin", label: "Hospital Admin" },
   { value: "admin", label: "Admin" },
   { value: "support", label: "Support" },
   { value: "super-admin", label: "Super Admin" },
@@ -65,10 +64,6 @@ export default function UpdateUserPage({ user, form, setForm, onSave, onCancel }
   const selectedStatus = String(currentValue("status", user.status ?? "active")).trim().toLowerCase() || "active";
   const isDoctorRole = roleNames.includes("doctor") || primaryRole === "doctor" || Boolean(user?.doctor);
   const isPatientRole = roleNames.includes("patient") || primaryRole === "patient" || Boolean(user?.patient);
-  const isHospitalRole =
-    roleNames.some((role) => role === "hospital" || role === "hospital admin") ||
-    primaryRole === "hospital" ||
-    primaryRole === "hospital admin";
 
   const passwordLabel = user?.id ? "New Password" : "Password";
   const passwordConfirmLabel = user?.id ? "Confirm New Password" : "Confirm Password";
@@ -248,14 +243,7 @@ export default function UpdateUserPage({ user, form, setForm, onSave, onCancel }
             </div>
           ) : null}
 
-          {isHospitalRole ? (
-            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-              Hospital admin roles are shown here, but hospital ownership and transfer details are managed from the
-              Hospitals module.
-            </div>
-          ) : null}
-
-          {!isDoctorRole && !isPatientRole && !isHospitalRole ? (
+          {!isDoctorRole && !isPatientRole ? (
             <div className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
               Use the roles field to unlock doctor or patient profile inputs when needed.
             </div>
@@ -373,8 +361,6 @@ function formatRoleLabel(role) {
       admin: "Admin",
       doctor: "Doctor",
       patient: "Patient",
-      hospital: "Hospital Admin",
-      "hospital admin": "Hospital Admin",
       support: "Support",
       user: "User",
     }[text] ?? text.replace(/(^|\s)\w/g, (match) => match.toUpperCase())

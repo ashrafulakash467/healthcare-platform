@@ -6,8 +6,8 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -66,10 +66,5 @@ class User extends Authenticatable
     public function patient()
     {
         return $this->hasOne(Patient::class);
-    }
-
-    public function createdHospitals()
-    {
-        return $this->hasMany(Hospital::class, 'created_by_user_id');
     }
 }

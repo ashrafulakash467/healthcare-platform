@@ -100,7 +100,7 @@ export default function DashboardOverviewPage({
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-slate-600">
-                    {appointment.doctor?.specialty} - {appointment.clinic?.name}
+                    {appointment.doctor?.specialty || "Consultation"}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
                     {appointment.appointmentDate} at {appointment.slotTime}
