@@ -9,6 +9,7 @@ import DashboardHeader from "../../Header_Sidebar-Admin-Doc-shareUi/header";
 import MyAppointmentPage from "./doctor_layouts/myappointment-page";
 import PendingRequestPage from "./doctor_layouts/pending-request";
 import MedicalRecordsPage from "./doctor_layouts/medicalrecords-page";
+import UploadDocumentPage from "./doctor_layouts/upload-document";
 import ScheduleManagementPage from "./doctor_layouts/schedule-management-page";
 import { apiFetch, getStoredToken } from "@/lib/api";
 import {
@@ -54,6 +55,10 @@ function renderDoctorSidebarIcon(item) {
 function isDoctorSidebarItemActive(item, activeTab, recordCategory) {
   if (item.key === "records") {
     return activeTab === "records" && recordCategory !== "prescriptions";
+  }
+
+  if (item.key === "documents") {
+    return activeTab === "documents";
   }
 
   if (item.key === "prescriptions") {
@@ -246,6 +251,11 @@ export default function DoctorDashboardClient() {
       return;
     }
 
+    if (nextTab === "documents") {
+      setActiveTab("documents");
+      return;
+    }
+
     setActiveTab(nextTab);
   }
 
@@ -328,6 +338,7 @@ export default function DoctorDashboardClient() {
             mode="today"
             now={now}
             onMedicalRecordsChanged={loadMedicalRecords}
+            onNavigateTab={handleTabChange}
           />
         )}
 
@@ -339,6 +350,7 @@ export default function DoctorDashboardClient() {
             mode="upcoming"
             now={now}
             onMedicalRecordsChanged={loadMedicalRecords}
+            onNavigateTab={handleTabChange}
           />
         )}
 
@@ -367,6 +379,17 @@ export default function DoctorDashboardClient() {
             records={records}
             recordCategory={recordCategory}
             setRecordCategory={setRecordCategory}
+          />
+        )}
+
+        {activeTab === "documents" && (
+          <UploadDocumentPage
+            appointments={appointments}
+            selectedAppointmentId={selectedAppointmentId}
+            onSelectAppointment={setSelectedAppointmentId}
+            records={records}
+            now={now}
+            onMedicalRecordsChanged={loadMedicalRecords}
           />
         )}
 

@@ -32,6 +32,7 @@ export default function MyAppointmentPage({
   mode,
   now,
   onMedicalRecordsChanged,
+  onNavigateTab,
 }) {
   const [decisionById, setDecisionById] = useState({});
   const [notesById, setNotesById] = useState({});
@@ -443,7 +444,14 @@ export default function MyAppointmentPage({
                   </button>
                 </div>
                       </div>
-                <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onNavigateTab?.("documents")}
+                    className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Upload Document
+                  </button>
                   <button
                     type="button"
                     onClick={() => updateDecision("reschedule")}

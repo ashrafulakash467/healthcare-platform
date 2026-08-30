@@ -104,6 +104,64 @@ export async function savePrescriptionRecord(
   return result.record;
 }
 
+export async function saveDocumentRecord(
+  {
+    appointmentId,
+    title,
+    documentType,
+    notes,
+    referenceNo,
+    documentDate,
+    amountCents,
+    documentUrl,
+    documentFile,
+  },
+  role = "doctor",
+) {
+  const token = resolveToken(role);
+  const formData = new FormData();
+
+  formData.append("title", title);
+  formData.append("documentType", documentType);
+
+  if (notes) {
+    formData.append("notes", notes);
+  }
+
+  if (referenceNo) {
+    formData.append("referenceNo", referenceNo);
+  }
+
+  if (documentDate) {
+    formData.append("documentDate", documentDate);
+  }
+
+  if (amountCents !== undefined && amountCents !== null && amountCents !== "") {
+    formData.append("amountCents", String(amountCents));
+  }
+
+  if (documentUrl) {
+    formData.append("documentUrl", documentUrl);
+  }
+
+  if (documentFile) {
+    formData.append("documentFile", documentFile);
+  }
+
+  const response = await apiFetch(
+    `/consultations/${appointmentId}/documents`,
+    {
+      method: "POST",
+      body: formData,
+    },
+    token,
+  );
+
+  const result = await parseJsonResponse(response);
+  notifyMedicalRecordsUpdated();
+  return result.record;
+}
+
 export function emptyMedicalRecords() {
   return {
     prescriptions: [],

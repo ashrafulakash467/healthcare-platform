@@ -88,6 +88,14 @@ export function Icon({ name, className = "w-5 h-5" }) {
         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
       />
     ),
+    printer: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M6 9V3h12v6M6 18H5a2 2 0 01-2-2v-4a3 3 0 013-3h14a3 3 0 013 3v4a2 2 0 01-2 2h-1m-4 0H8m4 0v3m0-3a2 2 0 100 4 2 2 0 000-4z"
+      />
+    ),
     eye: (
       <path
         strokeLinecap="round"

@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
+use App\Models\Payment;
 use App\Models\Prescription;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -85,13 +87,41 @@ class MedicalRecordController extends Controller
             ->flatMap(fn (MedicalRecord $record) => $this->formatAttachments($record))
             ->values();
 
+        $invoiceQuery = Payment::query()->with([
+            'doctor.user',
+            'patient.user',
+            'appointment',
+        ])->latest('paid_at')->latest();
+
+        if ($user->hasRole('doctor')) {
+            if (! $user->doctor) {
+                return response()->json([
+                    'records' => $this->emptyRecordsPayload(),
+                ]);
+            }
+
+            $invoiceQuery->where('doctor_id', $user->doctor->id);
+        } elseif ($user->hasRole('patient')) {
+            if (! $user->patient) {
+                return response()->json([
+                    'records' => $this->emptyRecordsPayload(),
+                ]);
+            }
+
+            $invoiceQuery->where('patient_id', $user->patient->id);
+        }
+
+        $invoices = $invoiceQuery->get()
+            ->map(fn (Payment $payment) => $this->formatInvoice($payment))
+            ->values();
+
         return response()->json([
             'records' => [
                 'prescriptions' => $prescriptions,
                 'diagnostics' => [],
                 'notes' => $notes,
                 'uploads' => $uploads,
-                'invoices' => [],
+                'invoices' => $invoices,
             ],
         ]);
     }
@@ -218,6 +248,94 @@ class MedicalRecordController extends Controller
         ], 201);
     }
 
+    public function storeDocument(Request $request, string $appointmentId): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user || ! $user->hasRole('doctor') || ! $user->doctor) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'title' => ['required', 'string', 'min:3'],
+            'documentType' => ['required', 'string', 'in:pdf,invoice,report,upload,other'],
+            'notes' => ['nullable', 'string'],
+            'referenceNo' => ['nullable', 'string', 'max:120'],
+            'documentDate' => ['nullable', 'date'],
+            'amountCents' => ['nullable', 'integer', 'min:0'],
+            'documentUrl' => ['nullable', 'string', 'max:2048'],
+            'documentFile' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg', 'max:20480'],
+        ]);
+
+        $appointment = $this->appointmentForDoctor($user->doctor->id, $appointmentId);
+
+        if (! $appointment) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['Appointment not found.'],
+            ]);
+        }
+
+        $medicalRecord = MedicalRecord::firstOrNew([
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $user->doctor->id,
+            'record_type' => 'consultation',
+        ]);
+
+        $attachmentUrl = $data['documentUrl'] ?? null;
+        $storedPath = null;
+        $uploadedFile = $request->file('documentFile');
+
+        if ($uploadedFile) {
+            $directory = 'medical-documents/'.$appointment->appointment_no;
+            $filename = Str::slug(pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME))
+                .'-'.Str::random(8).'.'.$uploadedFile->getClientOriginalExtension();
+            $storedPath = $uploadedFile->storePubliclyAs($directory, $filename, 'public');
+            $attachmentUrl = Storage::disk('public')->url($storedPath);
+        }
+
+        $attachment = [
+            'id' => (string) Str::uuid(),
+            'type' => $data['documentType'],
+            'title' => $data['title'],
+            'description' => $data['notes'] ?? null,
+            'referenceNo' => $data['referenceNo'] ?? null,
+            'documentDate' => $data['documentDate'] ?? now()->toDateString(),
+            'amountCents' => $data['amountCents'] ?? null,
+            'fileUrl' => $attachmentUrl,
+            'filePath' => $storedPath,
+            'fileName' => $uploadedFile?->getClientOriginalName(),
+            'mimeType' => $uploadedFile?->getClientMimeType(),
+            'appointmentId' => (string) $appointment->appointment_no,
+            'patientId' => (string) $appointment->patient_id,
+            'doctorId' => (string) $appointment->doctor_id,
+            'doctor' => $user->doctor->user?->name ?? 'Doctor',
+            'patientName' => $appointment->patient?->user?->name ?? 'Patient',
+            'source' => 'doctor-upload',
+            'createdAt' => now()->toISOString(),
+        ];
+
+        $medicalRecord->forceFill([
+            'patient_id' => $appointment->patient_id,
+            'status' => 'active',
+            'chief_complaint' => $medicalRecord->chief_complaint ?? $data['title'],
+            'recorded_at' => now(),
+        ])->save();
+
+        $currentAttachments = collect($medicalRecord->attachments ?? [])
+            ->push($attachment)
+            ->values()
+            ->all();
+
+        $medicalRecord->forceFill([
+            'attachments' => $currentAttachments,
+        ])->save();
+
+        return response()->json([
+            'message' => 'Document saved successfully.',
+            'record' => $this->formatDocumentAttachment($attachment, $medicalRecord->loadMissing(['doctor.user', 'patient.user'])),
+        ], 201);
+    }
+
     private function appointmentForDoctor(int $doctorId, string $appointmentId): ?Appointment
     {
         return Appointment::query()
@@ -293,17 +411,90 @@ class MedicalRecordController extends Controller
                     : (string) $attachment;
 
                 $url = is_array($attachment)
-                    ? ($attachment['url'] ?? $attachment['path'] ?? '#')
+                    ? ($attachment['fileUrl'] ?? $attachment['url'] ?? $attachment['path'] ?? '#')
                     : '#';
 
                 return [
                     'id' => $record->id.'-attachment-'.$index,
                     'title' => $title,
                     'doctor' => $record->doctor?->user?->name ?? 'Doctor',
-                    'date' => $record->recorded_at?->toDateString() ?? $record->created_at->toDateString(),
+                    'date' => is_array($attachment)
+                        ? ($attachment['documentDate'] ?? $attachment['date'] ?? $record->recorded_at?->toDateString() ?? $record->created_at->toDateString())
+                        : ($record->recorded_at?->toDateString() ?? $record->created_at->toDateString()),
                     'fileUrl' => $url,
+                    'fileName' => is_array($attachment)
+                        ? ($attachment['fileName'] ?? $attachment['file_name'] ?? null)
+                        : null,
+                    'mimeType' => is_array($attachment)
+                        ? ($attachment['mimeType'] ?? $attachment['mime_type'] ?? null)
+                        : null,
+                    'summary' => is_array($attachment)
+                        ? ($attachment['description'] ?? $attachment['notes'] ?? null)
+                        : null,
+                    'documentType' => is_array($attachment)
+                        ? ($attachment['type'] ?? $attachment['documentType'] ?? 'upload')
+                        : 'upload',
+                    'referenceNo' => is_array($attachment)
+                        ? ($attachment['referenceNo'] ?? $attachment['reference_no'] ?? null)
+                        : null,
+                    'amountCents' => is_array($attachment)
+                        ? ($attachment['amountCents'] ?? $attachment['amount_cents'] ?? null)
+                        : null,
+                    'appointmentId' => is_array($attachment)
+                        ? ($attachment['appointmentId'] ?? $attachment['appointment_id'] ?? null)
+                        : null,
+                    'patientName' => is_array($attachment)
+                        ? ($attachment['patientName'] ?? null)
+                        : null,
+                    'source' => is_array($attachment)
+                        ? ($attachment['source'] ?? 'consultation')
+                        : 'consultation',
                 ];
             })
             ->all();
+    }
+
+    private function formatDocumentAttachment(array $attachment, MedicalRecord $record): array
+    {
+        return [
+            'id' => (string) ($attachment['id'] ?? $record->id),
+            'title' => $attachment['title'] ?? 'Document',
+            'doctor' => $record->doctor?->user?->name ?? 'Doctor',
+            'patientName' => $record->patient?->user?->name ?? 'Patient',
+            'date' => $attachment['documentDate'] ?? $record->recorded_at?->toDateString() ?? $record->created_at->toDateString(),
+            'summary' => $attachment['description'] ?? null,
+            'fileUrl' => $attachment['fileUrl'] ?? null,
+            'fileName' => $attachment['fileName'] ?? null,
+            'mimeType' => $attachment['mimeType'] ?? null,
+            'documentType' => $attachment['type'] ?? 'upload',
+            'referenceNo' => $attachment['referenceNo'] ?? null,
+            'amountCents' => $attachment['amountCents'] ?? null,
+            'appointmentId' => $attachment['appointmentId'] ?? null,
+            'source' => $attachment['source'] ?? 'doctor-upload',
+        ];
+    }
+
+    private function formatInvoice(Payment $payment): array
+    {
+        $amount = (float) ($payment->paid_amount ?? $payment->total_amount ?? $payment->amount ?? 0);
+
+        return [
+            'id' => (string) $payment->id,
+            'title' => 'Invoice '.$payment->transaction_no,
+            'invoiceNo' => $payment->transaction_no,
+            'referenceNo' => $payment->transaction_no,
+            'doctor' => $payment->doctor?->user?->name ?? 'Doctor',
+            'patientName' => $payment->patient?->user?->name ?? 'Patient',
+            'date' => $payment->paid_at?->toDateString() ?? $payment->created_at->toDateString(),
+            'summary' => $payment->appointment?->reason ?? 'Consultation invoice',
+            'status' => $payment->status,
+            'paymentMethod' => $payment->method ?? 'cash',
+            'fileUrl' => null,
+            'documentType' => 'invoice',
+            'amountCents' => (int) round($amount * 100),
+            'currency' => $payment->currency ?? 'BDT',
+            'appointmentId' => $payment->appointment_id ? (string) $payment->appointment_id : null,
+            'source' => 'payment',
+        ];
     }
 }
