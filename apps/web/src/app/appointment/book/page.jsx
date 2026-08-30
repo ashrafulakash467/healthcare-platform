@@ -771,7 +771,7 @@ function formatDoctorList(value) {
 function InfoRow({ label, value }) {
   return (
     <div className="flex items-start justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3">
-      <p className="text-right text-sm font-semibold text-slate-700">{value}</p>
+      {/* <p className="text-right text-sm font-semibold text-slate-700">{value}</p> */}
       <p className="min-w-0 pr-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
         {label}
       </p>

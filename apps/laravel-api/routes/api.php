@@ -86,7 +86,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('appointment/available-slots', [AppointmentController::class, 'availableSlots']);
         Route::post('appointment/book', [AppointmentController::class, 'book']);
         Route::post('appointment/cancel', [AppointmentController::class, 'cancel']);
+
         Route::post('appointment/{appointmentId}/payment', [AppointmentController::class, 'payment']);
+        
+        Route::delete(
+            '/appointments/{appointment}',
+            [AppointmentController::class, 'destroy']
+            );
+
         Route::get('appointment/reschedule-options', [AppointmentController::class, 'rescheduleOptions']);
         Route::get('appointment/reschedule-slots', [AppointmentController::class, 'rescheduleSlots']);
         Route::post('appointment/reschedule', [AppointmentController::class, 'reschedule']);

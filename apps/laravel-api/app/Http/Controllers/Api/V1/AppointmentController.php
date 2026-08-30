@@ -277,6 +277,34 @@ class AppointmentController extends Controller
             ],
         ]);
     }
+    public function destroy(string $appointmentId, Request $request): JsonResponse
+    {
+        $appointment = $this->findAppointmentForCurrentUser(
+            $request->user(),
+            $appointmentId
+        );
+
+        if (! $appointment) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['Appointment not found.'],
+            ]);
+        }
+
+        // Only cancelled appointments can be deleted
+        if ($appointment->status !== 'cancelled') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only cancelled appointments can be deleted.',
+            ], 422);
+        }
+
+        $appointment->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appointment deleted successfully.',
+        ]);
+    }
 
     public function rescheduleOptions(Request $request): JsonResponse
     {

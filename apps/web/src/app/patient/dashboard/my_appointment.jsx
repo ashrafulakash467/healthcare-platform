@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { FaCalendarAlt, FaEye, FaTimesCircle } from "react-icons/fa";
+import { FaCalendarAlt, FaEye, FaTimesCircle,FaTrash } from "react-icons/fa";
 import {
   InfoCard,
   formatCurrency,
@@ -22,6 +22,7 @@ export default function MyAppointmentPage({
   handlePayAppointment,
   isCancellingId,
   isPayingId,
+  isDeletingId,
   actionMessage,
   actionError,
   setActionError,
@@ -41,6 +42,11 @@ export default function MyAppointmentPage({
   function handlePayClick(appointmentId) {
     if (typeof handlePayAppointment === "function") {
       void handlePayAppointment(appointmentId);
+    }
+  }
+  function handleDeleteClick(appointment) {
+    if (typeof handleDeleteAppointment === "function") {
+      void handleDeleteAppointment(appointment.id);
     }
   }
 
@@ -311,6 +317,17 @@ export default function MyAppointmentPage({
                       >
                         <FaTimesCircle className="text-sm" />
                         Cancel
+                      </button>
+                    ) : null}
+                    {appointment.status === "cancelled" ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteClick(appointment)}
+                        disabled={isDeletingId === appointment.id}
+                        className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition-all duration-200 hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <FaTrash className="text-sm" />
+                        {isDeletingId === appointment.id ? "Deleting..." : "Delete"}
                       </button>
                     ) : null}
                   </div>

@@ -21,6 +21,7 @@ export default function PatientDashboardPage() {
   const [actionError, setActionError] = useState("");
   const [isCancellingId, setIsCancellingId] = useState("");
   const [isPayingId, setIsPayingId] = useState("");
+  const [isDeletingId, setIsDeletingId] = useState(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState("");
   const [doctorContact, setDoctorContact] = useState(null);
   const [doctorContactError, setDoctorContactError] = useState("");
@@ -179,6 +180,59 @@ export default function PatientDashboardPage() {
     }
   }
 
+    async function handleDeleteAppointment(appointmentId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this cancelled appointment?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsDeletingId(appointmentId);
+      setActionError("");
+      setActionMessage("");
+
+      const response = await fetch(
+        `http://localhost:3001/appointments/${appointmentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message || "Failed to delete appointment."
+        );
+      }
+
+      // Remove deleted appointment from your current list
+      setAppointments((previousAppointments) =>
+        previousAppointments.filter(
+          (appointment) => appointment.id !== appointmentId
+        )
+      );
+
+      setActionMessage("Appointment deleted successfully.");
+    } catch (error) {
+      console.error("Delete appointment error:", error);
+
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete appointment."
+      );
+    } finally {
+      setIsDeletingId(null);
+    }
+  }
+
   function handlePayAppointment(appointmentId) {
     if (!authToken) {
       setActionError("You need to be logged in to make a payment.");
@@ -228,6 +282,7 @@ export default function PatientDashboardPage() {
             setCancellationReasons={setCancellationReasons}
             handleCancelAppointment={handleCancelAppointment}
             handlePayAppointment={handlePayAppointment}
+            handleDeleteAppointment={handleDeleteAppointment}
             isCancellingId={isCancellingId}
             isPayingId={isPayingId}
             actionMessage={actionMessage}
