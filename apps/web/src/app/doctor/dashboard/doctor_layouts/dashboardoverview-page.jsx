@@ -43,13 +43,9 @@ const settings = [
 
 function MetricCard({ label, value, detail, onClick, tone = "slate" }) {
   const toneClasses =
-    tone === "emerald"
-      ? "border-emerald-100 bg-emerald-50/70 text-emerald-800"
-      : tone === "amber"
-        ? "border-amber-100 bg-amber-50/70 text-amber-800"
-        : tone === "blue"
-          ? "border-blue-100 bg-blue-50/70 text-blue-800"
-          : "border-slate-200 bg-white text-slate-800";
+    tone === "green"
+          ? "border-black-50 bg-white-50/70 text-black-800 hover:bg-green-300"
+          : "border-slate-200 bg-white text-slate-800 hover:bg-green-300";
 
   return (
     <button
@@ -101,35 +97,35 @@ export default function DashboardOverviewPage({
           <button
             type="button"
             onClick={() => onNavigateTab("records")}
-            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-background-500 hover:text-white hover:border hover:border-black"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-green-300"
           >
             All Doc
           </button>
           <button
             type="button"
             onClick={() => onNavigateTab("earnings")}
-            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-red-50"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-green-300"
           >
             Reports
           </button>
           <button
             type="button"
             onClick={() => onNavigateTab("today")}
-            className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-green-300"
           >
             Open Today
           </button>
           <button
             type="button"
             onClick={() => onNavigateTab("pending")}
-            className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-green-300"
           >
             Pending Requests
           </button>
           <button
             type="button"
             onClick={() => onNavigateTab("schedule")}
-            className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-rgreen-300"
           >
             Manage Schedule
           </button>
@@ -141,56 +137,56 @@ export default function DashboardOverviewPage({
           label="Today's Appointments"
           value={summary.today ?? todayAppointments.length}
           detail="Appointments ready for consultation today."
-          tone="blue"
+          tone="green"
           onClick={() => onNavigateTab("today")}
         />
         <MetricCard
           label="Upcoming Appointments"
           value={summary.upcoming ?? upcomingAppointments.length}
           detail="Future consultations that need preparation."
-          tone="slate"
+          tone="green"
           onClick={() => onNavigateTab("upcoming")}
         />
         <MetricCard
           label="Pending Requests"
           value={summary.pending ?? pendingRequests.length}
           detail="Requests waiting for accept, reject, or reschedule."
-          tone="amber"
+          tone="green"
           onClick={() => onNavigateTab("pending")}
         />
         <MetricCard
           label="Patient Records"
           value={patientRecordCount}
           detail="Diagnostic reports, notes, and uploads."
-          tone="emerald"
+          tone="green"
           onClick={() => onNavigateTab("records")}
         />
         <MetricCard
           label="Prescriptions"
           value={prescriptionCount}
           detail="Medication files and prescription history."
-          tone="blue"
+          tone="green"
           onClick={() => onNavigateTab("prescriptions")}
         />
         <MetricCard
           label="Earnings"
           value={earningsValue}
           detail="Total paid consultation revenue."
-          tone="emerald"
+          tone="green"
           onClick={() => onNavigateTab("earnings")}
         />
         <MetricCard
           label="Notifications"
           value={notifications.length}
           detail="Alerts, reminders, and pending updates."
-          tone="amber"
+          tone="green"
           onClick={() => onNavigateTab("notifications")}
         />
         <MetricCard
           label="Settings"
           value={"Update Profile"}
           detail="Update and Edit your profile settings."
-          tone="amber"
+          tone="green"
           onClick={() => onNavigateTab("Settings")}
         />
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -254,7 +250,7 @@ export default function DashboardOverviewPage({
             <button
               type="button"
               onClick={() => onNavigateTab("notifications")}
-              className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center rounded-lg border border-black-500 bg-white px-4 py-2 text-sm font-semibold text-black-500 transition hover:bg-green-300"
             >
               Open list
             </button>

@@ -96,7 +96,7 @@ export default function DashboardOverviewPage({
           <button
             type="button"
             onClick={() => onNavigateTab("today")}
-            className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
           >
             Open Today
           </button>
