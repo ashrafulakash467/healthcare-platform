@@ -42,11 +42,23 @@ import { Icon } from "./doctor_layouts/dashboard-shared";
 
 function renderDoctorSidebarIcon(item) {
   if (item.key === "today") {
-    return <FontAwesomeIcon icon={faCalendarDays} />;
+    return (
+      <FontAwesomeIcon
+        icon={faCalendarDays}
+        className="h-4 w-4 shrink-0"
+        style={{ width: "1rem", height: "1rem" }}
+      />
+    );
   }
 
   if (item.key === "visit-site") {
-    return <FontAwesomeIcon icon={faArrowUpRightFromSquare} />;
+    return (
+      <FontAwesomeIcon
+        icon={faArrowUpRightFromSquare}
+        className="h-4 w-4 shrink-0"
+        style={{ width: "1rem", height: "1rem" }}
+      />
+    );
   }
 
   return <Icon name={item.icon} className="h-5 w-5" />;
@@ -73,7 +85,9 @@ export default function DoctorDashboardClient() {
   const router = useRouter();
   const [doctor, setDoctor] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isDoctorLoading, setIsDoctorLoading] = useState(true);
+  const [isAppointmentsLoading, setIsAppointmentsLoading] = useState(true);
+  const [isRecordsLoading, setIsRecordsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [recordCategory, setRecordCategory] = useState("diagnostics");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState("");
@@ -112,6 +126,23 @@ export default function DoctorDashboardClient() {
         return;
       }
 
+      const cachedDoctor = localStorage.getItem("doctorUser");
+      if (cachedDoctor) {
+        try {
+          setDoctor(JSON.parse(cachedDoctor));
+          setIsDoctorLoading(false);
+        } catch {
+          localStorage.removeItem("doctorUser");
+        }
+      }
+
+      function loadDashboardData() {
+        return Promise.all([
+          loadAppointments(token).finally(() => setIsAppointmentsLoading(false)),
+          loadMedicalRecords().finally(() => setIsRecordsLoading(false)),
+        ]);
+      }
+
       try {
         const response = await apiFetch("/doctor/me", {}, token);
         const result = await response.json();
@@ -124,16 +155,16 @@ export default function DoctorDashboardClient() {
         }
 
         setDoctor(result.user ?? null);
-        await loadAppointments(token);
-        await loadMedicalRecords();
+        setIsDoctorLoading(false);
+        await loadDashboardData();
       } catch {
-        const cachedDoctor = localStorage.getItem("doctorUser");
         if (cachedDoctor) {
-          setDoctor(JSON.parse(cachedDoctor));
-          await loadMedicalRecords();
+          await loadDashboardData();
         }
       } finally {
-        setIsLoading(false);
+        setIsDoctorLoading(false);
+        setIsAppointmentsLoading(false);
+        setIsRecordsLoading(false);
       }
     }
 
@@ -276,20 +307,20 @@ export default function DoctorDashboardClient() {
     router.replace("/doctor/login");
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 font-medium text-slate-500">
-        Loading doctor dashboard...
-      </div>
-    );
-  }
+  const isActiveTabLoading =
+    (["today", "upcoming", "pending", "earnings"].includes(activeTab) &&
+      isAppointmentsLoading) ||
+    (activeTab === "records" && isRecordsLoading) ||
+    (activeTab === "documents" &&
+      (isAppointmentsLoading || isRecordsLoading)) ||
+    (activeTab === "schedule" && isDoctorLoading);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <DashboardHeader
         user={doctor}
         title="Doctor Dashboard"
-        subtitle={doctor?.specialty ? `Welcome back, Dr. ${doctor.name}.` : "Welcome back."}
+        subtitle={doctor?.specialty ? `Dr. ${doctor.name}.` : "Welcome back."}
         roleLabel="Doctor"
         onLogout={handleLogout}
       />
@@ -312,6 +343,9 @@ export default function DoctorDashboardClient() {
         {activeTab === "dashboard" && (
           <DashboardOverviewPage
             doctor={doctor}
+            isDoctorLoading={isDoctorLoading}
+            isAppointmentsLoading={isAppointmentsLoading}
+            isRecordsLoading={isRecordsLoading}
             records={records}
             todayAppointments={todayAppointments}
             upcomingAppointments={upcomingAppointments}
@@ -324,7 +358,11 @@ export default function DoctorDashboardClient() {
 
           />
         )}
-        
+
+        {activeTab !== "dashboard" && isActiveTabLoading ? (
+          <DoctorContentSkeleton />
+        ) : (
+          <>
         {activeTab === "settings" && (
           <SettingsPage />
 
@@ -417,8 +455,51 @@ export default function DoctorDashboardClient() {
             onNavigateTab={handleTabChange}
           />
         )}
+          </>
+        )}
         </main>
       </div>
+    </div>
+  );
+}
+
+function DoctorContentSkeleton() {
+  return (
+    <div
+      className="mx-auto max-w-6xl animate-pulse space-y-8"
+      role="status"
+      aria-label="Loading dashboard content"
+    >
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-3">
+          <div className="h-7 w-52 rounded-lg bg-slate-200" />
+          <div className="h-4 w-72 max-w-full rounded bg-slate-200" />
+        </div>
+        <div className="h-10 w-36 rounded-lg bg-slate-200" />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }, (_, index) => (
+          <div
+            key={index}
+            className="h-32 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <div className="h-4 w-28 rounded bg-slate-200" />
+            <div className="mt-4 h-7 w-20 rounded bg-slate-200" />
+            <div className="mt-4 h-3 w-full rounded bg-slate-100" />
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="h-5 w-40 rounded bg-slate-200" />
+        <div className="mt-6 space-y-4">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div key={index} className="h-16 rounded-xl bg-slate-100" />
+          ))}
+        </div>
+      </div>
+      <span className="sr-only">Loading...</span>
     </div>
   );
 }
