@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
@@ -34,10 +35,13 @@ class DashboardController extends Controller
 
     public function admin(Request $request): JsonResponse
     {
+        $user = $request->user()?->loadMissing(['roles', 'permissions']);
+
         return response()->json([
             'role' => 'admin',
+            'user' => $user ? new UserResource($user) : null,
             'modules' => $this->modulesFor('admin'),
-            'summary' => $this->summaryFor($request->user(), 'admin'),
+            'summary' => $this->summaryFor($user, 'admin'),
         ]);
     }
 
@@ -62,13 +66,13 @@ class DashboardController extends Controller
     private function summaryFor(?User $user, ?string $role): array
     {
         return match ($role) {
-            'admin' => $this->adminSummary(),
+            'admin' => $this->adminSummary($user),
             'doctor' => $this->doctorSummary($user),
             default => $this->patientSummary($user),
         };
     }
 
-    private function adminSummary(): array
+    private function adminSummary(?User $user): array
     {
         $today = now()->toDateString();
 
@@ -81,6 +85,15 @@ class DashboardController extends Controller
             ->where('status', 'paid')
             ->sum('paid_amount');
 
+        $currency = Payment::query()
+            ->where('status', 'paid')
+            ->latest('paid_at')
+            ->value('currency') ?? 'BDT';
+
+        $profileFields = [$user?->name, $user?->email, $user?->phone];
+        $completedProfileFields = collect($profileFields)->filter(fn ($value) => filled($value))->count();
+        $profileCompletion = (int) round(($completedProfileFields / count($profileFields)) * 100);
+
         return [
             'patients' => Patient::query()->count(),
             'doctors' => Doctor::query()->count(),
@@ -89,10 +102,14 @@ class DashboardController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->count(),
             'revenueCents' => (int) round(((float) $revenue) * 100),
+            'currency' => $currency,
             'pendingDoctors' => $pendingDoctors,
             'pendingRefunds' => $pendingRefunds,
             'openTickets' => $openTickets,
             'systemHealth' => $systemHealth,
+            'profileCompletion' => $profileCompletion,
+            'rbacEnabled' => (bool) $user?->getRoleNames()->isNotEmpty(),
+            'mfaEnabled' => (bool) $user?->two_factor_enabled,
         ];
     }
 

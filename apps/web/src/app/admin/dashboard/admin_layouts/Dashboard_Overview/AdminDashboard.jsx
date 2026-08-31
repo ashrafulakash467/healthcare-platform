@@ -141,7 +141,7 @@ function getStoredAdminUser() {
 }
 
 export default function AdminDashboard() {
-  const [admin] = useState(() => getStoredAdminUser());
+  const [admin, setAdmin] = useState(() => getStoredAdminUser());
   const [isReady, setIsReady] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(appointmentsSeed[0].id);
@@ -156,6 +156,7 @@ export default function AdminDashboard() {
   const [editForm, setEditForm] = useState({});
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [summary, setSummary] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
   const [appointments, setAppointments] = useState(appointmentsSeed);
   const [payments, setPayments] = useState(paymentsSeed);
   const [content, setContent] = useState(contentSeed);
@@ -197,18 +198,27 @@ export default function AdminDashboard() {
   }, []);
   const loadSummary = useCallback(async () => {
     const token = getStoredToken("admin");
-    if (!token) return;
+    if (!token) {
+      setSummaryLoading(false);
+      return;
+    }
 
     try {
       const response = await apiFetch("/admin/dashboard", {}, token);
       const result = await response.json();
       if (response.ok && result?.summary) {
         setSummary(result.summary);
+        if (result.user) {
+          setAdmin(result.user);
+          localStorage.setItem("adminUser", JSON.stringify(result.user));
+        }
       } else {
         setStatusMessage("Failed to load dashboard summary.");
       }
     } catch {
-      // Keep fallback values when the API is unreachable.
+      setStatusMessage("Failed to load dashboard summary from the server.");
+    } finally {
+      setSummaryLoading(false);
     }
   }, []);
 
@@ -278,14 +288,19 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    void loadSummary();
-    void loadAdminData();
+    const initialLoadTimer = window.setTimeout(() => {
+      void loadSummary();
+      void loadAdminData();
+    }, 0);
 
     const interval = window.setInterval(() => {
       void loadSummary();
     }, 30000);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      window.clearTimeout(initialLoadTimer);
+      window.clearInterval(interval);
+    };
   }, [loadSummary, loadAdminData]);
 
   useEffect(() => {
@@ -600,34 +615,25 @@ export default function AdminDashboard() {
   }
 
   const totals = useMemo(() => {
-    const isPendingDoctor = (item) => {
-      const value = String(item?.verification_status ?? item?.status ?? "").toLowerCase();
-      return value.includes("pending") || value.includes("document") || value.includes("review");
-    };
-
-    const fallback = {
-      pendingDoctors: doctors.filter(isPendingDoctor).length,
-      pendingRefunds: payments.filter((item) =>
-        String(item?.status ?? "").toLowerCase().includes("refund"),
-      ).length,
-      openTickets: tickets.filter((item) => item?.status === "Open").length,
-      patients: 12480,
-      doctors: doctors.length || 386,
-      todayAppointments: appointments.length,
-      revenueCents: 9650000,
-    };
+    if (!summary) {
+      return null;
+    }
 
     return {
-      patients: summary?.patients ?? fallback.patients,
-      doctors: summary?.doctors ?? fallback.doctors,
-      todayAppointments: summary?.todayAppointments ?? fallback.todayAppointments,
-      revenueCents: summary?.revenueCents ?? fallback.revenueCents,
-      pendingDoctors: summary?.pendingDoctors ?? fallback.pendingDoctors,
-      pendingRefunds: summary?.pendingRefunds ?? fallback.pendingRefunds,
-      openTickets: summary?.openTickets ?? fallback.openTickets,
-      systemHealth: summary?.systemHealth ?? (systemSettings.maintenanceMode ? 71 : 98),
+      patients: summary.patients,
+      doctors: summary.doctors,
+      todayAppointments: summary.todayAppointments,
+      revenueCents: summary.revenueCents,
+      currency: summary.currency,
+      pendingDoctors: summary.pendingDoctors,
+      pendingRefunds: summary.pendingRefunds,
+      openTickets: summary.openTickets,
+      systemHealth: summary.systemHealth,
+      profileCompletion: summary.profileCompletion,
+      rbacEnabled: summary.rbacEnabled,
+      mfaEnabled: summary.mfaEnabled,
     };
-  }, [summary, systemSettings.maintenanceMode, doctors, payments, tickets, appointments]);
+  }, [summary]);
 
   if (!isReady) {
     return (
@@ -700,7 +706,12 @@ export default function AdminDashboard() {
           ) : null}
 
           {activeTab === "dashboard" && (
-            <DashboardOverviewPanel admin={admin} totals={totals} onNavigate={openModule} />
+            <DashboardOverviewPanel
+              admin={admin}
+              totals={totals}
+              isLoading={summaryLoading}
+              onNavigate={openModule}
+            />
           )}
           {activeTab === "users" && <UsersPage />}
           {activeTab === "doctors" && (
@@ -777,16 +788,25 @@ export default function AdminDashboard() {
   );
 }
 
-function DashboardOverviewPanel({ admin, totals, onNavigate }) {
+function DashboardOverviewPanel({ admin, totals, isLoading, onNavigate }) {
   const kpiCards = [
-    { key: "users", label: "Total Patients", value: totals.patients, tone: "blue" },
-    { key: "doctors", label: "Total Doctors", value: totals.doctors, tone: "emerald" },
-    { key: "appointments", label: "Today's Appointments", value: totals.todayAppointments, tone: "amber" },
-    { key: "payments", label: "Revenue", value: formatCurrency(totals.revenueCents, "BDT"), tone: "emerald" },
-    { key: "doctors", label: "Pending Verifications", value: totals.pendingDoctors, tone: "amber" },
-    { key: "payments", label: "Refund Requests", value: totals.pendingRefunds, tone: "blue" },
-    { key: "support", label: "Support Tickets", value: totals.openTickets, tone: "slate" },
-    { key: "settings", label: "Update Profile", value: "98%", tone: "emerald" },
+    { key: "users", label: "Total Patients", value: totals?.patients, tone: "green" },
+    { key: "doctors", label: "Total Doctors", value: totals?.doctors, tone: "emerald" },
+    { key: "appointments", label: "Today's Appointments", value: totals?.todayAppointments, tone: "green" },
+    {
+      key: "payments",
+      label: "Revenue",
+      value: totals ? formatCurrency(totals.revenueCents, totals.currency || "BDT") : null,
+      tone: "green",
+    },
+    { key: "doctors", label: "Pending Verifications", value: totals?.pendingDoctors, tone: "green" },
+    { key: "payments", label: "Refund Requests", value: totals?.pendingRefunds, tone: "green" },
+    {
+      key: "settings",
+      label: "Profile Completion",
+      value: totals ? `${totals.profileCompletion}%` : null,
+      tone: "green",
+    },
   ];
 
   return (
@@ -811,9 +831,24 @@ function DashboardOverviewPanel({ admin, totals, onNavigate }) {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 lg:w-[28rem]">
-            <QuickStat label="RBAC" value="Enabled" detail="Role based access control" />
-            <QuickStat label="MFA" value="Live" detail="OTP / second factor checks" />
-            <QuickStat label="Health" value={`${totals.systemHealth}%`} detail="System stability score" />
+            <QuickStat
+              label="RBAC"
+              value={totals ? (totals.rbacEnabled ? "Enabled" : "Disabled") : null}
+              detail="Role based access control"
+              isLoading={isLoading}
+            />
+            <QuickStat
+              label="MFA"
+              value={totals ? (totals.mfaEnabled ? "Enabled" : "Disabled") : null}
+              detail="Second-factor sign-in protection"
+              isLoading={isLoading}
+            />
+            <QuickStat
+              label="Health"
+              value={totals ? `${totals.systemHealth}%` : null}
+              detail="System stability score"
+              isLoading={isLoading}
+            />
           </div>
         </div>
       </section>
@@ -826,6 +861,7 @@ function DashboardOverviewPanel({ admin, totals, onNavigate }) {
             value={card.value}
             detail={card.detail}
             tone={card.tone}
+            isLoading={isLoading}
             onClick={() => onNavigate(card.key)}
           />
         ))}
@@ -836,68 +872,45 @@ function DashboardOverviewPanel({ admin, totals, onNavigate }) {
   );
 }
 
-function PanelCard({ eyebrow, title, description, children }) {
-  return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-      <SectionHeader eyebrow={eyebrow} title={title} description={description} />
-      <div className="mt-5">{children}</div>
-    </section>
-  );
-}
-
-function SectionHeader({ eyebrow, title, description }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-bold text-slate-950">{title}</h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{description}</p>
-    </div>
-  );
-}
-
-function WorkflowStep({ index, title }) {
-  return (
-    <div className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
-        {index}
-      </div>
-      <div className="min-w-0">
-        <h3 className="text-sm font-bold text-slate-950">{title}</h3>
-      </div>
-    </div>
-  );
-}
-
-function KpiCard({ label, value, detail, tone = "slate", onClick }) {
+function KpiCard({ label, value, detail, tone = "slate", isLoading = false, onClick }) {
   const toneClasses =
-    tone === "emerald"
-      ? "border-emerald-100 bg-emerald-50/70 text-emerald-800"
-      : tone === "amber"
-        ? "border-amber-100 bg-amber-50/70 text-amber-800"
-        : tone === "blue"
-          ? "border-blue-100 bg-blue-50/70 text-blue-800"
-          : "border-slate-200 bg-white text-slate-800";
+    tone === "green"
+          ? "border-black-50 bg-white-50/70 text-black-800 hover:bg-green-300"
+          : "border-slate-200 bg-white text-slate-800 hover:bg-green-300";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-2xl border p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneClasses}`}
+      aria-busy={isLoading}
+      className={`rounded-xl border p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneClasses}`}
     >
-      <p className="text-xl font-semibold uppercase tracking-wide text-current/70">{label}</p>
-      <p className="mt-2 text-3xl font-bold text-current">{value}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-current/70">{label}</p>
+      <div className="mt-2 min-h-9">
+        {isLoading ? (
+          <span className="block h-9 w-24 animate-pulse rounded-lg bg-current/15" />
+        ) : (
+          <p className="text-xl font-bold text-current">{value ?? "Null"}</p>
+        )}
+      </div>
       <p className="mt-2 text-sm text-current/80">{detail}</p>
      </button>
   );
 }
 
-function QuickStat({ label, value, detail }) {
+function QuickStat({ label, value, detail, isLoading = false }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-xl font-bold text-slate-950">{value}</p>
+      <div className="mt-2 min-h-7">
+        {isLoading ? (
+          <span className="block h-7 w-20 animate-pulse rounded bg-slate-200" />
+        ) : (
+          <p className="text-xl font-bold text-slate-950">{value ?? "Null"}</p>
+        )}
+      </div>
       <p className="mt-1 text-xs text-slate-500">{detail}</p>
     </div>
   );

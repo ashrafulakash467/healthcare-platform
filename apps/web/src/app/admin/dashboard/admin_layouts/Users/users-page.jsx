@@ -290,7 +290,7 @@ export default function UsersPage() {
     <PanelCard
       eyebrow="User Management"
       title="Users"
-      description="Browse user cards and use the buttons to view details or edit a user."
+      description=""
     >
       <div className="space-y-6">
         <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">

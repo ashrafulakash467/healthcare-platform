@@ -151,7 +151,7 @@ export default function DoctorsPage({
     <PanelCard
       eyebrow="Doctor Management"
       title="Doctors"
-      description="View all registered doctors. Edit their profiles or delete them from the platform."
+      description=""
     >
       <div className="mb-6 space-y-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">

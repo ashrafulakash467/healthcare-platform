@@ -69,8 +69,8 @@ export default function AppointmentsPage() {
       title={selectedDoctor ? "Patient Appointments" : "Doctor Appointments"}
       description={
         selectedDoctor
-          ? "Patient bookings for the selected doctor. Use the date and status filters, then print when needed."
-          : "Doctors with appointments. Select a doctor to view their patient appointments."
+          ? ""
+          : ""
       }
     >
       {loading ? (
