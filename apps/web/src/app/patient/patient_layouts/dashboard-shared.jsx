@@ -104,7 +104,7 @@ export function Icon({ name, className = "w-5 h-5" }) {
 
 export function InfoCard({ title, value }) {
   return (
-    <div className="rounded-xl flex justify-between border border-slate-100 bg-white p-4 shadow-sm">
+    <div className="flex justify-around p-4 ">
       <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
         {title}:
       </p>

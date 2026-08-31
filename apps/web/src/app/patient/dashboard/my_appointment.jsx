@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { FaCalendarAlt, FaEye, FaTimesCircle,FaTrash } from "react-icons/fa";
+import { useMemo, useState } from "react";
+import { FaCalendarAlt, FaEye, FaTimesCircle } from "react-icons/fa";
 import {
   InfoCard,
   formatCurrency,
@@ -20,10 +20,8 @@ export default function MyAppointmentPage({
   setCancellationReasons,
   handleCancelAppointment,
   handlePayAppointment,
-  handleDeleteAppointment,
   isCancellingId,
   isPayingId,
-  isDeletingId,
   actionMessage,
   actionError,
   setActionError,
@@ -32,6 +30,8 @@ export default function MyAppointmentPage({
   doctorContactError,
   now,
 }) {
+  const [appointmentFilter, setAppointmentFilter] = useState("today");
+
   function getCancellationReason(appointmentId) {
     return String(cancellationReasons[appointmentId] ?? "").trim();
   }
@@ -45,12 +45,6 @@ export default function MyAppointmentPage({
       void handlePayAppointment(appointmentId);
     }
   }
-  function handleDeleteClick(appointment) {
-    if (typeof handleDeleteAppointment === "function") {
-      void handleDeleteAppointment(appointment.id);
-    }
-  }
-
   function handleCancelClick(appointment) {
     const reason = getCancellationReason(appointment.id);
 
@@ -104,10 +98,36 @@ export default function MyAppointmentPage({
     };
   }, [appointments, now]);
 
+  const filteredAppointments = useMemo(() => {
+    const today = new Date(now).toISOString().slice(0, 10);
+
+    return appointments.filter((appointment) => {
+      const status = String(appointment.status ?? "").toLowerCase();
+
+      if (appointmentFilter === "all") {
+        return true;
+      }
+
+      if (appointmentFilter === "cancelled") {
+        return status === "cancelled";
+      }
+
+      if (appointmentFilter === "today") {
+        return appointment.appointmentDate === today && status !== "cancelled";
+      }
+
+      return appointment.appointmentDate > today && status !== "cancelled";
+    });
+  }, [appointmentFilter, appointments, now]);
+
+  function handleFilterChange(event) {
+    setAppointmentFilter(event.target.value);
+    onSelectAppointment("");
+  }
+
   return (
     <PanelCard
-    title="Patient Dashboard"
-    eyebrow="Booked Appointments"
+    title="Booked Appointments"
     >
       <div className="space-y-6">
         <div className="grid gap-3 md:grid-cols-4">
@@ -122,6 +142,26 @@ export default function MyAppointmentPage({
                 Book Another Appointment
               </Link>
           </div>
+        </div>
+
+        <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Appointment type</p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Choose which appointment cards you want to view.
+            </p>
+          </div>
+          <select
+            value={appointmentFilter}
+            onChange={handleFilterChange}
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-emerald-500 sm:w-56"
+            aria-label="Filter appointments by type"
+          >
+            <option value="today">Today&apos;s Appointments</option>
+            <option value="all">All Bookings</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
         </div>
 
         {actionError ? (
@@ -151,9 +191,18 @@ export default function MyAppointmentPage({
               Find Doctors
             </Link>
           </div>
+        ) : filteredAppointments.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-14 text-center">
+            <h3 className="text-lg font-bold text-slate-900">
+              No {appointmentFilter === "today" ? "appointments today" : "matching appointments"}
+            </h3>
+            <p className="mt-2 text-sm text-slate-500">
+              Select another appointment type to view more bookings.
+            </p>
+          </div>
         ) : (
           <div className="space-y-3">
-            {appointments.map((appointment) => {
+            {filteredAppointments.map((appointment) => {
               const isSelected = appointment.id === selectedAppointmentId;
               const appointmentStart = parseAppointmentDateTime(
                 appointment.appointmentDate,
@@ -315,17 +364,6 @@ export default function MyAppointmentPage({
                       >
                         <FaTimesCircle className="text-sm" />
                         Cancel
-                      </button>
-                    ) : null}
-                    {appointment.status === "cancelled" ? (
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteClick(appointment)}
-                        disabled={isDeletingId === appointment.id}
-                        className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition-all duration-200 hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <FaTrash className="text-sm" />
-                        {isDeletingId === appointment.id ? "Deleting..." : "Delete"}
                       </button>
                     ) : null}
                   </div>
