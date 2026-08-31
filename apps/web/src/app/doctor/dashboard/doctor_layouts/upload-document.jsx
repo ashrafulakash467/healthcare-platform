@@ -345,7 +345,7 @@ export default function UploadDocumentPage({
             </div>
           )}
         </section>
-      </div>
+       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
