@@ -201,6 +201,40 @@ class AppointmentController extends Controller
             ]);
         }
 
+        $paymentStatus = strtolower((string) ($appointment->payment?->status ?? $appointment->payment_status));
+
+        if (in_array($appointment->status, ['cancellation_requested', 'reschedule_requested'], true)) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['A change request is already waiting for doctor review.'],
+            ]);
+        }
+
+        if ($appointment->status === 'confirmed' && $paymentStatus === 'paid') {
+            $meta = $appointment->meta ?? [];
+            $meta['patient_change_request'] = [
+                'type' => 'cancellation',
+                'reason' => $data['reason'],
+                'requested_at' => now()->toISOString(),
+            ];
+
+            $appointment->forceFill([
+                'status' => 'cancellation_requested',
+                'cancel_reason' => $data['reason'],
+                'meta' => $meta,
+            ])->save();
+
+            return response()->json([
+                'message' => 'Cancellation request submitted for doctor review.',
+                'appointmentId' => $data['appointmentId'],
+            ]);
+        }
+
+        if ($appointment->status === 'confirmed') {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['Confirmed appointments can only be changed after payment through a doctor-reviewed request.'],
+            ]);
+        }
+
         $this->releaseSlotIfNeeded($appointment);
 
         $appointment->forceFill([
@@ -364,6 +398,12 @@ class AppointmentController extends Controller
             ]);
         }
 
+        if ($appointment->rescheduled_at !== null) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['This appointment has already been rescheduled.'],
+            ]);
+        }
+
         $appointment->loadMissing('doctor.schedules');
         $slot = $this->slotForBooking((int) $appointment->doctor_id, $data['appointmentDate'], $data['slotTime']);
 
@@ -376,6 +416,39 @@ class AppointmentController extends Controller
         if ($slot->booked_count >= $slot->capacity || ! $slot->is_bookable || $slot->status !== 'available') {
             throw ValidationException::withMessages([
                 'slotTime' => ['Selected time slot is already booked.'],
+            ]);
+        }
+
+        $paymentStatus = strtolower((string) ($appointment->payment?->status ?? $appointment->payment_status));
+
+        if (in_array($appointment->status, ['cancellation_requested', 'reschedule_requested'], true)) {
+            throw ValidationException::withMessages([
+                'appointmentId' => ['A change request is already waiting for doctor review.'],
+            ]);
+        }
+
+        if ($appointment->status === 'confirmed' && $paymentStatus === 'paid') {
+            $meta = $appointment->meta ?? [];
+            $meta['patient_change_request'] = [
+                'type' => 'reschedule',
+                'appointment_date' => $data['appointmentDate'],
+                'slot_time' => $slot->start_time,
+                'requested_at' => now()->toISOString(),
+            ];
+
+            $appointment->forceFill([
+                'status' => 'reschedule_requested',
+                'rescheduled_at' => now(),
+                'meta' => $meta,
+            ])->save();
+            $appointment->loadMissing(['patient.user', 'doctor.user']);
+
+            return response()->json([
+                'message' => 'Reschedule request submitted for doctor review.',
+                'requestSubmitted' => true,
+                'requestedAppointmentDate' => $data['appointmentDate'],
+                'requestedSlotTime' => $this->displaySlotTime($slot),
+                'appointment' => $this->formatAppointment($appointment),
             ]);
         }
 
@@ -420,6 +493,84 @@ class AppointmentController extends Controller
         if (! $appointment) {
             throw ValidationException::withMessages([
                 'appointmentId' => ['Appointment not found.'],
+            ]);
+        }
+
+        $changeRequest = $appointment->meta['patient_change_request'] ?? null;
+        if (is_array($changeRequest) && in_array($changeRequest['type'] ?? null, ['cancellation', 'reschedule'], true)) {
+            if (! in_array($data['decision'], ['accepted', 'rejected'], true)) {
+                throw ValidationException::withMessages([
+                    'decision' => ['Patient change requests can only be accepted or rejected.'],
+                ]);
+            }
+
+            $meta = $appointment->meta ?? [];
+            unset($meta['patient_change_request']);
+
+            if ($changeRequest['type'] === 'cancellation') {
+                if ($data['decision'] === 'accepted') {
+                    $this->releaseSlotIfNeeded($appointment);
+                    $appointment->forceFill([
+                        'status' => 'cancelled',
+                        'meta' => $meta,
+                    ])->save();
+                    $message = 'Patient cancellation request accepted.';
+                } else {
+                    $appointment->forceFill([
+                        'status' => 'confirmed',
+                        'cancel_reason' => null,
+                        'meta' => $meta,
+                    ])->save();
+                    $message = 'Patient cancellation request rejected.';
+                }
+
+                $appointment->loadMissing(['patient.user', 'doctor.user']);
+
+                return response()->json([
+                    'message' => $message,
+                    'appointment' => $this->formatAppointment($appointment),
+                ]);
+            }
+
+            if ($data['decision'] === 'accepted') {
+                $requestedDate = (string) ($changeRequest['appointment_date'] ?? '');
+                $requestedSlotTime = (string) ($changeRequest['slot_time'] ?? '');
+                $slot = $this->slotForBooking((int) $appointment->doctor_id, $requestedDate, $requestedSlotTime);
+
+                if (! $slot || $slot->booked_count >= $slot->capacity || ! $slot->is_bookable || $slot->status !== 'available') {
+                    throw ValidationException::withMessages([
+                        'appointmentId' => ['The requested reschedule slot is no longer available.'],
+                    ]);
+                }
+
+                $this->releaseSlotIfNeeded($appointment);
+                $appointment->forceFill([
+                    'appointment_slot_id' => $slot->id,
+                    'appointment_date' => $requestedDate,
+                    'start_time' => $slot->start_time,
+                    'end_time' => $slot->end_time,
+                    'status' => 'confirmed',
+                    'rescheduled_at' => now(),
+                    'meta' => $meta,
+                ])->save();
+                $slot->forceFill([
+                    'booked_count' => $slot->booked_count + 1,
+                    'status' => $slot->booked_count + 1 >= $slot->capacity ? 'booked' : $slot->status,
+                ])->save();
+                $message = 'Patient reschedule request accepted.';
+            } else {
+                $appointment->forceFill([
+                    'status' => 'confirmed',
+                    'meta' => $meta,
+                ])->save();
+                $message = 'Patient reschedule request rejected.';
+            }
+
+            $appointment->loadMissing(['patient.user', 'doctor.user']);
+
+            return response()->json([
+                'message' => $message,
+                'appointment' => $this->formatAppointment($appointment),
             ]);
         }
 
@@ -560,6 +711,16 @@ class AppointmentController extends Controller
         $appointmentDate = $overrides['appointmentDate'] ?? $appointment->appointment_date?->toDateString() ?? (string) $appointment->appointment_date;
         $slotTime = $overrides['slotTime'] ?? $this->displayTime($appointment->start_time);
 
+        $paymentStatus = $appointment->payment?->status
+            ?? $appointment->payment_status
+            ?? 'pending';
+        $changeRequest = $appointment->meta['patient_change_request'] ?? null;
+        $hasPendingChangeRequest = is_array($changeRequest)
+            && in_array($changeRequest['type'] ?? null, ['cancellation', 'reschedule'], true);
+        $hasBeenRescheduled = $appointment->rescheduled_at !== null;
+        $canRequestChange = $appointment->status === 'confirmed'
+            && strtolower((string) $paymentStatus) === 'paid';
+
         return array_merge([
             'id' => (string) $appointment->appointment_no,
             'patient' => $patient ? [
@@ -573,11 +734,16 @@ class AppointmentController extends Controller
             'appointmentDate' => $appointmentDate,
             'slotTime' => $slotTime,
             'status' => $appointment->status,
-            'paymentStatus' => $appointment->payment_status,
+            'paymentStatus' => $paymentStatus,
             'paymentAmountCents' => $this->appointmentAmount($appointment),
             'paymentCurrency' => 'BDT',
-            'isReschedulable' => ! in_array($appointment->status, ['cancelled', 'completed'], true),
-            'isCancellable' => ! in_array($appointment->status, ['cancelled', 'completed'], true),
+            'rescheduledAt' => $appointment->rescheduled_at?->toISOString(),
+            'isReschedulable' => ! $hasBeenRescheduled && ! in_array($appointment->status, ['cancelled', 'completed', 'reschedule_requested', 'cancellation_requested'], true) && ! $canRequestChange,
+            'isCancellable' => ! in_array($appointment->status, ['cancelled', 'completed', 'confirmed', 'reschedule_requested', 'cancellation_requested'], true),
+            'canRequestCancellation' => $canRequestChange,
+            'canRequestReschedule' => ! $hasBeenRescheduled && $canRequestChange,
+            'isChangeRequestPending' => $hasPendingChangeRequest,
+            'changeRequest' => $hasPendingChangeRequest ? $changeRequest : null,
             'cancellationReason' => $appointment->cancel_reason,
         ], $overrides);
     }

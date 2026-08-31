@@ -128,6 +128,7 @@ export default function PendingRequestPage({
             <div className="mt-4 space-y-3">
               {appointments.map((appointment) => {
                 const isSelected = appointment.id === selectedAppointmentId;
+                const isPatientChangeRequest = Boolean(appointment.changeRequest);
                 const isLoading =
                   loadingAction?.appointmentId === appointment.id;
                 const slotStart = parseAppointmentDateTime(
@@ -186,6 +187,18 @@ export default function PendingRequestPage({
                           >
                             {appointment.appointmentDate} at {appointment.slotTime}
                           </p>
+                          {appointment.changeRequest?.type === "reschedule" ? (
+                            <p
+                              className={`mt-2 rounded-lg border px-3 py-2 text-xs font-semibold ${
+                                isSelected
+                                  ? "border-amber-300/40 bg-amber-300/10 text-amber-100"
+                                  : "border-amber-200 bg-amber-50 text-amber-800"
+                              }`}
+                            >
+                              Requested: {appointment.changeRequest.appointment_date} at{" "}
+                              {appointment.changeRequest.slot_time}
+                            </p>
+                          ) : null}
                         </div>
 
                         <div className={`space-y-1 text-right ${isSelected ? "text-slate-100" : ""}`}>
@@ -217,7 +230,9 @@ export default function PendingRequestPage({
                       >
                         {isLoading && loadingAction?.decision === "accepted"
                           ? "Accepting..."
-                          : "Accept"}
+                          : isPatientChangeRequest
+                            ? "Accept request"
+                            : "Accept"}
                       </button>
                       <button
                         type="button"
@@ -227,18 +242,22 @@ export default function PendingRequestPage({
                       >
                         {isLoading && loadingAction?.decision === "rejected"
                           ? "Rejecting..."
-                          : "Reject"}
+                          : isPatientChangeRequest
+                            ? "Reject request"
+                            : "Reject"}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleAction(appointment.id, "reschedule")}
-                        disabled={isLoading}
-                        className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {isLoading && loadingAction?.decision === "reschedule"
-                          ? "Sending..."
-                          : "Reschedule"}
-                      </button>
+                      {!isPatientChangeRequest ? (
+                        <button
+                          type="button"
+                          onClick={() => handleAction(appointment.id, "reschedule")}
+                          disabled={isLoading}
+                          className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isLoading && loadingAction?.decision === "reschedule"
+                            ? "Sending..."
+                            : "Reschedule"}
+                        </button>
+                      ) : null}
                     </div>
                   </article>
                 );
@@ -295,6 +314,14 @@ export default function PendingRequestPage({
                     <span className="font-semibold text-slate-900">Reason:</span>{" "}
                     {selectedAppointment.reason || "Not provided"}
                   </p>
+                  {selectedAppointment.changeRequest ? (
+                    <p>
+                      <span className="font-semibold text-slate-900">Patient request:</span>{" "}
+                      {selectedAppointment.changeRequest.type === "reschedule"
+                        ? `Reschedule to ${selectedAppointment.changeRequest.appointment_date} at ${selectedAppointment.changeRequest.slot_time}`
+                        : "Cancellation"}
+                    </p>
+                  ) : null}
                   <p>
                     <span className="font-semibold text-slate-900">Phone:</span>{" "}
                     {selectedAppointment.patient?.phone || "Unavailable"}
@@ -333,19 +360,21 @@ export default function PendingRequestPage({
                     ? "Rejecting..."
                     : "Reject request"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleAction(selectedAppointment.id, "reschedule")
-                  }
-                  disabled={loadingAction?.appointmentId === selectedAppointment.id}
-                  className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {loadingAction?.appointmentId === selectedAppointment.id &&
-                  loadingAction?.decision === "reschedule"
-                    ? "Sending..."
-                    : "Move to reschedule"}
-                </button>
+                {!selectedAppointment.changeRequest ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleAction(selectedAppointment.id, "reschedule")
+                    }
+                    disabled={loadingAction?.appointmentId === selectedAppointment.id}
+                    className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {loadingAction?.appointmentId === selectedAppointment.id &&
+                    loadingAction?.decision === "reschedule"
+                      ? "Sending..."
+                      : "Move to reschedule"}
+                  </button>
+                ) : null}
               </div>
             </>
           ) : (

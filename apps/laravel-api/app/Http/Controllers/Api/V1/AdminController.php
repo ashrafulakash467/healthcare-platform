@@ -143,6 +143,36 @@ class AdminController extends Controller
             ])
             ->values();
 
+        $appointmentRequests = Appointment::query()
+            ->with(['patient.user', 'doctor.user', 'payment'])
+            ->whereIn('status', ['cancellation_requested', 'reschedule_requested'])
+            ->latest()
+            ->get()
+            ->map(function (Appointment $appointment): array {
+                $changeRequest = $appointment->meta['patient_change_request'] ?? [];
+
+                return [
+                    'id' => (string) $appointment->appointment_no,
+                    'type' => $changeRequest['type'] ?? 'change',
+                    'patient' => $appointment->patient?->user?->name
+                        ?? $appointment->patient?->name
+                        ?? ('Patient #'.$appointment->patient_id),
+                    'doctor' => $appointment->doctor?->user?->name
+                        ?? $appointment->doctor?->name
+                        ?? ('Doctor #'.$appointment->doctor_id),
+                    'appointmentDate' => $appointment->appointment_date?->toDateString(),
+                    'slotTime' => $this->formatAppointmentTime($appointment),
+                    'requestedAppointmentDate' => $changeRequest['appointment_date'] ?? null,
+                    'requestedSlotTime' => $changeRequest['slot_time'] ?? null,
+                    'reason' => $changeRequest['reason'] ?? $appointment->cancel_reason,
+                    'paymentStatus' => $this->adminDisplayLabel(
+                        $appointment->payment?->status ?? $appointment->payment_status,
+                        'Pending',
+                    ),
+                ];
+            })
+            ->values();
+
         $logs = AuditLog::query()
             ->with('user')
             ->latest()
@@ -174,6 +204,7 @@ class AdminController extends Controller
             'content' => $content,
             'reports' => $reports,
             'tickets' => $tickets,
+            'appointmentRequests' => $appointmentRequests,
             'logs' => $logs,
             'roles' => $roles,
             'notifications' => $this->adminNotifications(),

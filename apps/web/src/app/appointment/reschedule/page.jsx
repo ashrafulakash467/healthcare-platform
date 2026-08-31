@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiFetch, getStoredToken } from "@/lib/api";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 
 export default function RescheduleAppointmentPage() {
   const router = useRouter();
@@ -18,6 +20,7 @@ export default function RescheduleAppointmentPage() {
   const [error, setError] = useState("");
   const [rescheduleToast, setRescheduleToast] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSlotsLoading, setIsSlotsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -70,6 +73,7 @@ export default function RescheduleAppointmentPage() {
       setError("");
       setSlots([]);
       setSlotTime("");
+      setIsSlotsLoading(true);
 
       try {
         const response = await apiFetch(
@@ -87,6 +91,8 @@ export default function RescheduleAppointmentPage() {
         setSlots(result.slots ?? []);
       } catch {
         setError("Could not load slots. Make sure the backend is running on port 3001.");
+      } finally {
+        setIsSlotsLoading(false);
       }
     }
 
@@ -105,8 +111,24 @@ export default function RescheduleAppointmentPage() {
     return () => window.clearTimeout(timeoutId);
   }, [rescheduleToast]);
 
+  const activeAppointmentDate = dates.includes(appointmentDate)
+    ? appointmentDate
+    : "";
+  const availableSlots = slots.filter((slot) => !slot.isBooked);
+  const activeSlotTime = availableSlots.some((slot) => slot.time === slotTime)
+    ? slotTime
+    : "";
+  const hasRescheduled =
+    Boolean(appointment?.rescheduledAt) ||
+    appointment?.status === "reschedule_requested" ||
+    appointment?.changeRequest?.type === "reschedule";
+
   async function handleSubmit(event) {
     event.preventDefault();
+    if (hasRescheduled) {
+      return;
+    }
+
     const token = getStoredToken("patient");
     if (!token) {
       router.replace("/login");
@@ -124,8 +146,8 @@ export default function RescheduleAppointmentPage() {
           method: "POST",
           body: JSON.stringify({
             appointmentId,
-            appointmentDate,
-            slotTime,
+            appointmentDate: activeAppointmentDate,
+            slotTime: activeSlotTime,
           }),
         },
         token,
@@ -140,8 +162,10 @@ export default function RescheduleAppointmentPage() {
       setAppointment(result.appointment);
       setRescheduleToast({
         message: result.message ?? "Appointment rescheduled successfully.",
-        appointmentDate: result.appointment?.appointmentDate ?? appointmentDate,
-        slotTime: result.appointment?.slotTime ?? slotTime,
+        isRequestSubmitted: Boolean(result.requestSubmitted),
+        appointmentDate:
+          result.requestedAppointmentDate ?? result.appointment?.appointmentDate ?? appointmentDate,
+        slotTime: result.requestedSlotTime ?? result.appointment?.slotTime ?? activeSlotTime,
         doctorName: result.appointment?.doctor?.name ?? "Doctor",
       });
       setSlotTime("");
@@ -162,8 +186,9 @@ export default function RescheduleAppointmentPage() {
                 {rescheduleToast.message}
               </p>
               <p className="mt-1 text-sm text-slate-700">
-                {rescheduleToast.doctorName} on{" "}
-                {rescheduleToast.appointmentDate} at {rescheduleToast.slotTime}.
+                {rescheduleToast.isRequestSubmitted
+                  ? `Requested: ${rescheduleToast.appointmentDate} at ${rescheduleToast.slotTime}.`
+                  : `${rescheduleToast.doctorName} on ${rescheduleToast.appointmentDate} at ${rescheduleToast.slotTime}.`}
               </p>
             </div>
             <button
@@ -218,57 +243,108 @@ export default function RescheduleAppointmentPage() {
             </div>
           ) : null}
 
-          <div className="mt-6">
-            <p className="text-sm font-semibold text-slate-700">Available dates</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {dates.map((date) => (
-                <button
-                  key={date}
-                  type="button"
-                  onClick={() => setAppointmentDate(date)}
-                  className={`h-10 rounded border px-4 text-xs font-semibold ${
-                    appointmentDate === date
-                      ? "border-brand bg-brand text-brand-foreground"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-brand"
-                  }`}
-                >
-                  {date}
-                </button>
-              ))}
+          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-700">Available dates</p>
+              {activeAppointmentDate ? (
+                <span className="text-xs font-medium text-brand">
+                  Selected: {activeAppointmentDate}
+                </span>
+              ) : null}
             </div>
+            {dates.length === 0 ? (
+              <p className="mt-3 text-sm text-slate-500">
+                No future dates available.
+              </p>
+            ) : (
+              <div className="mt-3 rounded-xl border border-emerald-200 bg-white shadow-sm">
+                <DayPicker
+                  mode="single"
+                  selected={
+                    activeAppointmentDate
+                      ? parseDateKeyToDate(activeAppointmentDate)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    setAppointmentDate(date ? getLocalDateKey(date) : "");
+                    setSlotTime("");
+                    setSlots([]);
+                  }}
+                  disabled={(date) => !dates.includes(getLocalDateKey(date))}
+                  defaultMonth={parseDateKeyToDate(dates[0])}
+                  className="mx-auto"
+                />
+              </div>
+            )}
+            <p className="mt-2 text-xs text-slate-400">
+              Select a future available date to see its time slots.
+            </p>
           </div>
 
-          <div className="mt-6">
-            <p className="text-sm font-semibold text-slate-700">Available slots</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {slots.map((slot) => (
-                <button
-                  key={slot.time}
-                  type="button"
-                  onClick={() => setSlotTime(slot.time)}
-                  className={`h-10 rounded border px-4 text-xs font-semibold ${
-                    slotTime === slot.time
-                      ? "border-brand bg-brand text-brand-foreground"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-brand"
-                  }`}
-                >
-                  {slot.time}
-                </button>
-              ))}
-              {appointmentDate && slots.length === 0 ? (
-                <span className="text-sm text-slate-500">No slots available.</span>
+          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-700">
+                Available time slots
+              </p>
+              {activeSlotTime ? (
+                <span className="text-xs font-medium text-brand">
+                  Selected: {activeSlotTime}
+                </span>
               ) : null}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {!activeAppointmentDate ? (
+                <p className="text-sm text-slate-500">
+                  Choose a future date to see available time slots.
+                </p>
+              ) : isSlotsLoading ? (
+                <p className="text-sm text-slate-500">
+                  Loading available time slots...
+                </p>
+              ) : availableSlots.length === 0 ? (
+                <p className="text-sm text-slate-500">
+                  No available time slots for this date.
+                </p>
+              ) : (
+                availableSlots.map((slot) => {
+                  const isSlotSelected = activeSlotTime === slot.time;
+
+                  return (
+                    <button
+                      key={slot.time}
+                      type="button"
+                      onClick={() => setSlotTime(slot.time)}
+                      aria-pressed={isSlotSelected}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                        isSlotSelected
+                          ? "border-emerald-600 bg-emerald-600 text-white ring-2 ring-emerald-600 shadow-sm"
+                          : "border-emerald-300 bg-emerald-50 text-emerald-800 hover:border-green-300 hover:bg-green-100 hover:text-green-700"
+                      }`}
+                    >
+                      {slot.time}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <button
-              type="submit"
-              disabled={!appointmentDate || !slotTime || isSubmitting}
-              className="inline-flex h-12 flex-1 items-center justify-center rounded-md bg-brand px-5 text-sm font-semibold text-brand-foreground transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSubmitting ? "Rescheduling..." : "Confirm reschedule"}
-            </button>
+            {hasRescheduled ? (
+              <p className="flex min-h-12 flex-1 items-center rounded-md border border-amber-200 bg-amber-50 px-4 text-sm font-semibold text-amber-700">
+                {appointment?.status === "reschedule_requested"
+                  ? "Your reschedule request has already been submitted."
+                  : "This appointment has already been rescheduled."}
+              </p>
+            ) : (
+              <button
+                type="submit"
+                disabled={!activeAppointmentDate || !activeSlotTime || isSubmitting}
+                className="inline-flex h-12 flex-1 items-center justify-center rounded-md bg-brand px-5 text-sm font-semibold text-brand-foreground transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? "Rescheduling..." : "Confirm reschedule"}
+              </button>
+            )}
             <Link
               href="/patient/dashboard"
               className="inline-flex h-12 items-center justify-center rounded-md border border-brand px-5 text-sm font-semibold text-brand transition hover:bg-brand hover:text-brand-foreground"
@@ -280,4 +356,32 @@ export default function RescheduleAppointmentPage() {
       </section>
     </main>
   );
+}
+
+function getLocalDateKey(input = new Date()) {
+  const date = input instanceof Date ? input : new Date(input);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateKeyToDate(dateKey) {
+  if (typeof dateKey !== "string") {
+    return undefined;
+  }
+
+  const parts = dateKey.split("-").map(Number);
+
+  if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) {
+    return undefined;
+  }
+
+  return new Date(parts[0], parts[1] - 1, parts[2]);
 }

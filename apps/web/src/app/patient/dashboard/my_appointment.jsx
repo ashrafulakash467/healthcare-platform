@@ -31,6 +31,7 @@ export default function MyAppointmentPage({
   now,
 }) {
   const [appointmentFilter, setAppointmentFilter] = useState("today");
+  const [hasSelectedAppointmentFilter, setHasSelectedAppointmentFilter] = useState(false);
 
   function getCancellationReason(appointmentId) {
     return String(cancellationReasons[appointmentId] ?? "").trim();
@@ -98,29 +99,51 @@ export default function MyAppointmentPage({
     };
   }, [appointments, now]);
 
-  const filteredAppointments = useMemo(() => {
-    const today = new Date(now).toISOString().slice(0, 10);
+  const today = new Date(now).toISOString().slice(0, 10);
+  const hasTodayAppointments = appointments.some(
+    (appointment) =>
+      appointment.appointmentDate === today &&
+      String(appointment.status ?? "").toLowerCase() !== "cancelled",
+  );
+  const hasUpcomingAppointments = appointments.some(
+    (appointment) =>
+      appointment.appointmentDate > today &&
+      String(appointment.status ?? "").toLowerCase() !== "cancelled",
+  );
+  const visibleAppointmentFilter =
+    !hasSelectedAppointmentFilter &&
+    appointmentFilter === "today" &&
+    !hasTodayAppointments &&
+    hasUpcomingAppointments
+      ? "upcoming"
+      : appointmentFilter;
 
+  const filteredAppointments = useMemo(() => {
     return appointments.filter((appointment) => {
       const status = String(appointment.status ?? "").toLowerCase();
 
-      if (appointmentFilter === "all") {
+      if (visibleAppointmentFilter === "all") {
         return true;
       }
 
-      if (appointmentFilter === "cancelled") {
+      if (visibleAppointmentFilter === "cancelled") {
         return status === "cancelled";
       }
 
-      if (appointmentFilter === "today") {
+      if (visibleAppointmentFilter === "rescheduled") {
+        return Boolean(appointment.rescheduledAt);
+      }
+
+      if (visibleAppointmentFilter === "today") {
         return appointment.appointmentDate === today && status !== "cancelled";
       }
 
       return appointment.appointmentDate > today && status !== "cancelled";
     });
-  }, [appointmentFilter, appointments, now]);
+  }, [appointments, today, visibleAppointmentFilter]);
 
   function handleFilterChange(event) {
+    setHasSelectedAppointmentFilter(true);
     setAppointmentFilter(event.target.value);
     onSelectAppointment("");
   }
@@ -147,12 +170,9 @@ export default function MyAppointmentPage({
         <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-slate-900">Appointment type</p>
-            <p className="mt-0.5 text-xs text-slate-500">
-              Choose which appointment cards you want to view.
-            </p>
           </div>
           <select
-            value={appointmentFilter}
+            value={visibleAppointmentFilter}
             onChange={handleFilterChange}
             className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-emerald-500 sm:w-56"
             aria-label="Filter appointments by type"
@@ -160,6 +180,7 @@ export default function MyAppointmentPage({
             <option value="today">Today&apos;s Appointments</option>
             <option value="all">All Bookings</option>
             <option value="upcoming">Upcoming</option>
+            <option value="rescheduled">Rescheduled</option>
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
@@ -194,7 +215,7 @@ export default function MyAppointmentPage({
         ) : filteredAppointments.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-14 text-center">
             <h3 className="text-lg font-bold text-slate-900">
-              No {appointmentFilter === "today" ? "appointments today" : "matching appointments"}
+              No {visibleAppointmentFilter === "today" ? "appointments today" : "matching appointments"}
             </h3>
             <p className="mt-2 text-sm text-slate-500">
               Select another appointment type to view more bookings.
@@ -213,6 +234,9 @@ export default function MyAppointmentPage({
                 : "Unavailable";
               const doctorName = appointment.doctor?.name ?? "Unnamed Doctor";
               const doctorSpecialty = appointment.doctor?.specialty ?? "General Practice";
+              const isPaymentComplete = ["paid", "completed", "settled"].includes(
+                String(appointment.paymentStatus ?? "").toLowerCase(),
+              );
 
               return (
                 <article
@@ -271,7 +295,7 @@ export default function MyAppointmentPage({
                       </div>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[430px]">
+                    <div className="grid gap-3 sm:grid-cols-4 lg:min-w-[430px]">
                       <MetaBlock
                         selected={isSelected}
                         label="Time left"
@@ -288,13 +312,31 @@ export default function MyAppointmentPage({
                         )}
                         tone={getPaymentTone(appointment.paymentStatus)}
                       />
-                      <MetaBlock
-                        selected={isSelected}
-                        label="Booking"
-                        value={appointment.status ?? "unknown"}
-                        hint={appointment.isReschedulable ? "Reschedulable" : "Locked"}
-                        tone={getStatusTone(appointment.status)}
-                      />
+                        <MetaBlock
+                          selected={isSelected}
+                          label="Booking"
+                          value={appointment.status ?? "unknown"}
+                          hint={
+                            appointment.isChangeRequestPending
+                              ? "Doctor review pending"
+                              : appointment.canRequestReschedule
+                                ? "Change request available"
+                                : appointment.isReschedulable
+                                  ? "Reschedulable"
+                                  : "Locked"
+                          }
+                          tone={getStatusTone(appointment.status)}
+                        />
+                          <MetaBlock
+                          selected={isSelected}
+                          label="Reshedule"
+                          value={appointment.reshedulestatus ?? "unknown"}
+                          hint={formatCurrency(
+                            appointment.reshedulestatus,
+                            appointment.reshedulestatus,
+                          )}
+                          tone={getPaymentTone(appointment.reshedulestatus)}
+                        />
                     </div>
                   </div>
 
@@ -312,7 +354,7 @@ export default function MyAppointmentPage({
                       {isSelected ? "Hide" : "View"}
                     </button>
 
-                    {appointment.isReschedulable ? (
+                    {appointment.isReschedulable || appointment.canRequestReschedule ? (
                       <Link
                         href={`/appointment/reschedule?appointmentId=${appointment.id}`}
                         className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-200 ${
@@ -322,7 +364,7 @@ export default function MyAppointmentPage({
                         }`}
                       >
                         <FaCalendarAlt className="text-sm" />
-                        Reschedule
+                        {appointment.canRequestReschedule ? "Request reschedule" : "Reschedule"}
                       </Link>
                     ) : (
                       <span
@@ -336,7 +378,7 @@ export default function MyAppointmentPage({
                       </span>
                     )}
 
-                    {appointment.paymentStatus !== "paid" &&
+                    {!isPaymentComplete &&
                     appointment.status !== "cancelled" ? (
                       <button
                         type="button"
@@ -350,20 +392,24 @@ export default function MyAppointmentPage({
                       </button>
                     ) : (
                       <span className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-400">
-                        {appointment.paymentStatus === "paid"
+                        {isPaymentComplete
                           ? "Payment complete"
                           : "Payment unavailable"}
                       </span>
                     )}
 
-                    {appointment.isCancellable ? (
+                    {appointment.isChangeRequestPending ? (
+                      <span className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700">
+                        Doctor review pending
+                      </span>
+                    ) : appointment.isCancellable || appointment.canRequestCancellation ? (
                       <button
                         type="button"
                         onClick={() => handleCancelClick(appointment)}
                         className="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition-all duration-200 hover:border-rose-300 hover:bg-rose-100"
                       >
                         <FaTimesCircle className="text-sm" />
-                        Cancel
+                        {appointment.canRequestCancellation ? "Request cancellation" : "Cancel"}
                       </button>
                     ) : null}
                   </div>
@@ -449,10 +495,21 @@ export default function MyAppointmentPage({
                         </div>
                       </div>
 
-                      {appointment.isCancellable ? (
+                      {appointment.isChangeRequestPending ? (
+                        <div className="rounded-xl border border-amber-100 bg-amber-50/70 p-4 text-sm text-amber-800">
+                          <p className="font-semibold">Doctor review pending</p>
+                          <p className="mt-1">
+                            {appointment.changeRequest?.type === "reschedule"
+                              ? "Your reschedule request is waiting for doctor approval."
+                              : "Your cancellation request is waiting for doctor approval."}
+                          </p>
+                        </div>
+                      ) : appointment.isCancellable || appointment.canRequestCancellation ? (
                         <div className="rounded-xl border border-rose-100 bg-white/80 p-4">
                           <label className="block text-sm font-semibold text-slate-700">
-                            Cancellation reason
+                            {appointment.canRequestCancellation
+                              ? "Cancellation request reason"
+                              : "Cancellation reason"}
                             <textarea
                               value={cancellationReasons[appointment.id] ?? ""}
                               onChange={(event) => {
@@ -480,23 +537,29 @@ export default function MyAppointmentPage({
                             >
                               <FaTimesCircle className="text-sm" />
                               {isCancellingId === appointment.id
-                                ? "Cancelling..."
-                                : "Cancel appointment"}
+                                ? appointment.canRequestCancellation
+                                  ? "Submitting request..."
+                                  : "Cancelling..."
+                                : appointment.canRequestCancellation
+                                  ? "Submit cancellation request"
+                                  : "Cancel appointment"}
                             </button>
 
-                            {appointment.isReschedulable ? (
+                            {appointment.isReschedulable || appointment.canRequestReschedule ? (
                               <Link
                                 href={`/appointment/reschedule?appointmentId=${appointment.id}`}
                                 className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                               >
-                                Reschedule instead
+                                {appointment.canRequestReschedule
+                                  ? "Request reschedule instead"
+                                  : "Reschedule instead"}
                               </Link>
                             ) : null}
                           </div>
                         </div>
                       ) : (
                         <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-                          This appointment cannot be cancelled at the moment.
+                          This appointment cannot be changed at the moment.
                         </p>
                       )}
                     </div>

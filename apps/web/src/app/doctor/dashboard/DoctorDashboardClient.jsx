@@ -193,6 +193,38 @@ export default function DoctorDashboardClient() {
   }, []);
 
   useEffect(() => {
+    if (activeTab !== "pending") {
+      return undefined;
+    }
+
+    let isActive = true;
+    const token = getStoredToken("doctor");
+
+    const refreshPendingRequests = async () => {
+      try {
+        const response = await apiFetch("/appointment/my", {}, token);
+        const result = await response.json();
+
+        if (isActive && response.ok) {
+          setAppointments(result.appointments ?? []);
+        }
+      } catch (error) {
+        console.error("Failed to refresh pending requests:", error);
+      }
+    };
+
+    refreshPendingRequests();
+    const timer = window.setInterval(refreshPendingRequests, 15_000);
+    window.addEventListener("focus", refreshPendingRequests);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshPendingRequests);
+    };
+  }, [activeTab]);
+
+  useEffect(() => {
     if (!selectedAppointmentId) {
       const firstAppointment = getAppointmentsForActiveTab(activeTab, appointments)[0];
       if (firstAppointment) {
@@ -219,7 +251,7 @@ export default function DoctorDashboardClient() {
     (appointment) => appointment.appointmentDate > todayString,
   );
   const pendingRequests = appointments.filter(
-    (appointment) => (appointment.status ?? "").toLowerCase() === "pending",
+    (appointment) => isPendingRequest(appointment),
   );
   const paidAppointmentTotal = appointments.filter(
     (appointment) => (appointment.paymentStatus ?? "").toLowerCase() === "paid",
@@ -520,12 +552,16 @@ function getAppointmentsForActiveTab(activeTab, appointments) {
   }
 
   if (activeTab === "pending") {
-    return appointments.filter(
-      (appointment) => (appointment.status ?? "").toLowerCase() === "pending",
-    );
+    return appointments.filter((appointment) => isPendingRequest(appointment));
   }
 
   return appointments;
+}
+
+function isPendingRequest(appointment) {
+  return ["pending", "cancellation_requested", "reschedule_requested"].includes(
+    String(appointment?.status ?? "").toLowerCase(),
+  );
 }
 
 function EarningsPanel({ summary, appointments, onNavigateTab }) {

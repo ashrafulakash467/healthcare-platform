@@ -163,6 +163,8 @@ export default function AdminDashboard() {
   const [reports, setReports] = useState(reportsSeed);
   const [notifications, setNotifications] = useState(notificationsSeed);
   const [tickets, setTickets] = useState(supportSeed);
+  const [appointmentRequests, setAppointmentRequests] = useState([]);
+  const [appointmentRequestAction, setAppointmentRequestAction] = useState(null);
   const [roles, setRoles] = useState(rolesSeed);
   const [logs, setLogs] = useState(auditSeed);
 
@@ -273,6 +275,10 @@ export default function AdminDashboard() {
             ? current
             : result.tickets[0].id,
         );
+      }
+
+      if (Array.isArray(result.appointmentRequests)) {
+        setAppointmentRequests(result.appointmentRequests);
       }
 
       if (Array.isArray(result.roles)) {
@@ -666,6 +672,37 @@ export default function AdminDashboard() {
     setActiveTab(item.key);
   }
 
+  async function handleAppointmentRequestDecision(appointmentId, decision) {
+    const token = getStoredToken("admin");
+    if (!token) return;
+
+    setAppointmentRequestAction({ appointmentId, decision });
+
+    try {
+      const response = await apiFetch(
+        "/appointment/decision",
+        {
+          method: "POST",
+          body: JSON.stringify({ appointmentId, decision }),
+        },
+        token,
+      );
+      const result = await response.json();
+
+      if (!response.ok) {
+        setStatusMessage(result.message ?? "Could not process the appointment request.");
+        return;
+      }
+
+      setStatusMessage(result.message ?? "Appointment request processed successfully.");
+      await Promise.all([loadAdminData(), loadSummary()]);
+    } catch {
+      setStatusMessage("Could not process the appointment request from the server.");
+    } finally {
+      setAppointmentRequestAction(null);
+    }
+  }
+
   function toggleSetting(settingKey) {
     setSystemSettings((current) => ({
       ...current,
@@ -759,6 +796,9 @@ export default function AdminDashboard() {
               selectedTicketId={selectedTicketId}
               onSelectTicket={setSelectedTicketId}
               onMessage={setStatusMessage}
+              appointmentRequests={appointmentRequests}
+              appointmentRequestAction={appointmentRequestAction}
+              onAppointmentRequestDecision={handleAppointmentRequestDecision}
             />
           )}
           {activeTab === "roles" && <RolesPage roles={roles} />}
