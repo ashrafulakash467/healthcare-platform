@@ -201,7 +201,7 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $paymentStatus = strtolower((string) ($appointment->payment?->status ?? $appointment->payment_status));
+        $hasCompletedPayment = $this->hasCompletedPayment($appointment);
 
         if (in_array($appointment->status, ['cancellation_requested', 'reschedule_requested'], true)) {
             throw ValidationException::withMessages([
@@ -209,7 +209,7 @@ class AppointmentController extends Controller
             ]);
         }
 
-        if ($appointment->status === 'confirmed' && $paymentStatus === 'paid') {
+        if ($appointment->status === 'confirmed' && $hasCompletedPayment) {
             $meta = $appointment->meta ?? [];
             $meta['patient_change_request'] = [
                 'type' => 'cancellation',
@@ -419,7 +419,7 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $paymentStatus = strtolower((string) ($appointment->payment?->status ?? $appointment->payment_status));
+        $hasCompletedPayment = $this->hasCompletedPayment($appointment);
 
         if (in_array($appointment->status, ['cancellation_requested', 'reschedule_requested'], true)) {
             throw ValidationException::withMessages([
@@ -427,7 +427,7 @@ class AppointmentController extends Controller
             ]);
         }
 
-        if ($appointment->status === 'confirmed' && $paymentStatus === 'paid') {
+        if ($appointment->status === 'confirmed' && $hasCompletedPayment) {
             $meta = $appointment->meta ?? [];
             $meta['patient_change_request'] = [
                 'type' => 'reschedule',
@@ -438,7 +438,6 @@ class AppointmentController extends Controller
 
             $appointment->forceFill([
                 'status' => 'reschedule_requested',
-                'rescheduled_at' => now(),
                 'meta' => $meta,
             ])->save();
             $appointment->loadMissing(['patient.user', 'doctor.user']);
@@ -454,6 +453,16 @@ class AppointmentController extends Controller
 
         $this->releaseSlotIfNeeded($appointment);
 
+        $meta = $appointment->meta ?? [];
+        $meta['last_reschedule_request'] = [
+            'type' => 'reschedule',
+            'appointment_date' => $data['appointmentDate'],
+            'slot_time' => $slot->start_time,
+            'status' => 'accepted',
+            'requested_at' => now()->toISOString(),
+            'decided_at' => now()->toISOString(),
+        ];
+
         $appointment->forceFill([
             'appointment_slot_id' => $slot->id,
             'appointment_date' => $data['appointmentDate'],
@@ -461,6 +470,7 @@ class AppointmentController extends Controller
             'end_time' => $slot->end_time,
             'rescheduled_at' => now(),
             'status' => $appointment->status === 'cancelled' ? 'pending' : $appointment->status,
+            'meta' => $meta,
         ])->save();
 
         $slot->forceFill([
@@ -532,6 +542,11 @@ class AppointmentController extends Controller
                 ]);
             }
 
+            $meta['last_reschedule_request'] = array_merge($changeRequest, [
+                'status' => $data['decision'],
+                'decided_at' => now()->toISOString(),
+            ]);
+
             if ($data['decision'] === 'accepted') {
                 $requestedDate = (string) ($changeRequest['appointment_date'] ?? '');
                 $requestedSlotTime = (string) ($changeRequest['slot_time'] ?? '');
@@ -561,6 +576,7 @@ class AppointmentController extends Controller
             } else {
                 $appointment->forceFill([
                     'status' => 'confirmed',
+                    'rescheduled_at' => null,
                     'meta' => $meta,
                 ])->save();
                 $message = 'Patient reschedule request rejected.';
@@ -718,8 +734,29 @@ class AppointmentController extends Controller
         $hasPendingChangeRequest = is_array($changeRequest)
             && in_array($changeRequest['type'] ?? null, ['cancellation', 'reschedule'], true);
         $hasBeenRescheduled = $appointment->rescheduled_at !== null;
+        $lastRescheduleRequest = $appointment->meta['last_reschedule_request'] ?? null;
+        $pendingRescheduleRequest = is_array($changeRequest)
+            && ($changeRequest['type'] ?? null) === 'reschedule';
+        $rescheduleRequest = $pendingRescheduleRequest
+            ? $changeRequest
+            : (is_array($lastRescheduleRequest) ? $lastRescheduleRequest : null);
+        $rescheduleInfo = $rescheduleRequest ? [
+            'status' => $pendingRescheduleRequest
+                ? 'pending'
+                : (string) ($rescheduleRequest['status'] ?? ($hasBeenRescheduled ? 'accepted' : 'unknown')),
+            'appointmentDate' => (string) ($rescheduleRequest['appointment_date'] ?? $appointmentDate),
+            'slotTime' => $this->displayTime((string) ($rescheduleRequest['slot_time'] ?? $appointment->start_time)),
+            'requestedAt' => $rescheduleRequest['requested_at'] ?? null,
+            'decidedAt' => $rescheduleRequest['decided_at'] ?? null,
+        ] : ($hasBeenRescheduled ? [
+            'status' => 'accepted',
+            'appointmentDate' => $appointmentDate,
+            'slotTime' => $slotTime,
+            'requestedAt' => null,
+            'decidedAt' => $appointment->rescheduled_at?->toISOString(),
+        ] : null);
         $canRequestChange = $appointment->status === 'confirmed'
-            && strtolower((string) $paymentStatus) === 'paid';
+            && $this->hasCompletedPayment($appointment);
 
         return array_merge([
             'id' => (string) $appointment->appointment_no,
@@ -738,6 +775,7 @@ class AppointmentController extends Controller
             'paymentAmountCents' => $this->appointmentAmount($appointment),
             'paymentCurrency' => 'BDT',
             'rescheduledAt' => $appointment->rescheduled_at?->toISOString(),
+            'rescheduleInfo' => $rescheduleInfo,
             'isReschedulable' => ! $hasBeenRescheduled && ! in_array($appointment->status, ['cancelled', 'completed', 'reschedule_requested', 'cancellation_requested'], true) && ! $canRequestChange,
             'isCancellable' => ! in_array($appointment->status, ['cancelled', 'completed', 'confirmed', 'reschedule_requested', 'cancellation_requested'], true),
             'canRequestCancellation' => $canRequestChange,
@@ -908,6 +946,17 @@ class AppointmentController extends Controller
             'booked_count' => max(0, $slot->booked_count - 1),
             'status' => max(0, $slot->booked_count - 1) === 0 ? 'available' : $slot->status,
         ])->save();
+    }
+
+    private function hasCompletedPayment(Appointment $appointment): bool
+    {
+        $completedStatuses = ['paid', 'completed', 'settled', 'success', 'successful'];
+        $paymentStatuses = [
+            strtolower(trim((string) $appointment->payment?->status)),
+            strtolower(trim((string) $appointment->payment_status)),
+        ];
+
+        return count(array_intersect($completedStatuses, $paymentStatuses)) > 0;
     }
 
     private function formatAdminPatient(Appointment $appointment): array

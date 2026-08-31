@@ -237,6 +237,11 @@ export default function MyAppointmentPage({
               const isPaymentComplete = ["paid", "completed", "settled"].includes(
                 String(appointment.paymentStatus ?? "").toLowerCase(),
               );
+              const rescheduleInfo = appointment.rescheduleInfo ?? null;
+              const rescheduleStatus = rescheduleInfo?.status ?? "not_requested";
+              const rescheduleHint = rescheduleInfo
+                ? `${rescheduleInfo.appointmentDate} at ${rescheduleInfo.slotTime}`
+                : "No reschedule update";
 
               return (
                 <article
@@ -312,31 +317,28 @@ export default function MyAppointmentPage({
                         )}
                         tone={getPaymentTone(appointment.paymentStatus)}
                       />
-                        <MetaBlock
-                          selected={isSelected}
-                          label="Booking"
-                          value={appointment.status ?? "unknown"}
-                          hint={
-                            appointment.isChangeRequestPending
-                              ? "Doctor review pending"
-                              : appointment.canRequestReschedule
-                                ? "Change request available"
-                                : appointment.isReschedulable
-                                  ? "Reschedulable"
-                                  : "Locked"
-                          }
-                          tone={getStatusTone(appointment.status)}
-                        />
-                          <MetaBlock
-                          selected={isSelected}
-                          label="Reshedule"
-                          value={appointment.reshedulestatus ?? "unknown"}
-                          hint={formatCurrency(
-                            appointment.reshedulestatus,
-                            appointment.reshedulestatus,
-                          )}
-                          tone={getPaymentTone(appointment.reshedulestatus)}
-                        />
+                      <MetaBlock
+                        selected={isSelected}
+                        label="Booking"
+                        value={appointment.status ?? "unknown"}
+                        hint={
+                          appointment.isChangeRequestPending
+                            ? "Doctor review pending"
+                            : appointment.canRequestReschedule
+                              ? "Change request available"
+                              : appointment.isReschedulable
+                                ? "Reschedulable"
+                                : "Locked"
+                        }
+                        tone={getStatusTone(appointment.status)}
+                      />
+                      <MetaBlock
+                        selected={isSelected}
+                        label="Reschedule"
+                        value={formatStatusLabel(rescheduleStatus)}
+                        hint={rescheduleHint}
+                        tone={getRescheduleTone(rescheduleStatus)}
+                      />
                     </div>
                   </div>
 
@@ -653,4 +655,22 @@ function formatStatusLabel(status) {
   }
 
   return text.replace(/_/g, " ").replace(/(^|\s)\w/g, (match) => match.toUpperCase());
+}
+
+function getRescheduleTone(status) {
+  const value = String(status ?? "").toLowerCase();
+
+  if (value === "accepted") {
+    return "text-emerald-700";
+  }
+
+  if (value === "rejected") {
+    return "text-red-700";
+  }
+
+  if (value === "pending") {
+    return "text-amber-700";
+  }
+
+  return "text-slate-500";
 }

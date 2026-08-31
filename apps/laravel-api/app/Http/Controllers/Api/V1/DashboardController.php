@@ -143,7 +143,7 @@ class DashboardController extends Controller
 
         $pendingCount = Appointment::query()
             ->where('doctor_id', $doctor->id)
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'cancellation_requested', 'reschedule_requested'])
             ->count();
 
         $earnings = Payment::query()
